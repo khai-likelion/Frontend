@@ -17,7 +17,9 @@ import {
   MessageSquare,
   X,
   Sliders,
-  Info
+  Info,
+  CreditCard,
+  Target
 } from 'lucide-react';
 import {
   AreaChart,
@@ -540,6 +542,61 @@ const YReportView = () => (
   </div>
 );
 
+const PricingView = () => {
+  const plans = [
+    { credits: 10, price: '4,900원', color: 'bg-blue-50', text: 'text-blue-600' },
+    { credits: 30, price: '12,900원', color: 'bg-purple-50', text: 'text-purple-600', popular: true },
+    { credits: 50, price: '21,900원', color: 'bg-red-50', text: 'text-red-600' },
+    { credits: 100, price: '39,900원', color: 'bg-gray-900', text: 'text-white' },
+  ];
+
+  return (
+    <div className="space-y-8 animate-fade-in max-w-5xl mx-auto">
+      <div className="text-center space-y-4 mb-12">
+        <h1 className="text-4xl font-bold text-gray-900 font-space">요금제 선택</h1>
+        <p className="text-gray-500">로벨롭의 AI 분석을 위한 크레딧을 충전하세요.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {plans.map((plan, idx) => (
+          <div key={idx} className={`relative p-8 rounded-3xl border transition-all duration-300 hover:-translate-y-2 flex flex-col ${plan.color === 'bg-gray-900' ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100 shadow-lg shadow-gray-100 hover:border-red-500'}`}>
+            {plan.popular && (
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
+                Most Popular
+              </div>
+            )}
+            <div className={`w-12 h-12 rounded-2xl ${plan.color} ${plan.text} flex items-center justify-center mb-6`}>
+              <Zap size={24} fill={plan.color === 'bg-gray-900' ? 'white' : 'currentColor'} />
+            </div>
+            <h3 className={`text-2xl font-bold mb-2 ${plan.color === 'bg-gray-900' ? 'text-white' : 'text-gray-900'}`}>{plan.credits} Credits</h3>
+            <div className={`text-3xl font-black font-space mb-8 ${plan.color === 'bg-gray-900' ? 'text-white' : 'text-gray-900'}`}>{plan.price}</div>
+
+            <ul className={`space-y-3 mb-10 flex-1 ${plan.color === 'bg-gray-900' ? 'text-gray-400' : 'text-gray-500'} text-xs`}>
+              <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> AI X-Report 생성</li>
+              <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> 시뮬레이션 무제한 테스트</li>
+              <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> 실시간 상권 데이터 반영</li>
+            </ul>
+
+            <button className={`w-full py-4 rounded-xl font-bold transition-all ${plan.color === 'bg-gray-900' ? 'bg-white text-gray-900 hover:bg-gray-100' : 'bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200'}`}>
+              구매하기
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-16 bg-gray-50 p-8 rounded-3xl border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div>
+          <h4 className="text-lg font-bold text-gray-900 mb-1">엔터프라이즈 맞춤형 플랜</h4>
+          <p className="text-sm text-gray-500">프랜차이즈 본사 및 다점포 사장님을 위한 대용량 플랜이 필요하신가요?</p>
+        </div>
+        <button className="px-8 py-3 bg-white border border-gray-200 text-gray-900 rounded-xl font-bold hover:bg-gray-50 transition-all flex items-center gap-2">
+          문의하기 <ArrowRight size={18} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // --- Main App Component ---
 
 const App = () => {
@@ -597,6 +654,7 @@ const App = () => {
       );
       case 'simulation': return <SimulationView onComplete={() => changeTab('y-report')} />;
       case 'y-report': return <YReportView />;
+      case 'pricing': return <PricingView />;
       default: return (
         <DashboardView
           stats={stats}
@@ -653,11 +711,16 @@ const App = () => {
           <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4">
             <div className="text-xs font-bold text-gray-400 mb-2">CREDITS</div>
             <div className="flex justify-between items-center">
-              <span className="font-bold text-gray-900">240 / 500</span>
-              <span className="text-xs bg-white px-2 py-0.5 rounded border border-gray-200 text-gray-500">Charge</span>
+              <span className="font-bold text-gray-900">40 / 100</span>
+              <button
+                onClick={() => setActiveTab('pricing')}
+                className="text-xs bg-white px-2 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all"
+              >
+                Charge
+              </button>
             </div>
             <div className="w-full bg-gray-200 h-1.5 rounded-full mt-2 overflow-hidden">
-              <div className="bg-red-500 h-full w-[48%]"></div>
+              <div className="bg-red-500 h-full w-[40%]"></div>
             </div>
           </div>
           <div className="flex items-center gap-3">
