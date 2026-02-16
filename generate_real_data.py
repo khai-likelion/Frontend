@@ -24,10 +24,12 @@ def load_store_locations():
             for row in reader:
                 store_name = row.get('장소명')
                 if store_name:
-                    locations[store_name] = {
-                        'address': row.get('주소', '주소 정보 없음'),
-                        'lat': float(row.get('y', 0)) if row.get('y') else 37.556,
-                        'lng': float(row.get('x', 0)) if row.get('x') else 126.906
+                    # Normalize: remove spaces for better matching
+                    normalized_name = store_name.replace(' ', '')
+                    locations[normalized_name] = {
+                        'address': row.get('주소'),
+                        'lat': float(row.get('y')) if row.get('y') else None,
+                        'lng': float(row.get('x')) if row.get('x') else None
                     }
     except Exception as e:
         print(f"Error reading stores.csv: {e}")
@@ -113,19 +115,17 @@ for filename in glob.glob(os.path.join(REPORT_DIR, "*_result.json")):
             rank_pc = 5 + int((1 - sentiment_score) * 20)
             rank_pc = max(1, min(25, rank_pc))
 
-            # 위치 정보 매핑 (CSV에서 조회, 없으면 기본값)
-            location_info = store_locations.get(store_name, {
-                'address': '서울 마포구 망원동 (주소 정보 미확인)', 
-                'lat': 37.556, 
-                'lng': 126.906
-            })
-
+            # Get location data
+            # Normalize store name for lookup
+            normalized_store_name = store_name.replace(' ', '')
+            loc_data = store_locations.get(normalized_store_name)
+            
             stores_data.append({
                 "id": os.path.basename(filename).split('_')[0],
                 "name": store_name,
-                "address": location_info['address'],
-                "lat": location_info['lat'],
-                "lng": location_info['lng'],
+                "address": loc_data['address'] if loc_data and loc_data['address'] else '서울 마포구 망원동 (주소 정보 미확인)',
+                "lat": loc_data['lat'] if loc_data and loc_data['lat'] is not None else 37.556,  # Default fallback
+                "lng": loc_data['lng'] if loc_data and loc_data['lng'] is not None else 126.906, # Default fallback
                 "sentiment": sentiment_score,
                 "revenue": revenue_value,
                 "agents": 380,
