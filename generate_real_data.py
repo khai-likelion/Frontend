@@ -2,13 +2,41 @@ import json
 import os
 import glob
 import re
+import csv
 
-# Directory containing the reports
-data_dir = r"c:\Users\changhyun\Desktop\New_KHAI\batch_reports_random_10"
-output_file = r"c:\Users\changhyun\Desktop\New_KHAI\lovelop-frontend\src\data\real_data.json"
+# --- Configuration ---
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+# agent-sim/data/raw/stores.csv 경로 설정 (상위 폴더로 이동 후 접근)
+STORES_CSV_PATH = os.path.join(os.path.dirname(CURRENT_DIR), 'agent-sim', 'data', 'raw', 'stores.csv')
+REPORT_DIR = os.path.join(os.path.dirname(CURRENT_DIR), 'batch_reports_random_10')
+OUTPUT_FILE = os.path.join(CURRENT_DIR, 'src', 'data', 'real_data.json')
+
+# --- Helper: Load Store Locations from CSV ---
+def load_store_locations():
+    locations = {}
+    if not os.path.exists(STORES_CSV_PATH):
+        print(f"Warning: stores.csv not found at {STORES_CSV_PATH}")
+        return locations
+    
+    try:
+        with open(STORES_CSV_PATH, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                store_name = row.get('장소명')
+                if store_name:
+                    locations[store_name] = {
+                        'address': row.get('주소', '주소 정보 없음'),
+                        'lat': float(row.get('y', 0)) if row.get('y') else 37.556,
+                        'lng': float(row.get('x', 0)) if row.get('x') else 126.906
+                    }
+    except Exception as e:
+        print(f"Error reading stores.csv: {e}")
+    return locations
+
+store_locations = load_store_locations()
 
 # Ensure output directory exists
-os.makedirs(os.path.dirname(output_file), exist_ok=True)
+os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
 
 def extract_grade(report_text):
     match = re.search(r'종합 등급\*\*: \*\*([A-S\+]+)\*\*', report_text)
@@ -41,7 +69,7 @@ total_agents = 0
 total_revenue = 0
 revenue_count = 0
 
-for filename in glob.glob(os.path.join(data_dir, "*_result.json")):
+for filename in glob.glob(os.path.join(REPORT_DIR, "*_result.json")):
     with open(filename, 'r', encoding='utf-8') as f:
         try:
             data = json.load(f)
@@ -85,9 +113,19 @@ for filename in glob.glob(os.path.join(data_dir, "*_result.json")):
             rank_pc = 5 + int((1 - sentiment_score) * 20)
             rank_pc = max(1, min(25, rank_pc))
 
+            # 위치 정보 매핑 (CSV에서 조회, 없으면 기본값)
+            location_info = store_locations.get(store_name, {
+                'address': '서울 마포구 망원동 (주소 정보 미확인)', 
+                'lat': 37.556, 
+                'lng': 126.906
+            })
+
             stores_data.append({
                 "id": os.path.basename(filename).split('_')[0],
                 "name": store_name,
+                "address": location_info['address'],
+                "lat": location_info['lat'],
+                "lng": location_info['lng'],
                 "sentiment": sentiment_score,
                 "revenue": revenue_value,
                 "agents": 380,
@@ -122,7 +160,7 @@ final_data = {
     "stores": stores_data
 }
 
-with open(output_file, 'w', encoding='utf-8') as f:
+with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
     json.dump(final_data, f, ensure_ascii=False, indent=2)
 
-print(f"Successfully generated {output_file} with {total_stores} stores and detailed report data.")
+print(f"Successfully generated {OUTPUT_FILE} with {total_stores} stores and detailed report data.")
