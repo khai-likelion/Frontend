@@ -4,25 +4,20 @@ import {
   FileText,
   Play,
   BarChart2,
-  Settings,
   Search,
   TrendingUp,
   Users,
   DollarSign,
   ChevronRight,
   Download,
-  Plus,
   Zap,
   Printer,
-  RefreshCw,
   CheckCircle,
   ArrowRight,
   MessageSquare,
   X,
   Sliders,
-  Info,
-  ThumbsUp,
-  ThumbsDown
+  Info
 } from 'lucide-react';
 import {
   AreaChart,
@@ -46,6 +41,9 @@ import {
 
 // --- Mock Data ---
 
+// --- Mock Data ---
+
+// simulationData moved to SimulationView (or can be dynamic later)
 const simulationData = [
   { day: '월', before: 12, after: 18 },
   { day: '화', before: 15, after: 22 },
@@ -56,32 +54,14 @@ const simulationData = [
   { day: '일', before: 45, after: 68 },
 ];
 
-const radarData = [
-  { subject: '맛', A: 95, fullMark: 100, reason: "시그니처 메뉴 호평" },
-  { subject: '서비스', A: 85, fullMark: 100, reason: "응대 속도 우수" },
-  { subject: '청결도', A: 75, fullMark: 100, reason: "화장실 관리 필요" },
-  { subject: '가성비', A: 70, fullMark: 100, reason: "가격대비 양 적음" },
-  { subject: '분위기', A: 80, fullMark: 100, reason: "조명 좋음" },
-  { subject: '접근성', A: 60, fullMark: 100, reason: "주차 공간 부족" },
-];
-
-const reviewKeywords = {
-  '맛': { positive: ['인생맛집', '크림라떼', '풍미'], negative: ['약간 짬', '식어서 나옴'] },
-  '서비스': { positive: ['친절함', '설명 잘해줌'], negative: ['주문 누락', '무표정'] },
-  '청결도': { positive: ['매장 깔끔', '오픈키친'], negative: ['바닥 끈적임', '먼지'] },
-  '가성비': { positive: ['재료 좋음'], negative: ['양이 적음', '비쌈'] },
-  '분위기': { positive: ['사진 잘나옴', '힙함'], negative: ['음악 큼', '의자 불편'] },
-  '접근성': { positive: ['역세권'], negative: ['찾기 힘듦', '주차 불가'] },
-};
-
 // --- Components ---
 
 const SidebarItem = ({ icon: Icon, label, active, onClick }) => (
   <button
     onClick={onClick}
     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${active
-        ? 'bg-red-50 text-red-600 font-medium'
-        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+      ? 'bg-red-50 text-red-600 font-medium'
+      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
       }`}
   >
     <Icon size={18} className={active ? 'text-red-600' : 'text-gray-400'} />
@@ -113,10 +93,10 @@ const StepCard = ({ number, title, desc, active, completed, onClick }) => (
   <div
     onClick={onClick}
     className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all cursor-pointer hover:scale-105 duration-200 min-w-[100px] ${active
-        ? 'bg-white border-red-500 shadow-md ring-1 ring-red-100'
-        : completed
-          ? 'bg-red-50 border-red-100'
-          : 'bg-gray-50 border-gray-100 opacity-60'
+      ? 'bg-white border-red-500 shadow-md ring-1 ring-red-100'
+      : completed
+        ? 'bg-red-50 border-red-100'
+        : 'bg-gray-50 border-gray-100 opacity-60'
       }`}>
     <div className="flex items-center gap-1 mb-1">
       {completed && <CheckCircle size={10} className="text-red-600" />}
@@ -165,7 +145,7 @@ const AIChatButton = () => {
 
 // --- View Components ---
 
-const DashboardView = ({ onAnalyze }) => (
+const DashboardView = ({ stats, stores, onAnalyze, selectedStoreId, onSelectStore }) => (
   <div className="space-y-8 animate-fade-in">
     <div className="flex justify-between items-end">
       <div>
@@ -180,13 +160,19 @@ const DashboardView = ({ onAnalyze }) => (
 
       <div className="relative z-10 flex flex-col md:flex-row gap-6 items-end">
         <div className="flex-1 space-y-2 w-full">
-          <label className="text-gray-300 text-sm font-medium">분석할 매장명을 입력하세요</label>
+          <label className="text-gray-300 text-sm font-medium">분석할 매장 선택 ({stores.length}개 매장 데이터 보유)</label>
           <div className="relative group">
-            <input
-              type="text"
-              placeholder="예: 류진, 크리머리, 소금집..."
-              className="w-full bg-white/10 border border-white/20 text-white placeholder-gray-400 rounded-xl px-4 py-4 pl-12 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all backdrop-blur-sm group-hover:bg-white/15"
-            />
+            <select
+              value={selectedStoreId}
+              onChange={(e) => onSelectStore(e.target.value)}
+              className="w-full bg-white/10 border border-white/20 text-white rounded-xl px-4 py-4 pl-12 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all backdrop-blur-sm group-hover:bg-white/15 appearance-none cursor-pointer"
+            >
+              {stores.map(store => (
+                <option key={store.id} value={store.id} className="text-gray-900">
+                  {store.name}
+                </option>
+              ))}
+            </select>
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-white transition-colors" size={20} />
           </div>
         </div>
@@ -201,23 +187,31 @@ const DashboardView = ({ onAnalyze }) => (
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard label="분석 매장 수" value="168" subtext="망원동 전체 카페·음식점" icon={TrendingUp} trend="up" trendValue="12%" />
-      <StatCard label="평균 감성 점수" value="0.82" subtext="상권 평균 대비 우수" icon={Zap} trend="up" trendValue="5.2%" />
-      <StatCard label="시뮬레이션 에이전트" value="3,800+" subtext="가상 페르소나 기반 검증" icon={Users} trend="up" trendValue="Live" />
-      <StatCard label="평균 객단가" value="₩37,685" subtext="개선 잠재력 보유" icon={DollarSign} trend="up" trendValue="9%" />
+      <StatCard label="분석 매장 수" value={stats.storeCount} subtext="망원동 전체 카페·음식점" icon={TrendingUp} trend="up" trendValue="12%" />
+      <StatCard label="평균 감성 점수" value={stats.avgSentiment} subtext="상권 평균 대비 우수" icon={Zap} trend="up" trendValue="5.2%" />
+      <StatCard label="시뮬레이션 에이전트" value={stats.totalAgents} subtext="가상 페르소나 기반 검증" icon={Users} trend="up" trendValue="Live" />
+      <StatCard label="평균 객단가" value={stats.avgRevenue} subtext="개선 잠재력 보유" icon={DollarSign} trend="up" trendValue="9%" />
     </div>
   </div>
 );
 
-const XReportView = ({ onNext }) => {
-  const [selectedMetric, setSelectedMetric] = useState(radarData[0]);
+// --- Real Data Import ---
+import realData from './data/real_data.json';
+
+const XReportView = ({ data, onNext }) => {
+  const [selectedMetric, setSelectedMetric] = useState(data.radarData[0]);
+
+  // Update selectedMetric when data changes (e.g. store switching)
+  useEffect(() => {
+    setSelectedMetric(data.radarData[0]);
+  }, [data]);
 
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex justify-between items-end border-b border-gray-100 pb-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">X-Report: 크리머리</h1>
+            <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">X-Report: {data.name}</h1>
             <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold border border-red-200">진단 완료</span>
           </div>
           <p className="text-gray-500 text-sm">GPT-5.2 기반 AI 분석 리포트 — 매장 전략 처방전</p>
@@ -242,7 +236,7 @@ const XReportView = ({ onNext }) => {
           <p className="text-sm text-gray-400 mb-6">항목을 클릭하여 상세 분석을 확인하세요.</p>
           <div className="flex-1 min-h-[300px] relative">
             <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data.radarData}>
                 <PolarGrid stroke="#f3f4f6" />
                 <PolarAngleAxis
                   dataKey="subject"
@@ -251,11 +245,11 @@ const XReportView = ({ onNext }) => {
                       x={x} y={y}
                       dy={4}
                       textAnchor="middle"
-                      fill={selectedMetric.subject === payload.value ? '#E42313' : '#6b7280'}
-                      fontWeight={selectedMetric.subject === payload.value ? 'bold' : 'normal'}
+                      fill={selectedMetric?.subject === payload.value ? '#E42313' : '#6b7280'}
+                      fontWeight={selectedMetric?.subject === payload.value ? 'bold' : 'normal'}
                       fontSize={13}
                       className="cursor-pointer hover:fill-red-500 transition-colors"
-                      onClick={() => setSelectedMetric(radarData.find(d => d.subject === payload.value))}
+                      onClick={() => setSelectedMetric(data.radarData.find(d => d.subject === payload.value))}
                     >
                       {payload.value}
                     </text>
@@ -263,7 +257,7 @@ const XReportView = ({ onNext }) => {
                 />
                 <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                 <Radar
-                  name="크리머리"
+                  name={data.name}
                   dataKey="A"
                   stroke="#E42313"
                   strokeWidth={3}
@@ -283,31 +277,21 @@ const XReportView = ({ onNext }) => {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">FOCUS ON</span>
-                <h3 className="text-2xl font-bold text-gray-900 mt-1">{selectedMetric.subject} <span className="text-red-600">{selectedMetric.A}점</span></h3>
+                <h3 className="text-2xl font-bold text-gray-900 mt-1">{selectedMetric?.subject} <span className="text-red-600">{selectedMetric?.A}점</span></h3>
               </div>
               <div className="bg-white px-3 py-1 rounded-lg border border-gray-200 text-xs font-medium text-gray-500">
                 망원동 평균: 78점
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 gap-4 mb-4">
               <div className="bg-white p-4 rounded-xl border border-gray-100">
-                <div className="flex items-center gap-2 mb-2 text-green-600 font-bold text-sm">
-                  <ThumbsUp size={14} /> 긍정 키워드
+                <div className="flex items-center gap-2 mb-2 text-gray-900 font-bold text-sm">
+                  <MessageSquare size={14} /> 주요 키워드
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {reviewKeywords[selectedMetric.subject]?.positive.map(k => (
-                    <span key={k} className="px-2 py-1 bg-green-50 text-green-700 rounded text-xs">#{k}</span>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-100">
-                <div className="flex items-center gap-2 mb-2 text-red-500 font-bold text-sm">
-                  <ThumbsDown size={14} /> 부정 키워드
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {reviewKeywords[selectedMetric.subject]?.negative.map(k => (
-                    <span key={k} className="px-2 py-1 bg-red-50 text-red-700 rounded text-xs">#{k}</span>
+                  {data.keywords.slice(0, 8).map(k => (
+                    <span key={k} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">#{k}</span>
                   ))}
                 </div>
               </div>
@@ -316,8 +300,8 @@ const XReportView = ({ onNext }) => {
             <div className="text-sm text-gray-600 bg-white p-4 rounded-xl border border-gray-100 flex gap-3 items-start">
               <Info size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
               <p>
-                <strong>AI 분석:</strong> {selectedMetric.reason}.
-                {selectedMetric.A < 80 ? " 이 항목을 개선하면 전체 매출이 약 8% 상승할 것으로 예측됩니다." : " 현재 최상위권 수준을 유지하고 있습니다."}
+                <strong>AI 분석:</strong> {selectedMetric?.reason}.
+                {data.description}
               </p>
             </div>
           </div>
@@ -572,6 +556,11 @@ const App = () => {
     setCompletedSteps(steps.slice(0, idx));
   };
 
+  /* --- Data Loading --- */
+  const { stats, stores } = realData;
+  const [selectedStoreId, setSelectedStoreId] = useState(stores[0].id);
+  const selectedStoreData = stores.find(s => s.id === selectedStoreId) || stores[0];
+
   const handleAnalyze = () => {
     setLoading(true);
     setTimeout(() => {
@@ -586,17 +575,38 @@ const App = () => {
         <div className="h-full flex flex-col items-center justify-center animate-pulse">
           <div className="w-20 h-20 border-4 border-gray-100 border-t-red-600 rounded-full animate-spin mb-8"></div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2 font-space">Analyzing Data...</h2>
-          <p className="text-gray-500">3,800개의 가상 에이전트가 매장을 방문하고 있습니다.</p>
+          <p className="text-gray-500">{stats.totalAgents}개의 가상 에이전트가 매장을 방문하고 있습니다.</p>
         </div>
       );
     }
 
     switch (activeTab) {
-      case 'dashboard': return <DashboardView onAnalyze={handleAnalyze} />;
-      case 'x-report': return <XReportView onNext={() => changeTab('simulation')} />;
+      case 'dashboard': return (
+        <DashboardView
+          stats={stats}
+          stores={stores}
+          onAnalyze={handleAnalyze}
+          selectedStoreId={selectedStoreId}
+          onSelectStore={setSelectedStoreId}
+        />
+      );
+      case 'x-report': return (
+        <XReportView
+          data={selectedStoreData}
+          onNext={() => changeTab('simulation')}
+        />
+      );
       case 'simulation': return <SimulationView onComplete={() => changeTab('y-report')} />;
       case 'y-report': return <YReportView />;
-      default: return <DashboardView onAnalyze={handleAnalyze} />;
+      default: return (
+        <DashboardView
+          stats={stats}
+          stores={stores}
+          onAnalyze={handleAnalyze}
+          selectedStoreId={selectedStoreId}
+          onSelectStore={setSelectedStoreId}
+        />
+      );
     }
   };
 

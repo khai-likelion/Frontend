@@ -1,0 +1,561 @@
+{
+  "stats": {
+    "storeCount": 10,
+    "avgSentiment": 0.76,
+    "totalAgents": "3,800+",
+    "avgRevenue": "₩28,568"
+  },
+  "stores": [
+    {
+      "id": "돼지야",
+      "name": "돼지야",
+      "sentiment": 0.85,
+      "revenue": 36100,
+      "agents": 380,
+      "radarData": [
+        {
+          "subject": "맛",
+          "A": 90,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "서비스",
+          "A": 80,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "청결도",
+          "A": 60,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "가성비",
+          "A": 70,
+          "fullMark": 100,
+          "reason": "좋음"
+        },
+        {
+          "subject": "분위기",
+          "A": 70,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "접근성",
+          "A": 50,
+          "fullMark": 100,
+          "reason": "보통"
+        }
+      ],
+      "keywords": [
+        "고기",
+        "청국장",
+        "비빔국수",
+        "친절",
+        "밑반찬",
+        "가성비",
+        "고사리",
+        "위생"
+      ],
+      "description": "돼지야는 맛과 가성비 측면에서 높은 평가를 받는 동네 맛집으로, 특히 고기와 청국장, 비빔국수 등의 메뉴가 호평을 받고 있습니다. 사장님의 친절한 서비스와 다양한 밑반찬은 방문객들..."
+    },
+    {
+      "id": "망원부자부대찌개",
+      "name": "망원부자부대찌개",
+      "sentiment": 0.95,
+      "revenue": 40722,
+      "agents": 380,
+      "radarData": [
+        {
+          "subject": "맛",
+          "A": 95,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "서비스",
+          "A": 90,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "청결도",
+          "A": 85,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "가성비",
+          "A": 70,
+          "fullMark": 100,
+          "reason": "좋음"
+        },
+        {
+          "subject": "분위기",
+          "A": 75,
+          "fullMark": 100,
+          "reason": "좋음"
+        },
+        {
+          "subject": "접근성",
+          "A": 55,
+          "fullMark": 100,
+          "reason": "보통"
+        }
+      ],
+      "keywords": [
+        "친절",
+        "맛있음",
+        "무한리필",
+        "깨끗함",
+        "부대찌개",
+        "햄",
+        "국물",
+        "정겨운 분위기"
+      ],
+      "description": "망원부자부대찌개는 고객들로부터 높은 만족도를 받는 맛집으로, 특히 맛과 친절한 서비스가 큰 강점으로 꼽힙니다. 리뷰어들은 부대찌개의 맛을 칭찬하며, 햄의 품질과 깔끔한 국물을 특히..."
+    },
+    {
+      "id": "메가MGC커피망원망리단길점",
+      "name": "메가MGC커피망원망리단길점",
+      "sentiment": 0.2,
+      "revenue": 7497,
+      "agents": 380,
+      "radarData": [
+        {
+          "subject": "맛",
+          "A": 40,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "서비스",
+          "A": 30,
+          "fullMark": 100,
+          "reason": "낮음"
+        },
+        {
+          "subject": "청결도",
+          "A": 60,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "가성비",
+          "A": 30,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "분위기",
+          "A": 50,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "접근성",
+          "A": 40,
+          "fullMark": 100,
+          "reason": "보통"
+        }
+      ],
+      "keywords": [
+        "서비스",
+        "직원 태도",
+        "일관성 부족",
+        "프라페",
+        "청결",
+        "인건비",
+        "알바생 행동"
+      ],
+      "description": "메가MGC커피 망원망리단길점은 가까운 위치 덕분에 자주 방문하는 곳이지만, 최근 방문 시 음료의 품질 일관성과 직원 서비스 품질에 대한 우려가 커졌습니다. 특히 프라페의 맛과 양이..."
+    },
+    {
+      "id": "반했닭옛날통닭망원점",
+      "name": "반했닭옛날통닭망원점",
+      "sentiment": 0.75,
+      "revenue": 31309,
+      "agents": 380,
+      "radarData": [
+        {
+          "subject": "맛",
+          "A": 85,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "서비스",
+          "A": 65,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "청결도",
+          "A": 70,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "가성비",
+          "A": 60,
+          "fullMark": 100,
+          "reason": "좋음"
+        },
+        {
+          "subject": "분위기",
+          "A": 60,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "접근성",
+          "A": 55,
+          "fullMark": 100,
+          "reason": "보통"
+        }
+      ],
+      "keywords": [
+        "맛있음",
+        "가성비",
+        "옛날통닭",
+        "양념치킨",
+        "포장",
+        "불친절",
+        "가격",
+        "신선도"
+      ],
+      "description": "반했닭옛날통닭 망원점은 주로 맛있는 옛날 통닭과 양념치킨으로 호평을 받고 있으며, 특히 가성비 측면에서 높은 점수를 받고 있다. 많은 리뷰어들이 저렴한 가격과 맛있는 음식에 만족하..."
+    },
+    {
+      "id": "오늘요거",
+      "name": "오늘요거",
+      "sentiment": 0.85,
+      "revenue": 7497,
+      "agents": 380,
+      "radarData": [
+        {
+          "subject": "맛",
+          "A": 95,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "서비스",
+          "A": 80,
+          "fullMark": 100,
+          "reason": "좋음"
+        },
+        {
+          "subject": "청결도",
+          "A": 80,
+          "fullMark": 100,
+          "reason": "좋음"
+        },
+        {
+          "subject": "가성비",
+          "A": 60,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "분위기",
+          "A": 70,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "접근성",
+          "A": 50,
+          "fullMark": 100,
+          "reason": "보통"
+        }
+      ],
+      "keywords": [
+        "친절",
+        "요거트",
+        "맛있음",
+        "블루베리",
+        "친절한 서비스"
+      ],
+      "description": "오늘요거는 친절한 서비스로 고객들에게 호평을 받고 있으며, 특히 요거트의 맛에 대한 평가가 매우 긍정적입니다. 리뷰어들은 그릭 요거트 중에서도 블루베리 맛을 특히 칭찬하였습니다. ..."
+    },
+    {
+      "id": "육장",
+      "name": "육장",
+      "sentiment": 0.85,
+      "revenue": 40722,
+      "agents": 380,
+      "radarData": [
+        {
+          "subject": "맛",
+          "A": 90,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "서비스",
+          "A": 70,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "청결도",
+          "A": 80,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "가성비",
+          "A": 60,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "분위기",
+          "A": 65,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "접근성",
+          "A": 50,
+          "fullMark": 100,
+          "reason": "보통"
+        }
+      ],
+      "keywords": [
+        "육개장",
+        "맛",
+        "친절",
+        "가격",
+        "과일 후식",
+        "질긴 고기",
+        "분위기",
+        "회전율"
+      ],
+      "description": "육장은 맛과 친절한 서비스로 호평을 받는 해장 맛집으로, 특히 진하고 깊은 맛의 육개장과 세심한 배려로 제공되는 과일 후식이 돋보입니다. 그러나 가격 대비 가치에 대한 의문과 일부..."
+    },
+    {
+      "id": "육회by유신망원점",
+      "name": "육회by유신망원점",
+      "sentiment": 0.45,
+      "revenue": 36100,
+      "agents": 380,
+      "radarData": [
+        {
+          "subject": "맛",
+          "A": 65,
+          "fullMark": 100,
+          "reason": "보통 이상"
+        },
+        {
+          "subject": "서비스",
+          "A": 60,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "청결도",
+          "A": 70,
+          "fullMark": 100,
+          "reason": "양호"
+        },
+        {
+          "subject": "가성비",
+          "A": 40,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "분위기",
+          "A": 60,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "접근성",
+          "A": 50,
+          "fullMark": 100,
+          "reason": "보통"
+        }
+      ],
+      "keywords": [
+        "육회",
+        "맛",
+        "신선도",
+        "마늘",
+        "가격",
+        "서비스",
+        "분위기",
+        "연어",
+        "알탕"
+      ],
+      "description": "육회by유신 망원점은 맛에 대한 평가가 혼재되어 있습니다. 긍정적인 리뷰에서는 부드러운 육회와 맛있는 연어, 탄탄면, 알탕을 칭찬하지만, 부정적인 리뷰에서는 육회의 과도한 단맛, ..."
+    },
+    {
+      "id": "전조",
+      "name": "전조",
+      "sentiment": 0.85,
+      "revenue": 51728,
+      "agents": 380,
+      "radarData": [
+        {
+          "subject": "맛",
+          "A": 90,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "서비스",
+          "A": 70,
+          "fullMark": 100,
+          "reason": "양호"
+        },
+        {
+          "subject": "청결도",
+          "A": 70,
+          "fullMark": 100,
+          "reason": "양호"
+        },
+        {
+          "subject": "가성비",
+          "A": 60,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "분위기",
+          "A": 70,
+          "fullMark": 100,
+          "reason": "양호"
+        },
+        {
+          "subject": "접근성",
+          "A": 50,
+          "fullMark": 100,
+          "reason": "보통"
+        }
+      ],
+      "keywords": [
+        "분위기",
+        "음악",
+        "맛있는 맥주",
+        "맛있음",
+        "가성비"
+      ],
+      "description": "전조는 방문객들에게 긍정적인 분위기와 음악으로 유명한 곳으로, 특히 맛있는 음식과 맥주가 호평을 받고 있습니다. 리뷰어들은 식당의 따뜻하고 편안한 분위기를 강조하며, 음악과 함께하..."
+    },
+    {
+      "id": "정드린치킨망원점",
+      "name": "정드린치킨망원점",
+      "sentiment": 0.9,
+      "revenue": 26511,
+      "agents": 380,
+      "radarData": [
+        {
+          "subject": "맛",
+          "A": 95,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "서비스",
+          "A": 90,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "청결도",
+          "A": 85,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "가성비",
+          "A": 80,
+          "fullMark": 100,
+          "reason": "좋음"
+        },
+        {
+          "subject": "분위기",
+          "A": 70,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "접근성",
+          "A": 60,
+          "fullMark": 100,
+          "reason": "보통"
+        }
+      ],
+      "keywords": [
+        "맛있음",
+        "친절",
+        "가성비",
+        "옛날통닭",
+        "만족"
+      ],
+      "description": "정드린치킨 망원점은 고객들로부터 높은 만족도를 받는 식당으로, 특히 이모님의 친절함과 맛있는 옛날통닭이 호평을 받고 있습니다. 리뷰어들은 이곳의 맛과 가성비를 특히 강조하며, 만원..."
+    },
+    {
+      "id": "크리머리",
+      "name": "크리머리",
+      "sentiment": 0.95,
+      "revenue": 7497,
+      "agents": 380,
+      "radarData": [
+        {
+          "subject": "맛",
+          "A": 95,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "서비스",
+          "A": 85,
+          "fullMark": 100,
+          "reason": "매우 좋음"
+        },
+        {
+          "subject": "청결도",
+          "A": 75,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "가성비",
+          "A": 75,
+          "fullMark": 100,
+          "reason": "좋음"
+        },
+        {
+          "subject": "분위기",
+          "A": 70,
+          "fullMark": 100,
+          "reason": "보통"
+        },
+        {
+          "subject": "접근성",
+          "A": 45,
+          "fullMark": 100,
+          "reason": "보통"
+        }
+      ],
+      "keywords": [
+        "맛있음",
+        "친절",
+        "재방문",
+        "아이스크림",
+        "홈메이드",
+        "분위기",
+        "가격",
+        "운영시간"
+      ],
+      "description": "크리머리는 방문객들로부터 높은 만족도를 받는 곳으로, 특히 아이스크림의 맛과 사장님의 친절한 서비스가 주요 강점으로 꼽힙니다. 대부분의 리뷰에서 아이스크림의 품질과 독특한 맛에 대..."
+    }
+  ]
+}
