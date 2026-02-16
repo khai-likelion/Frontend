@@ -162,17 +162,22 @@ const DashboardView = ({ stats, stores, onAnalyze, selectedStoreId, onSelectStor
         <div className="flex-1 space-y-2 w-full">
           <label className="text-gray-300 text-sm font-medium">분석할 매장 선택 ({stores.length}개 매장 데이터 보유)</label>
           <div className="relative group">
-            <select
-              value={selectedStoreId}
-              onChange={(e) => onSelectStore(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 text-white rounded-xl px-4 py-4 pl-12 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all backdrop-blur-sm group-hover:bg-white/15 appearance-none cursor-pointer"
-            >
+            <input
+              type="text"
+              list="stores-list"
+              value={stores.find(s => s.id === selectedStoreId)?.name || ''}
+              onChange={(e) => {
+                const store = stores.find(s => s.name === e.target.value);
+                if (store) onSelectStore(store.id);
+              }}
+              placeholder="매장명을 입력하거나 선택하세요..."
+              className="w-full bg-white/10 border border-white/20 text-white placeholder:text-gray-400 rounded-xl px-4 py-4 pl-12 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all backdrop-blur-sm group-hover:bg-white/15 cursor-pointer"
+            />
+            <datalist id="stores-list">
               {stores.map(store => (
-                <option key={store.id} value={store.id} className="text-gray-900">
-                  {store.name}
-                </option>
+                <option key={store.id} value={store.name} />
               ))}
-            </select>
+            </datalist>
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-white transition-colors" size={20} />
           </div>
         </div>
@@ -219,12 +224,12 @@ const XReportView = ({ data, onNext }) => {
         <div className="flex items-center gap-6">
           <div className="text-right">
             <div className="text-sm text-gray-400 mb-1">종합 등급</div>
-            <div className="text-4xl font-bold font-space text-gray-900">A<span className="text-lg text-gray-400 font-normal ml-1">/ S</span></div>
+            <div className="text-4xl font-bold font-space text-gray-900">{data.grade}<span className="text-lg text-gray-400 font-normal ml-1">/ S</span></div>
           </div>
           <div className="w-px h-12 bg-gray-200"></div>
           <div className="text-right">
             <div className="text-sm text-gray-400 mb-1">상위</div>
-            <div className="text-4xl font-bold font-space text-red-600">5%</div>
+            <div className="text-4xl font-bold font-space text-red-600">{data.rankPercent}%</div>
           </div>
         </div>
       </div>
@@ -314,22 +319,16 @@ const XReportView = ({ data, onNext }) => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white p-5 rounded-xl border border-gray-200 hover:border-red-500 hover:shadow-md cursor-pointer transition-all group">
-              <div className="flex justify-between mb-2">
-                <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded">접점 확대</span>
-                <Play size={16} className="text-gray-300 group-hover:text-red-500" />
+            {data.solutions.map((sol, idx) => (
+              <div key={idx} className={`bg-white p-5 rounded-xl border border-gray-200 hover:shadow-md cursor-pointer transition-all group ${idx % 2 === 0 ? 'hover:border-red-500' : 'hover:border-blue-500'}`}>
+                <div className="flex justify-between mb-2">
+                  <span className={`text-xs font-bold px-2 py-1 rounded ${idx % 2 === 0 ? 'text-red-600 bg-red-50' : 'text-blue-600 bg-blue-50'}`}>{sol.category}</span>
+                  <Play size={16} className={`text-gray-300 ${idx % 2 === 0 ? 'group-hover:text-red-500' : 'group-hover:text-blue-500'}`} />
+                </div>
+                <div className="font-bold text-gray-900 mb-1 text-sm leading-tight">{sol.title}</div>
+                <div className="text-[10px] text-gray-500">{sol.desc}</div>
               </div>
-              <div className="font-bold text-gray-900 mb-1">영업일 확장 전략</div>
-              <div className="text-xs text-gray-500">주 2회 → 주 4회 변경 시</div>
-            </div>
-            <div className="bg-white p-5 rounded-xl border border-gray-200 hover:border-blue-500 hover:shadow-md cursor-pointer transition-all group">
-              <div className="flex justify-between mb-2">
-                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">공간 효율</span>
-                <Play size={16} className="text-gray-300 group-hover:text-blue-500" />
-              </div>
-              <div className="font-bold text-gray-900 mb-1">테이블 회전 최적화</div>
-              <div className="text-xs text-gray-500">피크타임 이용 제한 도입 시</div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
