@@ -264,6 +264,29 @@ const VerificationView = ({ data, onVerified, onBack }) => {
   const [bizNum, setBizNum] = useState('');
   const [error, setError] = useState('');
 
+  // Initialize Kakao Map
+  useEffect(() => {
+    if (window.kakao && window.kakao.maps) {
+      window.kakao.maps.load(() => {
+        const container = document.getElementById('kakao-map');
+        if (container) {
+          const options = {
+            center: new window.kakao.maps.LatLng(data.lat, data.lng),
+            level: 3
+          };
+          const map = new window.kakao.maps.Map(container, options);
+
+          // Marker
+          const markerPosition = new window.kakao.maps.LatLng(data.lat, data.lng);
+          const marker = new window.kakao.maps.Marker({
+            position: markerPosition
+          });
+          marker.setMap(map);
+        }
+      });
+    }
+  }, [data]);
+
   // Format business number (xxx-xx-xxxxx)
   const handleBizNumChange = (e) => {
     let val = e.target.value.replace(/[^0-9]/g, '');
@@ -298,23 +321,27 @@ const VerificationView = ({ data, onVerified, onBack }) => {
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
         {/* Map Section */}
         <div className="h-64 w-full bg-gray-100 relative">
-          <iframe
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            style={{ border: 0 }}
-            src={`https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${data.lat},${data.lng}&zoom=15`}
-            allowFullScreen
-            title="store-map"
-            className="filter grayscale opacity-80"
-          ></iframe>
-          {/* Fallback visual for demo without API key */}
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-200/50 pointer-events-none">
-            <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm font-bold text-gray-700">
-              <MapPin className="text-red-500" size={18} />
-              <span>{data.address || '주소 정보 없음'}</span>
+          <div id="kakao-map" className="w-full h-full"></div>
+
+          {/* Overlay info - only show if map might not load (e.g. no API key) */}
+          {!window.kakao && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-200/50 pointer-events-none">
+              <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm font-bold text-gray-700">
+                <MapPin className="text-red-500" size={18} />
+                <span>{data.address || '주소 정보 없음'} (API 키 확인 필요)</span>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Always visible address badge */}
+          {window.kakao && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none z-10">
+              <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm font-bold text-gray-700 border border-gray-100">
+                <MapPin className="text-red-500" size={16} />
+                <span>{data.address || '주소 정보 없음'}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Info & Verification Section */}
