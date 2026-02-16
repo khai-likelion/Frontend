@@ -264,26 +264,43 @@ const VerificationView = ({ data, onVerified, onBack }) => {
   const [bizNum, setBizNum] = useState('');
   const [error, setError] = useState('');
 
-  // Initialize Kakao Map
+  // Initialize Kakao Map with retry logic
   useEffect(() => {
-    if (window.kakao && window.kakao.maps) {
-      window.kakao.maps.load(() => {
-        const container = document.getElementById('kakao-map');
-        if (container) {
-          const options = {
-            center: new window.kakao.maps.LatLng(data.lat, data.lng),
-            level: 3
-          };
-          const map = new window.kakao.maps.Map(container, options);
+    const loadMap = () => {
+      if (window.kakao && window.kakao.maps) {
+        window.kakao.maps.load(() => {
+          const container = document.getElementById('kakao-map');
+          if (container) {
+            const options = {
+              center: new window.kakao.maps.LatLng(data.lat, data.lng),
+              level: 3
+            };
+            const map = new window.kakao.maps.Map(container, options);
 
-          // Marker
-          const markerPosition = new window.kakao.maps.LatLng(data.lat, data.lng);
-          const marker = new window.kakao.maps.Marker({
-            position: markerPosition
-          });
-          marker.setMap(map);
+            // Marker
+            const markerPosition = new window.kakao.maps.LatLng(data.lat, data.lng);
+            const marker = new window.kakao.maps.Marker({
+              position: markerPosition
+            });
+            marker.setMap(map);
+          }
+        });
+        return true;
+      }
+      return false;
+    };
+
+    // Try loading immediately
+    if (!loadMap()) {
+      // If not loaded, retry every 500ms for 5 seconds
+      let attempts = 0;
+      const intervalId = setInterval(() => {
+        attempts++;
+        if (loadMap() || attempts >= 10) {
+          clearInterval(intervalId);
         }
-      });
+      }, 500);
+      return () => clearInterval(intervalId);
     }
   }, [data]);
 
