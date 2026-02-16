@@ -41,6 +41,8 @@ import {
   Line
 } from 'recharts';
 
+import realData from './data/real_data.json';
+
 // --- Mock Data ---
 
 // --- Mock Data ---
@@ -164,46 +166,41 @@ const DashboardView = ({ stats, stores, onAnalyze, selectedStoreId, onSelectStor
         <div className="flex-1 space-y-2 w-full">
           <label className="text-gray-300 text-sm font-medium">분석할 매장 선택 ({stores.length}개 매장 데이터 보유)</label>
           <div className="relative group">
-            <input
-              type="text"
-              list="stores-list"
-              value={stores.find(s => s.id === selectedStoreId)?.name || ''}
-              onChange={(e) => {
-                const store = stores.find(s => s.name === e.target.value);
-                if (store) onSelectStore(store.id);
-              }}
-              placeholder="매장명을 입력하거나 선택하세요..."
-              className="w-full bg-white/10 border border-white/20 text-white placeholder:text-gray-400 rounded-xl px-4 py-4 pl-12 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all backdrop-blur-sm group-hover:bg-white/15 cursor-pointer"
-            />
-            <datalist id="stores-list">
+            <select
+              value={selectedStoreId}
+              onChange={(e) => onSelectStore(e.target.value)}
+              className="w-full bg-white/10 border border-white/20 text-white rounded-xl px-4 py-4 pl-12 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all backdrop-blur-sm group-hover:bg-white/15 appearance-none cursor-pointer"
+            >
               {stores.map(store => (
-                <option key={store.id} value={store.name} />
+                <option key={store.id} value={store.id} className="text-gray-900">
+                  {store.name}
+                </option>
               ))}
-            </datalist>
+            </select>
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-white transition-colors" size={20} />
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <ChevronRight className="text-gray-400 rotate-90" size={20} />
+            </div>
           </div>
+          <button
+            onClick={onAnalyze}
+            className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-red-900/30 whitespace-nowrap hover:shadow-red-900/50 hover:-translate-y-0.5"
+          >
+            <Zap size={18} fill="currentColor" />
+            AI 분석 시작
+          </button>
         </div>
-        <button
-          onClick={onAnalyze}
-          className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-red-900/30 whitespace-nowrap hover:shadow-red-900/50 hover:-translate-y-0.5"
-        >
-          <Zap size={18} fill="currentColor" />
-          AI 분석 시작
-        </button>
       </div>
-    </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard label="분석 매장 수" value={stats.storeCount} subtext="망원동 전체 카페·음식점" icon={TrendingUp} trend="up" trendValue="12%" />
-      <StatCard label="평균 감성 점수" value={stats.avgSentiment} subtext="상권 평균 대비 우수" icon={Zap} trend="up" trendValue="5.2%" />
-      <StatCard label="시뮬레이션 에이전트" value={stats.totalAgents} subtext="가상 페르소나 기반 검증" icon={Users} trend="up" trendValue="Live" />
-      <StatCard label="평균 객단가" value={stats.avgRevenue} subtext="개선 잠재력 보유" icon={DollarSign} trend="up" trendValue="9%" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard label="분석 매장 수" value={stats.storeCount} subtext="망원동 전체 카페·음식점" icon={TrendingUp} trend="up" trendValue="12%" />
+        <StatCard label="평균 감성 점수" value={stats.avgSentiment} subtext="상권 평균 대비 우수" icon={Zap} trend="up" trendValue="5.2%" />
+        <StatCard label="시뮬레이션 에이전트" value={stats.totalAgents} subtext="가상 페르소나 기반 검증" icon={Users} trend="up" trendValue="Live" />
+        <StatCard label="평균 객단가" value={stats.avgRevenue} subtext="개선 잠재력 보유" icon={DollarSign} trend="up" trendValue="9%" />
+      </div>
     </div>
   </div>
 );
-
-// --- Real Data Import ---
-import realData from './data/real_data.json';
 
 const XReportView = ({ data, onNext }) => {
   const [selectedMetric, setSelectedMetric] = useState(data.radarData[0]);
