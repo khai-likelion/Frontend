@@ -99,7 +99,24 @@ for filename in glob.glob(os.path.join(REPORT_DIR, "*_result.json")):
                     "reason": feature.get('label', '')
                 })
 
-            top_keywords = input_data.get('top_keywords', [])
+            # Keywords with Sentiment Logic
+            raw_keywords = input_data.get('top_keywords', [])
+            critical_feedback = input_data.get('critical_feedback', [])
+            critical_text = " ".join(critical_feedback)
+            
+            top_keywords = []
+            for k in raw_keywords:
+                sentiment = 'neutral'
+                # Simple heuristic: if keyword is in critical feedback, it's negative
+                # If overall score is high and not in critical, assume positive
+                if k in critical_text:
+                    sentiment = 'negative'
+                elif sentiment_score >= 0.7:
+                    sentiment = 'positive'
+                elif sentiment_score < 0.4:
+                    sentiment = 'negative'
+                
+                top_keywords.append({"text": k, "sentiment": sentiment})
             report_text = data.get('output_report', '')
             
             # Extract Grade and Solutions
@@ -134,7 +151,8 @@ for filename in glob.glob(os.path.join(REPORT_DIR, "*_result.json")):
                 "grade": grade,
                 "rankPercent": rank_pc,
                 "solutions": solutions,
-                "description": input_data.get('rag_context', '')[:120] + "..."
+                "description": input_data.get('rag_context', '')[:120] + "...",
+                "fullReport": report_text
             })
 
             total_stores += 1

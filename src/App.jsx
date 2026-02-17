@@ -601,6 +601,7 @@ const VerificationView = ({ data, onVerified, onBack }) => {
 
 const XReportView = ({ data, onNext }) => {
   const [selectedMetric, setSelectedMetric] = useState(data.radarData[0]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Update selectedMetric when data changes (e.g. store switching)
   useEffect(() => {
@@ -618,9 +619,17 @@ const XReportView = ({ data, onNext }) => {
           <p className="text-gray-500 text-sm">GPT-5.2 기반 AI 분석 리포트 — 매장 전략 처방전</p>
         </div>
         <div className="flex items-center gap-6">
-          <div className="text-right">
+          <div className="text-right group relative cursor-help">
             <div className="text-sm text-gray-400 mb-1">종합 등급</div>
             <div className="text-4xl font-bold font-space text-gray-900">{data.grade}<span className="text-lg text-gray-400 font-normal ml-1">/ S</span></div>
+            {/* Tooltip */}
+            <div className="absolute top-full right-0 mt-2 w-48 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+              <div className="flex justify-between mb-1"><span>S</span> <span className="text-gray-400">최상</span></div>
+              <div className="flex justify-between mb-1"><span>A</span> <span className="text-gray-400">상</span></div>
+              <div className="flex justify-between mb-1"><span>B</span> <span className="text-gray-400">중</span></div>
+              <div className="flex justify-between mb-1"><span>C</span> <span className="text-gray-400">하</span></div>
+              <div className="flex justify-between"><span>D</span> <span className="text-gray-400">최하</span></div>
+            </div>
           </div>
           <div className="w-px h-12 bg-gray-200"></div>
           <div className="text-right">
@@ -691,9 +700,17 @@ const XReportView = ({ data, onNext }) => {
                   <MessageSquare size={14} /> 주요 키워드
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {data.keywords.slice(0, 8).map(k => (
-                    <span key={k} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">#{k}</span>
-                  ))}
+                  {data.keywords.slice(0, 8).map(k => {
+                    let colorClass = 'bg-gray-100 text-gray-600';
+                    if (k.sentiment === 'positive') colorClass = 'bg-green-100 text-green-700 border border-green-200';
+                    if (k.sentiment === 'negative') colorClass = 'bg-red-50 text-red-600 border border-red-100';
+
+                    return (
+                      <span key={k.text} className={`px-2 py-1 rounded text-xs font-medium ${colorClass}`}>
+                        #{k.text}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             </div>
