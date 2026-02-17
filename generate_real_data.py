@@ -131,7 +131,27 @@ for filename in glob.glob(os.path.join(REPORT_DIR, "*_result.json")):
             rank_pc = 5 + int((1 - sentiment_score) * 20)
             rank_pc = max(1, min(25, rank_pc))
 
-            # Get location data
+            # Generate Dynamic Simulation Variables based on Solutions
+            simulation_variables = []
+            category_map = {
+                "공간 경험": {"id": "env_budget", "name": "환경 개선 예산 (월)", "min": 0, "max": 200, "step": 10, "unit": "만원", "default": 0},
+                "제품 매력": {"id": "menu_budget", "name": "메뉴 품질 투자 (월)", "min": 0, "max": 200, "step": 10, "unit": "만원", "default": 0},
+                "재방문 락인": {"id": "marketing_budget", "name": "마케팅/프로모션 예산 (월)", "min": 0, "max": 300, "step": 10, "unit": "만원", "default": 30}
+            }
+            
+            seen_vars = set()
+            for sol in solutions:
+                cat = sol['category']
+                if cat in category_map and cat not in seen_vars:
+                    config = category_map[cat]
+                    simulation_variables.append(config)
+                    seen_vars.add(cat)
+            
+            # Fallback
+            if not simulation_variables:
+                simulation_variables.append({"id": "marketing", "name": "통합 마케팅 예산", "min": 0, "max": 200, "step": 10, "unit": "만원", "default": 50})
+
+            # Add Location Data
             # Normalize store name for lookup
             normalized_store_name = store_name.replace(' ', '')
             loc_data = store_locations.get(normalized_store_name)
@@ -150,6 +170,7 @@ for filename in glob.glob(os.path.join(REPORT_DIR, "*_result.json")):
                 "grade": grade,
                 "rankPercent": rank_pc,
                 "solutions": solutions,
+                "simulationVariables": simulation_variables,
                 "description": input_data.get('rag_context', '')[:120] + "...",
                 "fullReport": report_text
             })

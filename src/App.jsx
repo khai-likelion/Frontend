@@ -807,15 +807,57 @@ const XReportView = ({ data, onNext }) => {
 };
 
 // --- New Component: Interactive Simulation Lab ---
-const SimulationView = ({ onComplete }) => {
-  const [days, setDays] = useState(3);
-  const [turnover, setTurnover] = useState(1.2);
-  const [marketing, setMarketing] = useState(50);
+const SimulationView = ({ data, onComplete }) => {
+  const [simValues, setSimValues] = useState({});
 
-  // Simple calculation for visual effect
-  const predictedRevenue = Math.floor(3500000 + (days * 500000) + (turnover * 800000) + (marketing * 1000));
-  const baseRevenue = 3500000;
-  const growth = ((predictedRevenue - baseRevenue) / baseRevenue * 100).toFixed(1);
+  // Initialize simulation values from data
+  useEffect(() => {
+    if (data?.simulationVariables) {
+      const initial = {};
+      data.simulationVariables.forEach(v => {
+        initial[v.id] = v.default;
+      });
+      setSimValues(initial);
+    }
+  }, [data]);
+
+  // Calculate Growth and Revenue dynamically
+  const calculateMetrics = () => {
+    // Default fallback if no variables
+    if (!data?.simulationVariables || data.simulationVariables.length === 0) {
+      return { growth: 0.0, predicted: 35000000 };
+    }
+
+    let totalImpact = 0;
+    let maxImpact = 0;
+
+    data.simulationVariables.forEach(v => {
+      const val = simValues[v.id] !== undefined ? simValues[v.id] : v.default;
+      // Normalize value (0 to 1) based on range
+      const normalized = (val - v.min) / ((v.max - v.min) || 1);
+      totalImpact += normalized;
+      maxImpact += 1;
+    });
+
+    // Max potential growth is 35% if all investments are maxed
+    const growthRate = (totalImpact / (maxImpact || 1)) * 35;
+
+    // Base Revenue Estimation (Monthly)
+    // Rough estimate: Avg Check * 30 days * 40 tables/day
+    // Use data.revenue (ticket size) or default 30000
+    const ticketSize = data?.revenue || 30000;
+    const baseRevenue = ticketSize * 30 * 40;
+
+    const predicted = Math.floor(baseRevenue * (1 + growthRate / 100));
+
+    return {
+      growth: growthRate.toFixed(1),
+      predicted,
+      base: baseRevenue
+    };
+  };
+
+  const { growth, predicted, base } = calculateMetrics();
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -825,7 +867,7 @@ const SimulationView = ({ onComplete }) => {
             <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">Interactive Lab</h1>
             <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">실험실</span>
           </div>
-          <p className="text-gray-500 text-sm">변수를 직접 조정하여 미래 매출을 예측해보세요.</p>
+          <p className="text-gray-500 text-sm">AI가 제안한 솔루션에 맞춰 예산을 조정하고 미래 매출을 예측해보세요.</p>
         </div>
       </div>
 
@@ -834,48 +876,39 @@ const SimulationView = ({ onComplete }) => {
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
             <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <Sliders size={18} /> 변수 설정
+              <Sliders size={18} /> 변수 설정 (맞춤형)
             </h3>
 
             <div className="space-y-8">
-              <div>
-                <div className="flex justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-700">주간 영업일 수</label>
-                  <span className="text-sm font-bold text-red-600">{days}일</span>
+              {data?.simulationVariables?.map((variable) => (
+                <div key={variable.id}>
+                  <div className="flex justify-between mb-2">
+                    <label className="text-sm font-medium text-gray-700">{variable.name}</label>
+                    <span className="text-sm font-bold text-blue-600">
+                      {simValues[variable.id] !== undefined ? simValues[variable.id] : variable.default}{variable.unit}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={variable.min}
+                    max={variable.max}
+                    step={variable.step}
+                    value={simValues[variable.id] !== undefined ? simValues[variable.id] : variable.default}
+                    onChange={(e) => setSimValues(prev => ({ ...prev, [variable.id]: Number(e.target.value) }))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                  <div className="flex justify-between text-xs text-gray-400 mt-1">
+                    <span>{variable.min}{variable.unit}</span>
+                    <span>{variable.max}{variable.unit}</span>
+                  </div>
                 </div>
-                <input
-                  type="range" min="1" max="7" step="1" value={days}
-                  onChange={(e) => setDays(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-600"
-                />
-                <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>1일</span><span>7일</span>
-                </div>
-              </div>
+              ))}
 
-              <div>
-                <div className="flex justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-700">테이블 회전율 (목표)</label>
-                  <span className="text-sm font-bold text-blue-600">{turnover}회</span>
+              {!data?.simulationVariables && (
+                <div className="text-center text-gray-400 py-4">
+                  설정 가능한 변수가 없습니다.
                 </div>
-                <input
-                  type="range" min="0.5" max="3.0" step="0.1" value={turnover}
-                  onChange={(e) => setTurnover(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-700">마케팅 예산 (월)</label>
-                  <span className="text-sm font-bold text-gray-900">{marketing}만원</span>
-                </div>
-                <input
-                  type="range" min="0" max="200" step="10" value={marketing}
-                  onChange={(e) => setMarketing(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gray-900"
-                />
-              </div>
+              )}
             </div>
           </div>
 
@@ -894,21 +927,21 @@ const SimulationView = ({ onComplete }) => {
           <div className="text-center z-10 space-y-2 mb-10">
             <h4 className="text-gray-500 font-medium">예상 월 매출</h4>
             <div className="text-6xl font-bold font-space text-gray-900 tracking-tighter">
-              ₩{predictedRevenue.toLocaleString()}
+              ₩{predicted.toLocaleString()}
             </div>
             <div className={`text-lg font-bold ${Number(growth) >= 0 ? 'text-green-600' : 'text-red-600'} flex items-center justify-center gap-1`}>
               {Number(growth) >= 0 ? <TrendingUp size={20} /> : <TrendingUp size={20} className="rotate-180" />}
-              현재 대비 {growth}% {Number(growth) >= 0 ? '성장' : '하락'} 예상
+              현재(₩{base.toLocaleString()}) 대비 {growth}% {Number(growth) >= 0 ? '성장' : '하락'} 예상
             </div>
           </div>
 
           <div className="w-full h-64 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={[
-                { name: '1주', current: 100, predicted: 100 + (growth / 4) },
-                { name: '2주', current: 105, predicted: 105 + (growth / 3) },
-                { name: '3주', current: 110, predicted: 110 + (growth / 2) },
-                { name: '4주', current: 108, predicted: 108 + (growth / 1.5) },
+                { name: '1주', current: 100, predicted: 100 + (Number(growth) / 4) },
+                { name: '2주', current: 105, predicted: 105 + (Number(growth) / 3) },
+                { name: '3주', current: 110, predicted: 110 + (Number(growth) / 2) },
+                { name: '4주', current: 108, predicted: 108 + (Number(growth) / 1.5) },
               ]}>
                 <defs>
                   <linearGradient id="colorPred" x1="0" y1="0" x2="0" y2="1">
@@ -925,7 +958,7 @@ const SimulationView = ({ onComplete }) => {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-xs text-center text-gray-400 mt-4">회색 점선: 현재 추이 / 붉은 실선: 시뮬레이션 예측</p>
+          <p className="text-xs text-center text-gray-400 mt-4">회색 점선: 현재 추이 / 붉은 실선: 시뮬레이션 예측 ({data?.name} 데이터 기준)</p>
         </div>
       </div>
     </div>
@@ -1129,7 +1162,12 @@ const App = () => {
           onNext={() => changeTab('simulation')}
         />
       );
-      case 'simulation': return <SimulationView onComplete={() => changeTab('y-report')} />;
+      case 'simulation': return (
+        <SimulationView
+          data={selectedStoreData}
+          onComplete={() => changeTab('y-report')}
+        />
+      );
       case 'y-report': return <YReportView />;
       case 'pricing': return <PricingView />;
       default: return (
