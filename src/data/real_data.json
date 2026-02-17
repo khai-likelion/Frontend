@@ -255,7 +255,7 @@
         },
         {
           "text": "직원 태도",
-          "sentiment": "negative"
+          "sentiment": "neutral"
         },
         {
           "text": "일관성 부족",
@@ -267,7 +267,7 @@
         },
         {
           "text": "청결",
-          "sentiment": "negative"
+          "sentiment": "neutral"
         },
         {
           "text": "인건비",
@@ -275,7 +275,7 @@
         },
         {
           "text": "알바생 행동",
-          "sentiment": "negative"
+          "sentiment": "neutral"
         }
       ],
       "grade": "D",
@@ -355,15 +355,15 @@
       "keywords": [
         {
           "text": "맛있음",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "가성비",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "옛날통닭",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "양념치킨",
@@ -375,15 +375,15 @@
         },
         {
           "text": "불친절",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "가격",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "신선도",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         }
       ],
       "grade": "B",

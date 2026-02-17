@@ -621,6 +621,25 @@ const XReportView = ({ data, onNext }) => {
             <p className="text-gray-500 text-sm">GPT-5.2 기반 AI 분석 리포트 — 매장 전략 처방전</p>
           </div>
           <div className="flex items-center gap-6">
+            {/* Action Buttons in Header */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 text-sm transition-colors"
+              >
+                <FileText size={16} className="text-red-500" />
+                전문 보기
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl font-bold hover:bg-black text-sm transition-colors"
+              >
+                <Printer size={16} />
+                PDF 저장
+              </button>
+            </div>
+            <div className="w-px h-8 bg-gray-200"></div>
+
             <div className="text-right group relative cursor-help">
               <div className="text-sm text-gray-400 mb-1">종합 등급</div>
               <div className="text-4xl font-bold font-space text-gray-900">{data.grade}<span className="text-lg text-gray-400 font-normal ml-1">/ S</span></div>
@@ -783,28 +802,6 @@ const XReportView = ({ data, onNext }) => {
           </div>
         </div>
       )}
-
-      {/* Floating Action Buttons - Moved outside animate-fade-in */}
-      <div className="fixed bottom-8 right-8 flex flex-col gap-3 print:hidden">
-        <button
-          onClick={() => window.print()}
-          className="bg-gray-900 hover:bg-black text-white p-4 rounded-full shadow-xl transition-transform hover:scale-110 flex items-center justify-center group relative"
-        >
-          <Printer size={24} />
-          <span className="absolute right-full mr-4 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-            PDF 저장
-          </span>
-        </button>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-red-600 hover:bg-red-700 text-white p-4 rounded-full shadow-xl shadow-red-600/30 transition-transform hover:scale-110 flex items-center justify-center group relative"
-        >
-          <FileText size={24} />
-          <span className="absolute right-full mr-4 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-            전문 보기
-          </span>
-        </button>
-      </div>
     </>
   );
 };
