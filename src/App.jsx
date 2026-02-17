@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import {
   LayoutDashboard,
   FileText,
@@ -744,6 +745,63 @@ const XReportView = ({ data, onNext }) => {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Full Report Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:hidden">
+          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col animate-fade-in-up">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <FileText size={20} className="text-red-600" />
+                X-Report 전문 보기
+              </h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-900 p-2 hover:bg-gray-200 rounded-full transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-8 overflow-y-auto prose prose-red max-w-none text-left">
+              <ReactMarkdown>{data.fullReport}</ReactMarkdown>
+            </div>
+            <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 flex items-center gap-2"
+              >
+                <Printer size={18} />
+                PDF 저장
+              </button>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-6 py-2 bg-gray-900 text-white rounded-xl font-bold hover:bg-black"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-8 right-8 flex flex-col gap-3 print:hidden">
+        <button
+          onClick={() => window.print()}
+          className="bg-gray-900 hover:bg-black text-white p-4 rounded-full shadow-xl transition-transform hover:scale-110 flex items-center justify-center group relative"
+        >
+          <Printer size={24} />
+          <span className="absolute right-full mr-4 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            PDF 저장
+          </span>
+        </button>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-red-600 hover:bg-red-700 text-white p-4 rounded-full shadow-xl shadow-red-600/30 transition-transform hover:scale-110 flex items-center justify-center group relative"
+        >
+          <FileText size={24} />
+          <span className="absolute right-full mr-4 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            전문 보기
+          </span>
+        </button>
       </div>
     </div>
   );
