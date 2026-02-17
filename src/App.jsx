@@ -284,6 +284,27 @@ const SignupView = ({ onSignup, onLogin }) => {
           </div>
         </div>
 
+        <div className="space-y-2">
+          <label className="text-sm font-bold text-gray-700 ml-1">비밀번호 확인</label>
+          <div className="relative">
+            <input
+              type="password"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 pl-11 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+              placeholder="비밀번호 재입력"
+            />
+            <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          </div>
+        </div>
+
+        <button
+          className="w-full bg-[#FEE500] hover:bg-[#FDD800] text-black font-bold py-4 rounded-xl shadow-lg shadow-yellow-400/20 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-4"
+        >
+          <MessageSquare size={20} fill="currentColor" />
+          카카오톡으로 시작하기
+        </button>
+
         <button
           onClick={onSignup}
           className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-red-600/20 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-2"
