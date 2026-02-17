@@ -56,27 +56,27 @@
       "keywords": [
         {
           "text": "고기",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "청국장",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "비빔국수",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "친절",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "밑반찬",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "가성비",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "고사리",
@@ -164,27 +164,27 @@
       "keywords": [
         {
           "text": "친절",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "맛있음",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "무한리필",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "깨끗함",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "부대찌개",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "햄",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "국물",
@@ -192,7 +192,7 @@
         },
         {
           "text": "정겨운 분위기",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         }
       ],
       "grade": "A",
@@ -471,15 +471,15 @@
         },
         {
           "text": "맛있음",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "블루베리",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "친절한 서비스",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         }
       ],
       "grade": "A",
@@ -559,11 +559,11 @@
       "keywords": [
         {
           "text": "육개장",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "맛",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "친절",
@@ -575,19 +575,19 @@
         },
         {
           "text": "과일 후식",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "질긴 고기",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "분위기",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "회전율",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         }
       ],
       "grade": "A",
@@ -737,23 +737,23 @@
       "keywords": [
         {
           "text": "분위기",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "음악",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "맛있는 맥주",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "맛있음",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "가성비",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         }
       ],
       "grade": "A",
@@ -833,23 +833,23 @@
       "keywords": [
         {
           "text": "맛있음",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "친절",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "가성비",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "옛날통닭",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "만족",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         }
       ],
       "grade": "A",
@@ -929,15 +929,15 @@
       "keywords": [
         {
           "text": "맛있음",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "친절",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "재방문",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "아이스크림",
@@ -945,19 +945,19 @@
         },
         {
           "text": "홈메이드",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "분위기",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "가격",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         },
         {
           "text": "운영시간",
-          "sentiment": "positive"
+          "sentiment": "neutral"
         }
       ],
       "grade": "A",

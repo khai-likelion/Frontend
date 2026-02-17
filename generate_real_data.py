@@ -107,14 +107,13 @@ for filename in glob.glob(os.path.join(REPORT_DIR, "*_result.json")):
             top_keywords = []
             for k in raw_keywords:
                 sentiment = 'neutral'
-                # Refined Logic:
+                # Refined Logic (Conservative):
                 # 1. Negative if explicitly in critical_feedback
                 if k in critical_text:
                     sentiment = 'negative'
-                # 2. Positive ONLY if overall sentiment is very high (>= 0.8) and NOT negative
-                elif sentiment_score >= 0.8:
-                    sentiment = 'positive'
-                # 3. Otherwise neutral (gray)
+                # 2. Everything else is neutral (gray) unless we have specific positive keyword data
+                else:
+                    sentiment = 'neutral'
                 
                 top_keywords.append({"text": k, "sentiment": sentiment})
             report_text = data.get('output_report', '')
