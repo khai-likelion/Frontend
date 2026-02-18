@@ -28,8 +28,10 @@ import {
   Lock,
   Mail,
   UserPlus,
-  LogIn
+  LogIn,
+  Globe // Added Globe icon
 } from 'lucide-react';
+import SimulationMap from './components/simulation/SimulationMap'; // Import SimulationMap
 import {
   AreaChart,
   Area,
@@ -807,8 +809,10 @@ const XReportView = ({ data, onNext }) => {
 };
 
 // --- New Component: Interactive Simulation Lab ---
+// --- New Component: Interactive Simulation Lab ---
 const SimulationView = ({ data, onComplete }) => {
   const [simValues, setSimValues] = useState({});
+  const [duration, setDuration] = useState('1week');
 
   // Initialize simulation values from data
   useEffect(() => {
@@ -821,62 +825,68 @@ const SimulationView = ({ data, onComplete }) => {
     }
   }, [data]);
 
-  // Calculate Growth and Revenue dynamically
-  const calculateMetrics = () => {
-    // Default fallback if no variables
-    if (!data?.simulationVariables || data.simulationVariables.length === 0) {
-      return { growth: 0.0, predicted: 35000000 };
-    }
+  const durationOptions = [
+    { id: '1week', label: '1주일', credits: 10 },
+    { id: '2weeks', label: '2주일', credits: 20 },
+    { id: '1month', label: '1개월', credits: 35 },
+    { id: '3months', label: '3개월', credits: 100 },
+    { id: '6months', label: '6개월', credits: 180 },
+    { id: '1year', label: '1년', credits: 330 },
+  ];
 
-    let totalImpact = 0;
-    let maxImpact = 0;
-
-    data.simulationVariables.forEach(v => {
-      const val = simValues[v.id] !== undefined ? simValues[v.id] : v.default;
-      // Normalize value (0 to 1) based on range
-      const normalized = (val - v.min) / ((v.max - v.min) || 1);
-      totalImpact += normalized;
-      maxImpact += 1;
-    });
-
-    // Max potential growth is 35% if all investments are maxed
-    const growthRate = (totalImpact / (maxImpact || 1)) * 35;
-
-    // Base Revenue Estimation (Monthly)
-    // Rough estimate: Avg Check * 30 days * 40 tables/day
-    // Use data.revenue (ticket size) or default 30000
-    const ticketSize = data?.revenue || 30000;
-    const baseRevenue = ticketSize * 30 * 40;
-
-    const predicted = Math.floor(baseRevenue * (1 + growthRate / 100));
-
-    return {
-      growth: growthRate.toFixed(1),
-      predicted,
-      base: baseRevenue
-    };
-  };
-
-  const { growth, predicted, base } = calculateMetrics();
+  const selectedCredits = durationOptions.find(d => d.id === duration)?.credits || 0;
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in max-w-5xl mx-auto">
       <div className="flex justify-between items-end border-b border-gray-100 pb-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">Interactive Lab</h1>
-            <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">실험실</span>
+            <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">Simulation Settings</h1>
+            <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">Step 3</span>
           </div>
-          <p className="text-gray-500 text-sm">AI가 제안한 솔루션에 맞춰 예산을 조정하고 미래 매출을 예측해보세요.</p>
+          <p className="text-gray-500 text-sm">시뮬레이션을 진행할 기간과 변수를 설정하세요.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Controls */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-            <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <Sliders size={18} /> 변수 설정 (맞춤형)
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Left Col: Duration Settings */}
+        <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm h-fit">
+          <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2 text-lg">
+            <Clock size={20} className="text-blue-500" /> 시뮬레이션 기간 설정
+          </h3>
+
+          <div className="space-y-3">
+            {durationOptions.map((opt) => (
+              <label
+                key={opt.id}
+                className={`flex justify-between items-center p-4 rounded-xl border cursor-pointer transition-all ${duration === opt.id
+                    ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                onClick={() => setDuration(opt.id)}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${duration === opt.id ? 'border-blue-500' : 'border-gray-300'
+                    }`}>
+                    {duration === opt.id && <div className="w-2 h-2 rounded-full bg-blue-500" />}
+                  </div>
+                  <span className={`font-medium ${duration === opt.id ? 'text-gray-900' : 'text-gray-600'}`}>
+                    {opt.label}
+                  </span>
+                </div>
+                <div className="bg-gray-900 text-white text-xs font-bold px-2 py-1 rounded">
+                  {opt.credits} CREDITS
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Col: Variable Settings */}
+        <div className="flex flex-col h-full space-y-6">
+          <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm flex-1">
+            <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2 text-lg">
+              <Sliders size={20} className="text-green-500" /> 솔루션 변수 설정 (맞춤형)
             </h3>
 
             <div className="space-y-8">
@@ -912,53 +922,18 @@ const SimulationView = ({ data, onComplete }) => {
             </div>
           </div>
 
-          <button
-            onClick={onComplete}
-            className="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg"
-          >
-            이 설정으로 최종 리포트 생성 <ArrowRight size={18} />
-          </button>
-        </div>
-
-        {/* Real-time Preview */}
-        <div className="lg:col-span-8 bg-gray-50 p-8 rounded-2xl border border-gray-200 flex flex-col justify-center items-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-32 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
-
-          <div className="text-center z-10 space-y-2 mb-10">
-            <h4 className="text-gray-500 font-medium">예상 월 매출</h4>
-            <div className="text-6xl font-bold font-space text-gray-900 tracking-tighter">
-              ₩{predicted.toLocaleString()}
+          <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-gray-500">지불할 크레딧</span>
+              <span className="text-2xl font-bold text-gray-900">{selectedCredits} CREDITS</span>
             </div>
-            <div className={`text-lg font-bold ${Number(growth) >= 0 ? 'text-green-600' : 'text-red-600'} flex items-center justify-center gap-1`}>
-              {Number(growth) >= 0 ? <TrendingUp size={20} /> : <TrendingUp size={20} className="rotate-180" />}
-              현재(₩{base.toLocaleString()}) 대비 {growth}% {Number(growth) >= 0 ? '성장' : '하락'} 예상
-            </div>
+            <button
+              onClick={onComplete}
+              className="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              시뮬레이션 시작하기 <ArrowRight size={18} />
+            </button>
           </div>
-
-          <div className="w-full h-64 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={[
-                { name: '1주', current: 100, predicted: 100 + (Number(growth) / 4) },
-                { name: '2주', current: 105, predicted: 105 + (Number(growth) / 3) },
-                { name: '3주', current: 110, predicted: 110 + (Number(growth) / 2) },
-                { name: '4주', current: 108, predicted: 108 + (Number(growth) / 1.5) },
-              ]}>
-                <defs>
-                  <linearGradient id="colorPred" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#E42313" stopOpacity={0.1} />
-                    <stop offset="95%" stopColor="#E42313" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af' }} />
-                <YAxis hide />
-                <Tooltip />
-                <Area type="monotone" dataKey="predicted" stroke="#E42313" fillOpacity={1} fill="url(#colorPred)" strokeWidth={3} />
-                <Area type="monotone" dataKey="current" stroke="#9ca3af" fillOpacity={0} strokeDasharray="5 5" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-          <p className="text-xs text-center text-gray-400 mt-4">회색 점선: 현재 추이 / 붉은 실선: 시뮬레이션 예측 ({data?.name} 데이터 기준)</p>
         </div>
       </div>
     </div>
@@ -1110,7 +1085,7 @@ const App = () => {
   const changeTab = (tab) => {
     setActiveTab(tab);
     // Logic to mark previous steps as complete
-    const steps = ['dashboard', 'verification', 'x-report', 'simulation', 'y-report'];
+    const steps = ['dashboard', 'verification', 'x-report', 'simulation', 'simulation_map', 'y-report'];
     const idx = steps.indexOf(tab);
     setCompletedSteps(steps.slice(0, idx));
   };
@@ -1168,6 +1143,7 @@ const App = () => {
           onComplete={() => changeTab('y-report')}
         />
       );
+      case 'simulation_map': return <SimulationMap />; // Added Simulation Map View
       case 'y-report': return <YReportView />;
       case 'pricing': return <PricingView />;
       default: return (
@@ -1225,14 +1201,20 @@ const App = () => {
               onClick={() => changeTab('x-report')}
             />
             <SidebarItem
-              icon={Play}
-              label="시뮬레이션"
+              icon={Sliders}
+              label="시뮬레이션 설정"
               active={activeTab === 'simulation'}
               onClick={() => changeTab('simulation')}
             />
             <SidebarItem
+              icon={Globe}
+              label="시뮬레이션"
+              active={activeTab === 'simulation_map'}
+              onClick={() => changeTab('simulation_map')}
+            />
+            <SidebarItem
               icon={BarChart2}
-              label="Y-Report"
+              label="최종 리포트"
               active={activeTab === 'y-report'}
               onClick={() => changeTab('y-report')}
             />
@@ -1275,9 +1257,11 @@ const App = () => {
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
           <StepCard number="2" title="X-Report" completed={completedSteps.includes('x-report')} active={activeTab === 'x-report'} onClick={() => changeTab('x-report')} />
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
-          <StepCard number="3" title="시뮬레이션" completed={completedSteps.includes('simulation')} active={activeTab === 'simulation'} onClick={() => changeTab('simulation')} />
+          <StepCard number="3" title="시뮬레이션 설정" completed={completedSteps.includes('simulation')} active={activeTab === 'simulation'} onClick={() => changeTab('simulation')} />
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
-          <StepCard number="4" title="Y-Report" completed={completedSteps.includes('y-report')} active={activeTab === 'y-report'} onClick={() => changeTab('y-report')} />
+          <StepCard number="4" title="시뮬레이션" completed={completedSteps.includes('simulation_map')} active={activeTab === 'simulation_map'} onClick={() => changeTab('simulation_map')} />
+          <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
+          <StepCard number="5" title="최종 리포트" completed={completedSteps.includes('y-report')} active={activeTab === 'y-report'} onClick={() => changeTab('y-report')} />
         </div>
 
         <div className="max-w-7xl mx-auto p-8 lg:p-12 pb-24">
