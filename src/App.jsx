@@ -1141,10 +1141,12 @@ const App = () => {
       case 'simulation': return (
         <SimulationView
           data={selectedStoreData}
-          onComplete={() => changeTab('y-report')}
+          onComplete={() => changeTab('simulation_map')}
         />
       );
-      case 'simulation_map': return <SimulationMap />; // Added Simulation Map View
+      case 'simulation_map': return (
+        <SimulationMap onComplete={() => changeTab('y-report')} />
+      );
       case 'y-report': return <YReportView />;
       case 'pricing': return <PricingView />;
       default: return (

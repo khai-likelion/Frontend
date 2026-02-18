@@ -14,7 +14,7 @@ const MANGWON_COORDS = {
     bearing: -17.6,
 };
 
-export default function SimulationMap() {
+export default function SimulationMap({ onComplete }) {
     const [viewState, setViewState] = useState(MANGWON_COORDS);
     const [agents, setAgents] = useState([]);
     const [speed, setSpeed] = useState(1); // 1x, 10x, 60x, etc.
@@ -120,14 +120,22 @@ export default function SimulationMap() {
                                     key={s}
                                     onClick={() => setSpeed(s)}
                                     className={`py-2 rounded-lg text-xs font-bold transition-all ${speed === s
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                                            : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                                        : 'bg-white/10 text-gray-400 hover:bg-white/20'
                                         }`}
                                 >
                                     {s}x
                                 </button>
                             ))}
                         </div>
+                    </div>
+                    <div className="pt-4 border-t border-white/10">
+                        <button
+                            onClick={onComplete}
+                            className="w-full bg-green-600 hover:bg-green-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-green-500/20"
+                        >
+                            결과 리포트 보기 <ArrowRight size={18} />
+                        </button>
                     </div>
                 </div>
             </div>
