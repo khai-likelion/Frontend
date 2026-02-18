@@ -17,12 +17,14 @@ const MANGWON_COORDS = {
 export default function SimulationMap() {
     const [viewState, setViewState] = useState(MANGWON_COORDS);
     const [agents, setAgents] = useState([]);
-    const [time, setTime] = useState(new Date().toLocaleTimeString());
+    const [speed, setSpeed] = useState(1); // 1x, 10x, 60x, etc.
+    const [simTime, setSimTime] = useState(new Date());
 
     // Mock Data Generation (Temporary)
     useEffect(() => {
         const interval = setInterval(() => {
-            setTime(new Date().toLocaleTimeString());
+            // Increment simulation time based on speed
+            setSimTime(prevTime => new Date(prevTime.getTime() + 1000 * speed));
 
             // Simulate moving agents
             setAgents(prevAgents => {
@@ -38,17 +40,20 @@ export default function SimulationMap() {
                     }));
                 }
 
-                // Move existing agents slightly
+                // Move existing agents - movement scale increased by speed
+                const movementScale = 0.0001 * (1 + Math.log10(speed));
                 return prevAgents.map(agent => ({
                     ...agent,
-                    lat: agent.lat + (Math.random() - 0.5) * 0.0001,
-                    lng: agent.lng + (Math.random() - 0.5) * 0.0001,
+                    lat: agent.lat + (Math.random() - 0.5) * movementScale,
+                    lng: agent.lng + (Math.random() - 0.5) * movementScale,
                 }));
             });
         }, 1000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [speed]);
+
+    const formattedTime = simTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     const markers = useMemo(() => agents.map(agent => (
         <AgentMarker key={agent.id} agent={agent} />
@@ -88,11 +93,42 @@ export default function SimulationMap() {
             </Map>
 
             {/* Simulation Info Overlay */}
-            <div className="absolute top-4 left-4 bg-black/70 text-white p-4 rounded-lg backdrop-blur-md border border-white/10">
-                <h3 className="text-lg font-bold">Mangwon Digital Twin</h3>
-                <div className="text-sm text-gray-300">
-                    <p>Time: <span className="font-mono text-green-400">{time}</span></p>
-                    <p>Active Agents: <span className="font-mono text-blue-400">{agents.length}</span></p>
+            <div className="absolute top-4 left-4 bg-black/70 text-white p-6 rounded-2xl backdrop-blur-md border border-white/10 shadow-2xl min-w-[240px]">
+                <div className="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 className="text-xl font-bold font-space tracking-tight">Mangwon Digital Twin</h3>
+                        <p className="text-xs text-gray-400">Generative Agents Simulation</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                        <span className="text-sm text-gray-400">Current Time</span>
+                        <span className="font-mono text-xl font-bold text-green-400">{formattedTime}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                        <span className="text-sm text-gray-400">Total Agents</span>
+                        <span className="font-mono text-xl font-bold text-blue-400">{agents.length}</span>
+                    </div>
+
+                    <div className="pt-2">
+                        <div className="text-[10px] font-bold text-gray-500 mb-2 tracking-widest uppercase">Simulation Speed</div>
+                        <div className="grid grid-cols-3 gap-2">
+                            {[1, 10, 60].map((s) => (
+                                <button
+                                    key={s}
+                                    onClick={() => setSpeed(s)}
+                                    className={`py-2 rounded-lg text-xs font-bold transition-all ${speed === s
+                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                                            : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                                        }`}
+                                >
+                                    {s}x
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
