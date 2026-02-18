@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { AgentMarker } from './AgentMarker';
+import { ArrowRight } from 'lucide-react';
 
 // Fallback to empty string if not set, user will need to add it later
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
