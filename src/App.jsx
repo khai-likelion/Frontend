@@ -29,7 +29,8 @@ import {
   Mail,
   UserPlus,
   LogIn,
-  Globe // Added Globe icon
+  Globe,
+  Clock // Added Clock icon
 } from 'lucide-react';
 import SimulationMap from './components/simulation/SimulationMap'; // Import SimulationMap
 import {
@@ -860,8 +861,8 @@ const SimulationView = ({ data, onComplete }) => {
               <label
                 key={opt.id}
                 className={`flex justify-between items-center p-4 rounded-xl border cursor-pointer transition-all ${duration === opt.id
-                    ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
-                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 onClick={() => setDuration(opt.id)}
               >
