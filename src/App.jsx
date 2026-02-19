@@ -604,7 +604,7 @@ const VerificationView = ({ data, onVerified, onBack }) => {
   );
 };
 
-const XReportView = ({ data, onNext }) => {
+const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution }) => {
   const [selectedMetric, setSelectedMetric] = useState(data.radarData[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -612,6 +612,14 @@ const XReportView = ({ data, onNext }) => {
   useEffect(() => {
     setSelectedMetric(data.radarData[0]);
   }, [data]);
+
+  const toggleSolution = (solution) => {
+    if (selectedSolutions.find(s => s.title === solution.title)) {
+      onSelectSolution(selectedSolutions.filter(s => s.title !== solution.title));
+    } else {
+      onSelectSolution([...selectedSolutions, solution]);
+    }
+  };
 
   return (
     <>
@@ -752,7 +760,7 @@ const XReportView = ({ data, onNext }) => {
             <div className="flex items-center justify-between pt-4 mb-4">
               <h4 className="font-bold text-gray-900">추천 필살기 (Solutions)</h4>
               <button onClick={onNext} className="flex items-center gap-2 text-red-600 font-medium hover:underline">
-                전체 시뮬레이션으로 이동 <ArrowRight size={16} />
+                전체 시뮬레이션으로 적용 <ArrowRight size={16} />
               </button>
             </div>
 
@@ -775,45 +783,61 @@ const XReportView = ({ data, onNext }) => {
 
                   {/* Solutions in this category */}
                   <div className="flex flex-col gap-3">
-                    {solutions.map((sol, idx) => (
-                      <div
-                        key={idx}
-                        className={`relative bg-white p-4 rounded-xl border border-gray-200 hover:shadow-lg cursor-pointer transition-all duration-300 group flex flex-col h-full hover:z-50 ${catIdx === 0 ? 'hover:border-red-400' : catIdx === 1 ? 'hover:border-blue-400' : 'hover:border-green-400'}`}
-                      >
-                        <div className="font-bold text-gray-900 mb-2 text-sm leading-snug relative z-10">{sol.title}</div>
-                        <div className="text-xs text-gray-500 pt-2 border-t border-gray-50 mt-auto relative z-10 group-hover:opacity-0 transition-opacity">{sol.desc}</div>
+                    {solutions.map((sol, idx) => {
+                      const isSelected = selectedSolutions.some(s => s.title === sol.title);
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => toggleSolution(sol)}
+                          className={`relative bg-white p-4 rounded-xl border hover:shadow-lg cursor-pointer transition-all duration-300 group flex flex-col h-full hover:z-50 
+                          ${isSelected
+                              ? 'border-red-500 ring-2 ring-red-100 bg-red-50/10'
+                              : 'border-gray-200'}
+                          ${catIdx === 0 && !isSelected ? 'hover:border-red-400' : ''}
+                          ${catIdx === 1 && !isSelected ? 'hover:border-blue-400' : ''}
+                          ${catIdx === 2 && !isSelected ? 'hover:border-green-400' : ''}
+                        `}
+                        >
+                          {isSelected && (
+                            <div className="absolute top-2 right-2 text-red-600 bg-white rounded-full p-1 shadow-sm z-30">
+                              <CheckCircle2 size={16} fill="currentColor" className="text-white" />
+                            </div>
+                          )}
+                          <div className="font-bold text-gray-900 mb-2 text-sm leading-snug relative z-10">{sol.title}</div>
+                          <div className="text-xs text-gray-500 pt-2 border-t border-gray-50 mt-auto relative z-10 group-hover:opacity-0 transition-opacity">{sol.desc}</div>
 
-                        {/* Hover Overlay */}
-                        <div className={`absolute left-[-1px] top-[-1px] w-[calc(100%+2px)] min-h-[calc(100%+2px)] h-auto bg-white p-4 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 rounded-xl border shadow-xl ${catIdx === 0 ? 'border-red-400 shadow-red-100' : catIdx === 1 ? 'border-blue-400 shadow-blue-100' : 'border-green-400 shadow-green-100'}`}>
-                          <div className="space-y-3">
-                            {sol.execution && (
-                              <div>
-                                <div className={`text-[10px] font-bold uppercase mb-1 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
-                                  <span className="text-lg">💡</span> 이렇게 실행해보세요
+                          {/* Hover Overlay */}
+                          <div className={`absolute left-[-1px] top-[-1px] w-[calc(100%+2px)] min-h-[calc(100%+2px)] h-auto bg-white p-4 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 rounded-xl border shadow-xl ${catIdx === 0 ? 'border-red-400 shadow-red-100' : catIdx === 1 ? 'border-blue-400 shadow-blue-100' : 'border-green-400 shadow-green-100'}`}>
+                            <div className="space-y-3">
+                              {sol.execution && (
+                                <div>
+                                  <div className={`text-[10px] font-bold uppercase mb-1 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
+                                    <span className="text-lg">💡</span> 이렇게 실행해보세요
+                                  </div>
+                                  <div className="text-xs text-gray-800 leading-relaxed font-medium">
+                                    <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
+                                      {sol.execution}
+                                    </ReactMarkdown>
+                                  </div>
                                 </div>
-                                <div className="text-xs text-gray-800 leading-relaxed font-medium">
-                                  <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
-                                    {sol.execution}
-                                  </ReactMarkdown>
+                              )}
+                              {sol.effect && (
+                                <div>
+                                  <div className={`text-[10px] font-bold uppercase mb-1 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
+                                    <span className="text-lg">📈</span> 기대되는 변화
+                                  </div>
+                                  <div className="text-xs text-gray-600 leading-relaxed">
+                                    <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
+                                      {sol.effect}
+                                    </ReactMarkdown>
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                            {sol.effect && (
-                              <div>
-                                <div className={`text-[10px] font-bold uppercase mb-1 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
-                                  <span className="text-lg">📈</span> 기대되는 변화
-                                </div>
-                                <div className="text-xs text-gray-600 leading-relaxed">
-                                  <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
-                                    {sol.effect}
-                                  </ReactMarkdown>
-                                </div>
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}
@@ -864,7 +888,7 @@ const XReportView = ({ data, onNext }) => {
 
 // --- New Component: Interactive Simulation Lab ---
 // --- New Component: Interactive Simulation Lab ---
-const SimulationView = ({ data, onComplete }) => {
+const SimulationView = ({ data, onComplete, selectedSolutions = [] }) => {
   const [simValues, setSimValues] = useState({});
   const [duration, setDuration] = useState('1week');
 
@@ -940,37 +964,21 @@ const SimulationView = ({ data, onComplete }) => {
         <div className="flex flex-col h-full space-y-6">
           <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm flex-1">
             <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2 text-lg">
-              <Sliders size={20} className="text-green-500" /> 솔루션 변수 설정 (맞춤형)
+              <Sliders size={20} className="text-green-500" /> 사장님이 선택하신 솔루션 리스트
             </h3>
 
-            <div className="space-y-8">
-              {data?.simulationVariables?.map((variable) => (
-                <div key={variable.id}>
-                  <div className="flex justify-between mb-2">
-                    <label className="text-sm font-medium text-gray-700">{variable.name}</label>
-                    <span className="text-sm font-bold text-blue-600">
-                      {simValues[variable.id] !== undefined ? simValues[variable.id] : variable.default}{variable.unit}
-                    </span>
+            <div className="space-y-4 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
+              {selectedSolutions.length > 0 ? (
+                selectedSolutions.map((sol, idx) => (
+                  <div key={idx} className="p-4 rounded-xl border border-blue-100 bg-blue-50 flex flex-col gap-1 items-start shadow-sm">
+                    <span className="text-[10px] font-bold text-blue-600 bg-white px-2 py-0.5 rounded border border-blue-200 mb-1">{sol.category}</span>
+                    <div className="font-bold text-gray-900 text-sm">{sol.title}</div>
                   </div>
-                  <input
-                    type="range"
-                    min={variable.min}
-                    max={variable.max}
-                    step={variable.step}
-                    value={simValues[variable.id] !== undefined ? simValues[variable.id] : variable.default}
-                    onChange={(e) => setSimValues(prev => ({ ...prev, [variable.id]: Number(e.target.value) }))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                  />
-                  <div className="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>{variable.min}{variable.unit}</span>
-                    <span>{variable.max}{variable.unit}</span>
-                  </div>
-                </div>
-              ))}
-
-              {!data?.simulationVariables && (
-                <div className="text-center text-gray-400 py-4">
-                  설정 가능한 변수가 없습니다.
+                ))
+              ) : (
+                <div className="text-center text-gray-400 py-10 border-2 border-dashed border-gray-100 rounded-xl">
+                  선택된 솔루션이 없습니다.<br />
+                  <span className="text-xs">Step 2에서 솔루션을 선택해주세요.</span>
                 </div>
               )}
             </div>
@@ -1148,6 +1156,7 @@ const App = () => {
   const { stats, stores } = realData;
   const [selectedStoreId, setSelectedStoreId] = useState(stores[0].id);
   const selectedStoreData = stores.find(s => s.id === selectedStoreId) || stores[0];
+  const [selectedSolutions, setSelectedSolutions] = useState([]); // Lifted state for selected solutions
 
   const handleAnalyze = () => {
     setLoading(true);
@@ -1189,12 +1198,15 @@ const App = () => {
         <XReportView
           data={selectedStoreData}
           onNext={() => changeTab('simulation')}
+          selectedSolutions={selectedSolutions}
+          onSelectSolution={setSelectedSolutions}
         />
       );
       case 'simulation': return (
         <SimulationView
           data={selectedStoreData}
           onComplete={() => changeTab('simulation_map')}
+          selectedSolutions={selectedSolutions}
         />
       );
       case 'simulation_map': return (
