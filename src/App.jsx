@@ -755,15 +755,15 @@ const XReportView = ({ data, onNext }) => {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {data.solutions.map((sol, idx) => (
-                <div key={idx} className={`bg-white p-5 rounded-xl border border-gray-200 hover:shadow-md cursor-pointer transition-all group ${idx % 2 === 0 ? 'hover:border-red-500' : 'hover:border-blue-500'}`}>
-                  <div className="flex justify-between mb-2">
-                    <span className={`text-xs font-bold px-2 py-1 rounded ${idx % 2 === 0 ? 'text-red-600 bg-red-50' : 'text-blue-600 bg-blue-50'}`}>{sol.category}</span>
-                    <Play size={16} className={`text-gray-300 ${idx % 2 === 0 ? 'group-hover:text-red-500' : 'group-hover:text-blue-500'}`} />
+                <div key={idx} className={`bg-white p-5 rounded-xl border border-gray-200 hover:shadow-md cursor-pointer transition-all group flex flex-col h-full ${idx % 2 === 0 ? 'hover:border-red-500' : 'hover:border-blue-500'}`}>
+                  <div className="flex justify-between items-start mb-3">
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-md ${idx % 2 === 0 ? 'text-red-600 bg-red-50' : 'text-blue-600 bg-blue-50'}`}>{sol.category}</span>
+                    {/* <Play size={16} className={`text-gray-300 ${idx % 2 === 0 ? 'group-hover:text-red-500' : 'group-hover:text-blue-500'}`} /> */}
                   </div>
-                  <div className="font-bold text-gray-900 mb-1 text-sm leading-tight">{sol.title}</div>
-                  <div className="text-[10px] text-gray-500">{sol.desc}</div>
+                  <div className="font-bold text-gray-900 mb-2 text-sm leading-snug flex-1">{sol.title}</div>
+                  <div className="text-xs text-gray-500 pt-2 border-t border-gray-50 mt-auto">{sol.desc}</div>
                 </div>
               ))}
             </div>
@@ -1145,7 +1145,10 @@ const App = () => {
         />
       );
       case 'simulation_map': return (
-        <SimulationMap onComplete={() => changeTab('y-report')} />
+        <SimulationMap
+          storeData={selectedStoreData}
+          onComplete={() => changeTab('y-report')}
+        />
       );
       case 'y-report': return <YReportView />;
       case 'pricing': return <PricingView />;
