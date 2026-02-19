@@ -71,6 +71,188 @@ const simulationData = [
   { day: '일', before: 45, after: 68 },
 ];
 
+const MyPageView = ({ data, onBack }) => {
+  // Initialize Kakao Map with retry logic (similar to VerificationView)
+  useEffect(() => {
+    const loadMap = () => {
+      if (window.kakao && window.kakao.maps) {
+        window.kakao.maps.load(() => {
+          const container = document.getElementById('mypage-map'); // Unique ID for MyPage map
+          if (container) {
+            const options = {
+              center: new window.kakao.maps.LatLng(data.lat, data.lng),
+              level: 3
+            };
+            const map = new window.kakao.maps.Map(container, options);
+
+            // Marker
+            const markerPosition = new window.kakao.maps.LatLng(data.lat, data.lng);
+            const marker = new window.kakao.maps.Marker({
+              position: markerPosition
+            });
+            marker.setMap(map);
+          }
+        });
+        return true;
+      }
+      return false;
+    };
+
+    // Try loading immediately
+    if (!loadMap()) {
+      let attempts = 0;
+      const intervalId = setInterval(() => {
+        attempts++;
+        if (loadMap() || attempts >= 10) {
+          clearInterval(intervalId);
+        }
+      }, 500);
+      return () => clearInterval(intervalId);
+    }
+  }, [data]);
+
+  return (
+    <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-12">
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <ArrowRight className="rotate-180" size={24} />
+        </button>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 font-space">마이페이지</h1>
+          <p className="text-gray-500 text-sm">내 가게 정보와 지난 리포트 보관함</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Column: Store Info & Map (4 cols) */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-gray-100">
+              <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                <MapPin size={20} className="text-red-500" /> 매장 정보
+              </h3>
+            </div>
+
+            {/* Map Area */}
+            <div className="h-48 bg-gray-100 relative">
+              <div id="mypage-map" className="w-full h-full"></div>
+              {/* Fallback for no API key */}
+              {!window.kakao && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-200/50">
+                  <span className="text-xs text-gray-500 font-medium">지도 로딩 중... (API 키 확인 필요)</span>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">매장명</label>
+                <div className="font-bold text-xl text-gray-900">{data.name}</div>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">상세 주소</label>
+                <div className="text-sm text-gray-700 leading-relaxed">{data.address}</div>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">등록된 키워드</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {['한식', '가성비', '점심맛집'].map(tag => (
+                    <span key={tag} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200">#{tag}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <div className="text-xs font-bold text-gray-400 mb-1">MY MEMBERSHIP</div>
+                <div className="text-xl font-bold font-space">PRO PLAN</div>
+              </div>
+              <div className="bg-white/10 p-2 rounded-lg">
+                <Zap size={20} className="text-yellow-400" fill="currentColor" />
+              </div>
+            </div>
+            <div className="text-sm text-gray-300 mb-4">
+              다음 결제일: 2026. 03. 19
+            </div>
+            <button className="w-full bg-white text-gray-900 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition-colors">
+              멤버십 관리
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column: Report Archives (8 cols) */}
+        <div className="lg:col-span-8 space-y-8">
+          {/* X-Report Archive */}
+          <section>
+            <div className="flex justify-between items-end mb-4">
+              <h3 className="font-bold text-xl text-gray-900 flex items-center gap-2">
+                <FileText size={24} className="text-blue-500" /> X-Report 보관함
+              </h3>
+              <button className="text-sm text-gray-500 hover:text-gray-900 underline">전체보기</button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Current Report Card */}
+              <div className="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer group relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                <div className="flex justify-between items-start mb-3">
+                  <span className="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100">최신 리포트</span>
+                  <span className="text-xs text-gray-400">2026.02.19</span>
+                </div>
+                <h4 className="font-bold text-gray-900 text-lg mb-1 group-hover:text-blue-600 transition-colors">{data.name} 2월 진단 리포트</h4>
+                <p className="text-sm text-gray-500 mb-4 line-clamp-1">경쟁사 대비 상위 8% 달성, 맛/서비스 우수</p>
+                <div className="flex items-center justify-between mt-auto">
+                  <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
+                    <span className="flex items-center gap-1"><Target size={12} /> 종합등급 S</span>
+                  </div>
+                  <ArrowRight size={16} className="text-gray-300 group-hover:text-blue-500 transform group-hover:translate-x-1 transition-all" />
+                </div>
+              </div>
+
+              {/* Past Report Mockup */}
+              <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 cursor-not-allowed opacity-70">
+                <div className="flex justify-between items-start mb-3">
+                  <span className="bg-gray-200 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded">지난 리포트</span>
+                  <span className="text-xs text-gray-400">2026.01.18</span>
+                </div>
+                <h4 className="font-bold text-gray-700 text-lg mb-1">1월 월간 분석 리포트</h4>
+                <p className="text-sm text-gray-400 mb-4">기간 만료로 열람할 수 없습니다.</p>
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <Lock size={12} /> 멤버십 업그레이드 필요
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Y-Report Archive */}
+          <section>
+            <div className="flex justify-between items-end mb-4">
+              <h3 className="font-bold text-xl text-gray-900 flex items-center gap-2">
+                <BarChart2 size={24} className="text-purple-500" /> Y-Report 보관함
+              </h3>
+              <button className="text-sm text-gray-500 hover:text-gray-900 underline">전체보기</button>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
+              <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles size={32} className="text-purple-400" />
+              </div>
+              <h4 className="font-bold text-gray-900 mb-2">아직 완료된 시뮬레이션 결과가 없습니다</h4>
+              <p className="text-gray-500 text-sm mb-6">X-Report 진단 후 가상 시뮬레이션을 돌려보세요.<br />미래의 매출 변화를 미리 예측해드립니다.</p>
+              <button className="bg-gray-900 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-black transition-colors">
+                새 시뮬레이션 시작하기
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- Components ---
 
 const SidebarItem = ({ icon: Icon, label, active, onClick }) => (
@@ -1215,6 +1397,12 @@ const App = () => {
           onComplete={() => changeTab('y-report')}
         />
       );
+      case 'mypage': return (
+        <MyPageView
+          data={selectedStoreData}
+          onBack={() => changeTab('dashboard')}
+        />
+      );
       case 'y-report': return <YReportView />;
       case 'pricing': return <PricingView />;
       default: return (
@@ -1299,6 +1487,14 @@ const App = () => {
 
         <div className="mt-auto p-6 border-t border-gray-50">
           <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4">
+            <div className="flex justify-between items-center mb-4">
+              <button
+                onClick={() => changeTab('mypage')}
+                className="text-xs font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1 transition-colors"
+              >
+                <User size={14} /> 마이페이지
+              </button>
+            </div>
             <div className="text-xs font-bold text-gray-400 mb-2">CREDITS</div>
             <div className="flex justify-between items-center">
               <span className="font-bold text-gray-900">40 / 100</span>
