@@ -748,62 +748,66 @@ const XReportView = ({ data, onNext }) => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-4">
+            <div className="flex items-center justify-between pt-4 mb-4">
               <h4 className="font-bold text-gray-900">추천 필살기 (Solutions)</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Group solutions by category */}
-                {Object.entries(
-                  data.solutions.reduce((acc, sol) => {
-                    if (!acc[sol.category]) acc[sol.category] = [];
-                    acc[sol.category].push(sol);
-                    return acc;
-                  }, {})
-                ).map(([category, solutions], catIdx) => (
-                  <div key={category} className="flex flex-col gap-4">
-                    {/* Category Header */}
-                    <div className={`p-3 rounded-lg border-l-4 ${catIdx === 0 ? 'bg-red-50 border-red-500' : catIdx === 1 ? 'bg-blue-50 border-blue-500' : 'bg-green-50 border-green-500'}`}>
-                      <h5 className={`font-bold text-sm ${catIdx === 0 ? 'text-red-700' : catIdx === 1 ? 'text-blue-700' : 'text-green-700'}`}>
-                        {category}
-                      </h5>
-                    </div>
+              <button onClick={onNext} className="flex items-center gap-2 text-red-600 font-medium hover:underline">
+                전체 시뮬레이션으로 이동 <ArrowRight size={16} />
+              </button>
+            </div>
 
-                    {/* Solutions in this category */}
-                    <div className="flex flex-col gap-3">
-                      {solutions.map((sol, idx) => (
-                        <div
-                          key={idx}
-                          className={`relative bg-white p-4 rounded-xl border border-gray-200 hover:shadow-lg cursor-pointer transition-all duration-300 group flex flex-col h-full overflow-hidden ${catIdx === 0 ? 'hover:border-red-400' : catIdx === 1 ? 'hover:border-blue-400' : 'hover:border-green-400'}`}
-                        >
-                          <div className="font-bold text-gray-900 mb-2 text-sm leading-snug relative z-10">{sol.title}</div>
-                          <div className="text-xs text-gray-500 pt-2 border-t border-gray-50 mt-auto relative z-10 group-hover:opacity-0 transition-opacity">{sol.desc}</div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Group solutions by category */}
+              {Object.entries(
+                data.solutions.reduce((acc, sol) => {
+                  if (!acc[sol.category]) acc[sol.category] = [];
+                  acc[sol.category].push(sol);
+                  return acc;
+                }, {})
+              ).map(([category, solutions], catIdx) => (
+                <div key={category} className="flex flex-col gap-4">
+                  {/* Category Header */}
+                  <div className={`p-3 rounded-lg border-l-4 ${catIdx === 0 ? 'bg-red-50 border-red-500' : catIdx === 1 ? 'bg-blue-50 border-blue-500' : 'bg-green-50 border-green-500'}`}>
+                    <h5 className={`font-bold text-sm ${catIdx === 0 ? 'text-red-700' : catIdx === 1 ? 'text-blue-700' : 'text-green-700'}`}>
+                      {category}
+                    </h5>
+                  </div>
 
-                          {/* Hover Overlay */}
-                          <div className="absolute inset-0 bg-white/95 backdrop-blur-sm p-4 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                            <div className="space-y-2">
-                              {sol.execution && (
-                                <div>
-                                  <div className={`text-[10px] font-bold uppercase mb-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>실행 가이드</div>
-                                  <p className="text-xs text-gray-800 leading-relaxed font-medium">{sol.execution}</p>
-                                </div>
-                              )}
-                              {sol.effect && (
-                                <div>
-                                  <div className={`text-[10px] font-bold uppercase mb-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>기대 효과</div>
-                                  <p className="text-xs text-gray-600 leading-relaxed">{sol.effect}</p>
-                                </div>
-                              )}
-                            </div>
+                  {/* Solutions in this category */}
+                  <div className="flex flex-col gap-3">
+                    {solutions.map((sol, idx) => (
+                      <div
+                        key={idx}
+                        className={`relative bg-white p-4 rounded-xl border border-gray-200 hover:shadow-lg cursor-pointer transition-all duration-300 group flex flex-col h-full overflow-hidden ${catIdx === 0 ? 'hover:border-red-400' : catIdx === 1 ? 'hover:border-blue-400' : 'hover:border-green-400'}`}
+                      >
+                        <div className="font-bold text-gray-900 mb-2 text-sm leading-snug relative z-10">{sol.title}</div>
+                        <div className="text-xs text-gray-500 pt-2 border-t border-gray-50 mt-auto relative z-10 group-hover:opacity-0 transition-opacity">{sol.desc}</div>
+
+                        {/* Hover Overlay */}
+                        <div className="absolute inset-0 bg-white/95 backdrop-blur-sm p-4 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                          <div className="space-y-2">
+                            {sol.execution && (
+                              <div>
+                                <div className={`text-[10px] font-bold uppercase mb-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>실행 가이드</div>
+                                <p className="text-xs text-gray-800 leading-relaxed font-medium">{sol.execution}</p>
+                              </div>
+                            )}
+                            {sol.effect && (
+                              <div>
+                                <div className={`text-[10px] font-bold uppercase mb-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>기대 효과</div>
+                                <p className="text-xs text-gray-600 leading-relaxed">{sol.effect}</p>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          </div >
-        </div >
-      </div >
+          </div>
+        </div>
+      </div>
 
       {/* Full Report Modal */}
       {
