@@ -1184,83 +1184,419 @@ const SimulationView = ({ data, onComplete, selectedSolutions = [] }) => {
   );
 };
 
-const YReportView = () => (
-  <div className="space-y-8 animate-fade-in">
-    {/* Header */}
-    <div className="flex justify-between items-end border-b border-gray-100 pb-6">
-      <div>
-        <div className="flex items-center gap-3 mb-2">
-          <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">Y-Report: 결과 예측</h1>
-          <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">최종 분석</span>
-        </div>
-        <p className="text-gray-500 text-sm">설정된 변수(영업일 4일, 회전율 1.2) 기반 예측 리포트</p>
+// ── Y-Report: 비교 분석 리포트 (지표 1~3) ──────────────────────────────
+const yReportMockData = {
+  // 지표 1: 기본 방문 지표
+  overview: {
+    sim1: { totalVisits: 142, marketShare: 8.2 },
+    sim2: { totalVisits: 189, marketShare: 10.45 },
+  },
+  // 워드클라우드 키워드
+  keywords: {
+    sim1: [
+      { text: '가성비', weight: 18 }, { text: '맛있다', weight: 15 },
+      { text: '점심특선', weight: 12 }, { text: '직장인', weight: 11 },
+      { text: '혼밥', weight: 10 }, { text: '가까워서', weight: 9 },
+      { text: '빠른식사', weight: 8 }, { text: '편의성', weight: 7 },
+      { text: '웨이팅길다', weight: 14 }, { text: '메뉴다양', weight: 6 },
+    ],
+    sim2: [
+      { text: '분위기맛집', weight: 22 }, { text: '원격줄서기', weight: 19 },
+      { text: '2인세트', weight: 17 }, { text: '데이트코스', weight: 15 },
+      { text: '맛커스텀', weight: 13 }, { text: '깔끔한매장', weight: 11 },
+      { text: '가성비', weight: 10 }, { text: '직장인', weight: 9 },
+      { text: '인스타감성', weight: 8 }, { text: '재방문의사', weight: 7 },
+    ],
+  },
+  // 지표 2: 평점 분포 (KDE-like data points)
+  ratingDistribution: {
+    taste: {
+      sim1: [
+        { score: 1, density: 0.05 }, { score: 1.5, density: 0.08 }, { score: 2, density: 0.15 },
+        { score: 2.5, density: 0.22 }, { score: 3, density: 0.35 }, { score: 3.5, density: 0.42 },
+        { score: 4, density: 0.30 }, { score: 4.5, density: 0.15 }, { score: 5, density: 0.06 },
+      ],
+      sim2: [
+        { score: 1, density: 0.02 }, { score: 1.5, density: 0.04 }, { score: 2, density: 0.08 },
+        { score: 2.5, density: 0.14 }, { score: 3, density: 0.25 }, { score: 3.5, density: 0.38 },
+        { score: 4, density: 0.48 }, { score: 4.5, density: 0.32 }, { score: 5, density: 0.12 },
+      ],
+    },
+    value: {
+      sim1: [
+        { score: 1, density: 0.08 }, { score: 1.5, density: 0.12 }, { score: 2, density: 0.22 },
+        { score: 2.5, density: 0.30 }, { score: 3, density: 0.38 }, { score: 3.5, density: 0.28 },
+        { score: 4, density: 0.18 }, { score: 4.5, density: 0.10 }, { score: 5, density: 0.04 },
+      ],
+      sim2: [
+        { score: 1, density: 0.03 }, { score: 1.5, density: 0.05 }, { score: 2, density: 0.10 },
+        { score: 2.5, density: 0.16 }, { score: 3, density: 0.28 }, { score: 3.5, density: 0.40 },
+        { score: 4, density: 0.45 }, { score: 4.5, density: 0.28 }, { score: 5, density: 0.10 },
+      ],
+    },
+    atmosphere: {
+      sim1: [
+        { score: 1, density: 0.06 }, { score: 1.5, density: 0.10 }, { score: 2, density: 0.18 },
+        { score: 2.5, density: 0.28 }, { score: 3, density: 0.36 }, { score: 3.5, density: 0.32 },
+        { score: 4, density: 0.22 }, { score: 4.5, density: 0.12 }, { score: 5, density: 0.05 },
+      ],
+      sim2: [
+        { score: 1, density: 0.04 }, { score: 1.5, density: 0.06 }, { score: 2, density: 0.12 },
+        { score: 2.5, density: 0.18 }, { score: 3, density: 0.30 }, { score: 3.5, density: 0.38 },
+        { score: 4, density: 0.42 }, { score: 4.5, density: 0.25 }, { score: 5, density: 0.10 },
+      ],
+    },
+  },
+  ratingSummary: {
+    sim1: { avg: 3.42, satisfaction: 31.0 },
+    sim2: { avg: 3.81, satisfaction: 54.5 },
+  },
+  // 지표 3: 시간대별 트래픽
+  hourlyTraffic: [
+    { slot: '아침(07)', sim1: 8, sim2: 12 },
+    { slot: '점심(12)', sim1: 52, sim2: 68 },
+    { slot: '저녁(18)', sim1: 48, sim2: 72 },
+    { slot: '야식(22)', sim1: 34, sim2: 37 },
+  ],
+  peakSlot: { sim1: '점심(12)', sim2: '저녁(18)' },
+};
+
+// 워드클라우드 시각화 컴포넌트
+const WordCloudVisual = ({ keywords, label, accentColor }) => {
+  const maxWeight = Math.max(...keywords.map(k => k.weight));
+  return (
+    <div className="flex-1">
+      <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 ${accentColor === 'gray' ? 'bg-gray-100 text-gray-600' : 'bg-emerald-100 text-emerald-700'}`}>
+        {label}
       </div>
-      <div className="flex gap-3">
-        <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-black">
-          <Printer size={16} /> PDF 저장
-        </button>
+      <div className="flex flex-wrap gap-2 items-center justify-center min-h-[140px] p-4 rounded-xl bg-gray-50/50">
+        {keywords.map((kw, i) => {
+          const ratio = kw.weight / maxWeight;
+          const fontSize = 12 + ratio * 18;
+          const opacity = 0.4 + ratio * 0.6;
+          const colors = accentColor === 'gray'
+            ? ['text-gray-500', 'text-gray-600', 'text-gray-700', 'text-gray-800', 'text-gray-900']
+            : ['text-emerald-400', 'text-emerald-500', 'text-emerald-600', 'text-emerald-700', 'text-emerald-800'];
+          const colorIdx = Math.min(Math.floor(ratio * 5), 4);
+          return (
+            <span
+              key={i}
+              className={`font-bold ${colors[colorIdx]} transition-all hover:scale-110 cursor-default`}
+              style={{ fontSize: `${fontSize}px`, opacity }}
+              title={`${kw.text}: ${kw.weight}회`}
+            >
+              #{kw.text}
+            </span>
+          );
+        })}
       </div>
     </div>
+  );
+};
 
-    {/* Before & After Cards */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Before */}
-      <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 opacity-70">
-        <div className="inline-block px-3 py-1 bg-gray-200 text-gray-600 text-xs font-bold rounded mb-6">BEFORE</div>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-            <span className="text-gray-500 text-sm">총 방문 수</span>
-            <span className="text-xl font-bold text-gray-900">127회</span>
+// 변화량 뱃지
+const ChangeBadge = ({ value, suffix = '%', showPlus = true }) => {
+  const isPositive = value > 0;
+  const isZero = value === 0;
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${isZero ? 'bg-gray-100 text-gray-500' :
+        isPositive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'
+      }`}>
+      {isPositive && showPlus ? '+' : ''}{value}{suffix}
+    </span>
+  );
+};
+
+const YReportView = () => {
+  const d = yReportMockData;
+  const [activeRatingTab, setActiveRatingTab] = useState('taste');
+
+  // KDE 차트 데이터 결합
+  const ratingLabels = { taste: '맛', value: '가성비', atmosphere: '분위기' };
+  const currentRating = d.ratingDistribution[activeRatingTab];
+  const kdeChartData = currentRating.sim1.map((s1, i) => ({
+    score: s1.score,
+    sim1: s1.density,
+    sim2: currentRating.sim2[i].density,
+  }));
+
+  // 만족도 바 차트 데이터
+  const satisfactionData = Object.keys(d.ratingDistribution).map(key => {
+    const s1Scores = d.ratingDistribution[key].sim1;
+    const s2Scores = d.ratingDistribution[key].sim2;
+    const s1Sat = s1Scores.filter(s => s.score >= 4).reduce((a, b) => a + b.density, 0);
+    const s2Sat = s2Scores.filter(s => s.score >= 4).reduce((a, b) => a + b.density, 0);
+    const s1Total = s1Scores.reduce((a, b) => a + b.density, 0);
+    const s2Total = s2Scores.reduce((a, b) => a + b.density, 0);
+    return {
+      name: ratingLabels[key],
+      sim1: Math.round((s1Sat / s1Total) * 100),
+      sim2: Math.round((s2Sat / s2Total) * 100),
+    };
+  });
+
+  const visitChange = ((d.overview.sim2.totalVisits - d.overview.sim1.totalVisits) / d.overview.sim1.totalVisits * 100).toFixed(1);
+  const shareChange = (d.overview.sim2.marketShare - d.overview.sim1.marketShare).toFixed(2);
+  const avgChange = (d.ratingSummary.sim2.avg - d.ratingSummary.sim1.avg).toFixed(2);
+  const satChange = (d.ratingSummary.sim2.satisfaction - d.ratingSummary.sim1.satisfaction).toFixed(1);
+
+  return (
+    <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-12">
+      {/* Header */}
+      <div className="flex justify-between items-end border-b border-gray-100 pb-6">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">Y-Report</h1>
+            <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">비교 분석</span>
           </div>
-          <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-            <span className="text-gray-500 text-sm">추정 매출</span>
-            <span className="text-xl font-bold text-gray-900">₩951,995</span>
-          </div>
+          <p className="text-gray-500 text-sm">전략 적용 전(Sim 1) vs 후(Sim 2) 시뮬레이션 비교 보고서  ·  96명 에이전트 × 7일</p>
+        </div>
+        <div className="flex gap-3">
+          <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-black transition-colors">
+            <Printer size={16} /> PDF 저장
+          </button>
         </div>
       </div>
 
-      {/* After */}
-      <div className="bg-white p-6 rounded-2xl border-2 border-green-500 shadow-xl shadow-green-50 relative overflow-hidden">
-        <div className="absolute top-0 right-0 bg-green-500 text-white text-xs px-3 py-1 rounded-bl-lg font-bold">Optimized</div>
-        <div className="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded mb-6">AFTER</div>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-            <span className="text-gray-500 text-sm">총 방문 수</span>
+      {/* ────────────────── 지표 1: 기본 방문 지표 + 워드클라우드 ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+            <BarChart2 size={18} className="text-blue-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">지표 1 — 기본 방문 지표 (Overview)</h2>
+            <p className="text-xs text-gray-400">전략 후 손님이 실제로 늘었는가? 방문자 리뷰 키워드가 달라졌는가?</p>
+          </div>
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <p className="text-xs text-gray-400 font-medium mb-1">총 방문 수 (전)</p>
+            <p className="text-2xl font-bold text-gray-400">{d.overview.sim1.totalVisits}건</p>
+          </div>
+          <div className="bg-white p-5 rounded-xl border-2 border-emerald-200 shadow-sm shadow-emerald-50">
+            <p className="text-xs text-emerald-600 font-medium mb-1">총 방문 수 (후)</p>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-green-600">189회</span>
-              <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold">+48.8%</span>
+              <p className="text-2xl font-bold text-emerald-600">{d.overview.sim2.totalVisits}건</p>
+              <ChangeBadge value={parseFloat(visitChange)} />
             </div>
           </div>
-          <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-            <span className="text-gray-500 text-sm">추정 매출</span>
+          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <p className="text-xs text-gray-400 font-medium mb-1">시장 점유율 (전)</p>
+            <p className="text-2xl font-bold text-gray-400">{d.overview.sim1.marketShare}%</p>
+          </div>
+          <div className="bg-white p-5 rounded-xl border-2 border-emerald-200 shadow-sm shadow-emerald-50">
+            <p className="text-xs text-emerald-600 font-medium mb-1">시장 점유율 (후)</p>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-green-600">₩1,417,905</span>
-              <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold">+49%</span>
+              <p className="text-2xl font-bold text-emerald-600">{d.overview.sim2.marketShare}%</p>
+              <ChangeBadge value={parseFloat(shareChange)} suffix="%p" />
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    {/* Conclusion Banner */}
-    <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-6 text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl">
-      <div className="flex-1">
-        <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-          <CheckCircle className="text-green-400" size={20} />
-          성장 로드맵이 준비되었습니다.
-        </h3>
-        <p className="text-gray-300 text-sm leading-relaxed opacity-90">
-          사장님께서 설정하신 전략대로 실행할 경우,
-          다음 달 예상 순수익은 약 <strong>+120만원</strong> 증가할 것으로 보입니다.
-        </p>
+        {/* Word Cloud */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2 text-sm">
+            <MessageSquare size={16} className="text-blue-500" /> 방문 키워드 워드클라우드 비교
+          </h3>
+          <div className="flex flex-col md:flex-row gap-6">
+            <WordCloudVisual keywords={d.keywords.sim1} label="Sim 1 — 전략 전" accentColor="gray" />
+            <div className="hidden md:flex items-center">
+              <div className="w-px h-32 bg-gray-200"></div>
+              <ArrowRight size={20} className="text-gray-300 mx-2" />
+              <div className="w-px h-32 bg-gray-200"></div>
+            </div>
+            <WordCloudVisual keywords={d.keywords.sim2} label="Sim 2 — 전략 후" accentColor="emerald" />
+          </div>
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+            <p className="text-xs text-blue-700">
+              <strong>💡 인사이트:</strong> 전략 전 <span className="font-bold">#웨이팅길다</span>(14회)가 상위 키워드였으나, 전략 후 <span className="font-bold">#원격줄서기</span>(19회), <span className="font-bold">#분위기맛집</span>(22회)으로 전환. 솔루션이 고객 인식에 직접 반영됨.
+            </p>
+          </div>
+        </div>
       </div>
-      <button className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-green-900/20 whitespace-nowrap">
-        실행 계획서 보기
-        <ArrowRight size={18} />
-      </button>
+
+      {/* ────────────────── 지표 2: 평점 분포 분석 (Rating Spread) ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+            <TrendingUp size={18} className="text-purple-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">지표 2 — 평점 분포 분석 (Rating Spread)</h2>
+            <p className="text-xs text-gray-400">평균이 오른 게 아니라, 분포 자체가 바뀌었는가?</p>
+          </div>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-400 mb-1">평균 종합 평점</p>
+              <p className="text-lg font-bold text-gray-600">{d.ratingSummary.sim1.avg}점 → <span className="text-emerald-600">{d.ratingSummary.sim2.avg}점</span></p>
+            </div>
+            <ChangeBadge value={parseFloat(avgChange)} suffix="" showPlus={true} />
+          </div>
+          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-400 mb-1">만족도 (4점 이상)</p>
+              <p className="text-lg font-bold text-gray-600">{d.ratingSummary.sim1.satisfaction}% → <span className="text-emerald-600">{d.ratingSummary.sim2.satisfaction}%</span></p>
+            </div>
+            <ChangeBadge value={parseFloat(satChange)} suffix="%p" />
+          </div>
+        </div>
+
+        {/* KDE Chart */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-gray-900 text-sm">평점 밀도 분포 (KDE)</h3>
+            <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+              {Object.keys(ratingLabels).map(key => (
+                <button
+                  key={key}
+                  onClick={() => setActiveRatingTab(key)}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${activeRatingTab === key
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                  {ratingLabels[key]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={kdeChartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="score" tick={{ fontSize: 12 }} label={{ value: '점수', position: 'insideBottomRight', offset: -5, fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} label={{ value: '밀도', angle: -90, position: 'insideLeft', fontSize: 11 }} />
+              <Tooltip
+                formatter={(val, name) => [val.toFixed(3), name === 'sim1' ? '전략 전' : '전략 후']}
+                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+              />
+              <Area type="monotone" dataKey="sim1" stroke="#9ca3af" fill="#9ca3af" fillOpacity={0.15} strokeWidth={2} name="전략 전" dot={false} />
+              <Area type="monotone" dataKey="sim2" stroke="#10b981" fill="#10b981" fillOpacity={0.2} strokeWidth={2.5} name="전략 후" dot={false} />
+              <Legend
+                formatter={(val) => val === 'sim1' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
+                wrapperStyle={{ fontSize: '12px' }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Satisfaction Rate Bar Chart */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <h3 className="font-bold text-gray-900 text-sm mb-4">항목별 만족도 비율 (4점 이상)</h3>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={satisfactionData} barGap={4} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 12, fontWeight: 600 }} />
+              <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} unit="%" />
+              <Tooltip
+                formatter={(val, name) => [`${val}%`, name === 'sim1' ? '전략 전' : '전략 후']}
+                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+              />
+              <Bar dataKey="sim1" fill="#d1d5db" radius={[4, 4, 0, 0]} name="전략 전" barSize={32} />
+              <Bar dataKey="sim2" fill="#10b981" radius={[4, 4, 0, 0]} name="전략 후" barSize={32} />
+              <Legend
+                formatter={(val) => val === 'sim1' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
+                wrapperStyle={{ fontSize: '12px' }}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+          <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-100">
+            <p className="text-xs text-purple-700">
+              <strong>💡 인사이트:</strong> 가성비 만족도(4점↑)가 가장 크게 개선됨. 2인 세트 도입이 "가격 대비 만족"에 직접적 영향.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ────────────────── 지표 3: 시간대별 손님 변화 (Hourly Traffic) ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+            <Clock size={18} className="text-amber-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">지표 3 — 시간대별 손님 변화 (Hourly Traffic)</h2>
+            <p className="text-xs text-gray-400">전략이 특정 시간대에만 효과가 있는가? 피크타임이 바뀌었는가?</p>
+          </div>
+        </div>
+
+        {/* Peak Time Cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <p className="text-xs text-gray-400 mb-1">피크 타임슬롯 (전)</p>
+            <p className="text-xl font-bold text-gray-500">{d.peakSlot.sim1}</p>
+          </div>
+          <div className="bg-white p-5 rounded-xl border-2 border-amber-200 shadow-sm shadow-amber-50">
+            <p className="text-xs text-amber-600 mb-1">피크 타임슬롯 (후)</p>
+            <div className="flex items-center gap-2">
+              <p className="text-xl font-bold text-amber-600">{d.peakSlot.sim2}</p>
+              {d.peakSlot.sim1 !== d.peakSlot.sim2 && (
+                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">피크 전환</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Line Chart */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <h3 className="font-bold text-gray-900 text-sm mb-4">시간대별 방문 트래픽</h3>
+          <ResponsiveContainer width="100%" height={280}>
+            <AreaChart data={d.hourlyTraffic} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <defs>
+                <linearGradient id="gradSim2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="slot" tick={{ fontSize: 12, fontWeight: 600 }} />
+              <YAxis tick={{ fontSize: 11 }} label={{ value: '방문 횟수', angle: -90, position: 'insideLeft', fontSize: 11 }} />
+              <Tooltip
+                formatter={(val, name) => [`${val}회`, name === 'sim1' ? '전략 전' : '전략 후']}
+                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+              />
+              <Area type="monotone" dataKey="sim1" stroke="#9ca3af" fill="none" strokeWidth={2} strokeDasharray="6 3" name="전략 전" dot={{ r: 4, fill: '#9ca3af' }} />
+              <Area type="monotone" dataKey="sim2" stroke="#f59e0b" fill="url(#gradSim2)" strokeWidth={2.5} name="전략 후" dot={{ r: 5, fill: '#f59e0b', stroke: '#fff', strokeWidth: 2 }} />
+              <Legend
+                formatter={(val) => val === 'sim1' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
+                wrapperStyle={{ fontSize: '12px' }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+          <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
+            <p className="text-xs text-amber-700">
+              <strong>💡 인사이트:</strong> 피크 타임이 <strong>점심 → 저녁</strong>으로 전환됨. 2인 세트가 저녁 데이트 고객 유입에 기여하며, 저녁 방문이 <strong>+50%</strong> 증가.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Coming Soon */}
+      <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-6 text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl">
+        <div className="flex-1">
+          <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
+            <Sparkles className="text-yellow-400" size={20} />
+            지표 4~11 업데이트 예정
+          </h3>
+          <p className="text-gray-300 text-sm leading-relaxed opacity-90">
+            세대별 증감, 방문 목적별 분석, 재방문율, 경쟁 레이더 차트, 에이전트 유형, 성별 구성, 크로스탭 히트맵, LLM 종합 평가가 추가됩니다.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-gray-400 whitespace-nowrap">
+          <Clock size={16} />
+          <span className="text-sm font-medium">Coming Soon</span>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const PricingView = () => {
   const plans = [
