@@ -778,13 +778,13 @@ const XReportView = ({ data, onNext }) => {
                     {solutions.map((sol, idx) => (
                       <div
                         key={idx}
-                        className={`relative bg-white p-4 rounded-xl border border-gray-200 hover:shadow-lg cursor-pointer transition-all duration-300 group flex flex-col h-full overflow-hidden ${catIdx === 0 ? 'hover:border-red-400' : catIdx === 1 ? 'hover:border-blue-400' : 'hover:border-green-400'}`}
+                        className={`relative bg-white p-4 rounded-xl border border-gray-200 hover:shadow-lg cursor-pointer transition-all duration-300 group flex flex-col h-full hover:z-50 ${catIdx === 0 ? 'hover:border-red-400' : catIdx === 1 ? 'hover:border-blue-400' : 'hover:border-green-400'}`}
                       >
                         <div className="font-bold text-gray-900 mb-2 text-sm leading-snug relative z-10">{sol.title}</div>
                         <div className="text-xs text-gray-500 pt-2 border-t border-gray-50 mt-auto relative z-10 group-hover:opacity-0 transition-opacity">{sol.desc}</div>
 
                         {/* Hover Overlay */}
-                        <div className="absolute inset-0 bg-white/95 backdrop-blur-sm p-4 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                        <div className={`absolute left-[-1px] top-[-1px] w-[calc(100%+2px)] min-h-[calc(100%+2px)] h-auto bg-white p-4 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 rounded-xl border shadow-xl ${catIdx === 0 ? 'border-red-400 shadow-red-100' : catIdx === 1 ? 'border-blue-400 shadow-blue-100' : 'border-green-400 shadow-green-100'}`}>
                           <div className="space-y-3">
                             {sol.execution && (
                               <div>
