@@ -785,17 +785,29 @@ const XReportView = ({ data, onNext }) => {
 
                         {/* Hover Overlay */}
                         <div className="absolute inset-0 bg-white/95 backdrop-blur-sm p-4 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                          <div className="space-y-2">
+                          <div className="space-y-3">
                             {sol.execution && (
                               <div>
-                                <div className={`text-[10px] font-bold uppercase mb-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>실행 가이드</div>
-                                <p className="text-xs text-gray-800 leading-relaxed font-medium">{sol.execution}</p>
+                                <div className={`text-[10px] font-bold uppercase mb-1 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
+                                  <span className="text-lg">💡</span> 이렇게 실행해보세요
+                                </div>
+                                <div className="text-xs text-gray-800 leading-relaxed font-medium">
+                                  <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
+                                    {sol.execution}
+                                  </ReactMarkdown>
+                                </div>
                               </div>
                             )}
                             {sol.effect && (
                               <div>
-                                <div className={`text-[10px] font-bold uppercase mb-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>기대 효과</div>
-                                <p className="text-xs text-gray-600 leading-relaxed">{sol.effect}</p>
+                                <div className={`text-[10px] font-bold uppercase mb-1 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
+                                  <span className="text-lg">📈</span> 기대되는 변화
+                                </div>
+                                <div className="text-xs text-gray-600 leading-relaxed">
+                                  <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
+                                    {sol.effect}
+                                  </ReactMarkdown>
+                                </div>
                               </div>
                             )}
                           </div>
