@@ -30,7 +30,8 @@ import {
   UserPlus,
   LogIn,
   Globe,
-  Clock // Added Clock icon
+  Clock, // Added Clock icon
+  Sparkles // Added Sparkles icon
 } from 'lucide-react';
 import SimulationMap from './components/simulation/SimulationMap'; // Import SimulationMap
 import {
@@ -1226,11 +1227,16 @@ const App = () => {
       {/* Sidebar */}
       <aside className="w-64 border-r border-gray-100 flex flex-col bg-white z-10 hidden md:flex">
         <div className="p-8 pb-4">
-          <div className="flex items-center gap-2.5 text-red-600 mb-10 cursor-pointer" onClick={() => changeTab('dashboard')}>
-            <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-red-200">
-              <span className="text-white font-bold text-lg">l</span>
+          <div className="mb-10 cursor-pointer group" onClick={() => changeTab('dashboard')}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-200 text-white transform group-hover:rotate-12 transition-all duration-300">
+                <Sparkles size={20} fill="currentColor" className="text-white" />
+              </div>
+              <div>
+                <span className="text-2xl font-bold font-space text-gray-900 tracking-tight">Lovelop</span>
+              </div>
             </div>
-            <span className="text-xl font-bold font-space text-gray-900 tracking-tight">lovelop</span>
+            <p className="text-[11px] text-gray-400 font-medium mt-3 tracking-wide pl-1">AI가 실험해주는 내 가게의 미래</p>
           </div>
 
           <nav className="space-y-1">
