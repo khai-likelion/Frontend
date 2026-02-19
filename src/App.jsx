@@ -757,13 +757,33 @@ const XReportView = ({ data, onNext }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {data.solutions.map((sol, idx) => (
-                <div key={idx} className={`bg-white p-5 rounded-xl border border-gray-200 hover:shadow-md cursor-pointer transition-all group flex flex-col h-full ${idx % 2 === 0 ? 'hover:border-red-500' : 'hover:border-blue-500'}`}>
-                  <div className="flex justify-between items-start mb-3">
-                    <span className={`text-xs font-bold px-2.5 py-1 rounded-md ${idx % 2 === 0 ? 'text-red-600 bg-red-50' : 'text-blue-600 bg-blue-50'}`}>{sol.category}</span>
-                    {/* <Play size={16} className={`text-gray-300 ${idx % 2 === 0 ? 'group-hover:text-red-500' : 'group-hover:text-blue-500'}`} /> */}
+                <div
+                  key={idx}
+                  className={`relative bg-white p-5 rounded-xl border border-gray-200 hover:shadow-lg cursor-pointer transition-all duration-300 group flex flex-col h-full overflow-hidden ${idx % 2 === 0 ? 'hover:border-red-500' : 'hover:border-blue-500'}`}
+                >
+                  <div className="flex justify-between items-start mb-3 relative z-10">
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-md transition-colors ${idx % 2 === 0 ? 'text-red-600 bg-red-50 group-hover:bg-red-100' : 'text-blue-600 bg-blue-50 group-hover:bg-blue-100'}`}>{sol.category}</span>
                   </div>
-                  <div className="font-bold text-gray-900 mb-2 text-sm leading-snug flex-1">{sol.title}</div>
-                  <div className="text-xs text-gray-500 pt-2 border-t border-gray-50 mt-auto">{sol.desc}</div>
+                  <div className="font-bold text-gray-900 mb-2 text-sm leading-snug flex-1 relative z-10">{sol.title}</div>
+                  <div className="text-xs text-gray-500 pt-2 border-t border-gray-50 mt-auto relative z-10 group-hover:opacity-0 transition-opacity">{sol.desc}</div>
+
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-white/95 backdrop-blur-sm p-5 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                    <div className="space-y-3">
+                      {sol.execution && (
+                        <div>
+                          <div className={`text-[10px] font-bold uppercase mb-1 ${idx % 2 === 0 ? 'text-red-500' : 'text-blue-500'}`}>실행 가이드</div>
+                          <p className="text-xs text-gray-800 leading-relaxed font-medium">{sol.execution}</p>
+                        </div>
+                      )}
+                      {sol.effect && (
+                        <div>
+                          <div className={`text-[10px] font-bold uppercase mb-1 ${idx % 2 === 0 ? 'text-red-500' : 'text-blue-500'}`}>기대 효과</div>
+                          <p className="text-xs text-gray-600 leading-relaxed">{sol.effect}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
