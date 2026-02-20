@@ -48,25 +48,39 @@ export default function SimulationMap({ storeData, onComplete }) {
 
             // Simulate moving agents
             setAgents(prevAgents => {
+                const centerLat = storeData?.lat || 37.556;
+                const centerLng = storeData?.lng || 126.906;
+                // 한강 경계 — 이 위도보다 북쪽은 강이므로 에이전트 진입 금지
+                const RIVER_BOUNDARY_LAT = 37.5615;
+
                 if (prevAgents.length === 0) {
                     // Initialize random agents (160 agents for simulation)
-                    return Array.from({ length: 160 }).map((_, i) => ({
-                        id: i,
-                        type: i % 2 === 0 ? 'resident' : 'floating',
-                        lat: (storeData?.lat || 37.556) + (Math.random() - 0.5) * 0.015,
-                        lng: (storeData?.lng || 126.906) + (Math.random() - 0.5) * 0.015,
-                        name: `Agent-${i}`,
-                        info: i % 2 === 0 ? 'Resident (Z-Gen)' : 'Floating (Tourist)',
-                    }));
+                    return Array.from({ length: 160 }).map((_, i) => {
+                        // 남쪽으로 더 넓게, 북쪽은 한강 경계까지만
+                        const lat = centerLat + (Math.random() - 0.6) * 0.015;
+                        const lng = centerLng + (Math.random() - 0.5) * 0.015;
+                        return {
+                            id: i,
+                            type: i % 2 === 0 ? 'resident' : 'floating',
+                            lat: Math.min(lat, RIVER_BOUNDARY_LAT),
+                            lng,
+                            name: `Agent-${i}`,
+                            info: i % 2 === 0 ? 'Resident (Z-Gen)' : 'Floating (Tourist)',
+                        };
+                    });
                 }
 
-                // Move existing agents - movement scale increased by speed
+                // Move existing agents — 한강 넘어가지 않도록 클램핑
                 const movementScale = 0.0001 * (1 + Math.log10(speed));
-                return prevAgents.map(agent => ({
-                    ...agent,
-                    lat: agent.lat + (Math.random() - 0.5) * movementScale,
-                    lng: agent.lng + (Math.random() - 0.5) * movementScale,
-                }));
+                return prevAgents.map(agent => {
+                    const newLat = agent.lat + (Math.random() - 0.5) * movementScale;
+                    const newLng = agent.lng + (Math.random() - 0.5) * movementScale;
+                    return {
+                        ...agent,
+                        lat: Math.min(newLat, RIVER_BOUNDARY_LAT),
+                        lng: newLng,
+                    };
+                });
             });
         }, 1000);
 
