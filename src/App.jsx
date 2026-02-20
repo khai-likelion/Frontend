@@ -1294,6 +1294,15 @@ const yReportMockData = {
     { label: '여', sim1: 38.5, sim2: 41.6 },
     { label: '혼성', sim1: 16.3, sim2: 15.6 },
   ],
+  // 지표 7: 경쟁 매장 레이더 차트
+  radar: [
+    { metric: '방문수', target_before: 142, target_after: 189, comp1: 210, comp2: 165, comp3: 130 },
+    { metric: '평점', target_before: 3.42, target_after: 3.81, comp1: 3.65, comp2: 3.90, comp3: 3.30 },
+    { metric: '재방문율', target_before: 31, target_after: 44, comp1: 38, comp2: 42, comp3: 28 },
+    { metric: '만족도', target_before: 31, target_after: 55, comp1: 45, comp2: 52, comp3: 35 },
+    { metric: 'Z세대비율', target_before: 41, target_after: 50, comp1: 55, comp2: 48, comp3: 32 },
+  ],
+  radarStores: { comp1: '오시 망원본점', comp2: '마마무식당', comp3: '홍익돈까스' },
   // 지표 11: 크로스탭 (세대 × 방문목적) — 비율
   crosstab: {
     generations: ['Z1', 'Z2', 'Y', 'X', 'S'],
@@ -1735,6 +1744,47 @@ const YReportView = () => {
             <p className="text-xs text-gray-500 mb-1">순 증가</p>
             <p className="text-2xl font-bold text-gray-900">+{d.retention.newUsers - d.retention.churned}명</p>
             <p className="text-xs text-gray-400 mt-1">{d.retention.sim1Agents} → {d.retention.sim2Agents} 에이전트</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ────────────────── 지표 7: 경쟁 매장 비교 레이더 ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">
+            <Target size={18} className="text-teal-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">지표 7 — 경쟁 매장 비교 (Radar Chart)</h2>
+            <p className="text-xs text-gray-400">전략 전후 타겟 매장이 경쟁 매장 대비 어떻게 달라졌는가?</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <div className="flex flex-wrap gap-3 mb-4 text-xs font-bold">
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-gray-300 inline-block"></span> 류진 (전략 전)</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> 류진 (전략 후)</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-blue-400 inline-block"></span> {d.radarStores.comp1}</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-purple-400 inline-block"></span> {d.radarStores.comp2}</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-orange-400 inline-block"></span> {d.radarStores.comp3}</span>
+          </div>
+          <ResponsiveContainer width="100%" height={350}>
+            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={d.radar}>
+              <PolarGrid stroke="#e5e7eb" />
+              <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12, fontWeight: 600 }} />
+              <PolarRadiusAxis tick={{ fontSize: 10 }} />
+              <Radar name="류진 (전)" dataKey="target_before" stroke="#9ca3af" fill="#9ca3af" fillOpacity={0.1} strokeWidth={1.5} strokeDasharray="4 3" />
+              <Radar name="류진 (후)" dataKey="target_after" stroke="#10b981" fill="#10b981" fillOpacity={0.2} strokeWidth={2.5} />
+              <Radar name={d.radarStores.comp1} dataKey="comp1" stroke="#60a5fa" fill="none" strokeWidth={1.5} strokeDasharray="3 3" />
+              <Radar name={d.radarStores.comp2} dataKey="comp2" stroke="#a78bfa" fill="none" strokeWidth={1.5} strokeDasharray="3 3" />
+              <Radar name={d.radarStores.comp3} dataKey="comp3" stroke="#fb923c" fill="none" strokeWidth={1.5} strokeDasharray="3 3" />
+              <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
+            </RadarChart>
+          </ResponsiveContainer>
+          <div className="mt-3 p-3 bg-teal-50 rounded-lg border border-teal-100">
+            <p className="text-xs text-teal-700">
+              <strong>💡 인사이트:</strong> 전략 후 류진이 만족도·재방문율에서 경쟁 매장을 <strong>추월</strong>했습니다. 방문수는 아직 오시 망원본점에 다소 뒤처지나, 격차가 크게 축소됨.
+            </p>
           </div>
         </div>
       </div>
