@@ -489,8 +489,10 @@ const SignupView = ({ onSignup, onLogin }) => {
         <button
           className="w-full bg-[#FEE500] hover:bg-[#FDD800] text-black font-bold py-4 rounded-xl shadow-lg shadow-yellow-400/20 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-4"
         >
-          <MessageSquare size={20} fill="currentColor" />
-          카카오톡으로 시작하기
+          <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M128 36C70.562 36 24 72.713 24 118c0 29.279 19.466 54.97 48.748 69.477l-10.202 37.319a4 4 0 0 0 6.029 4.413l43.689-29.126C118.687 201.372 123.281 202 128 202c57.438 0 104-36.713 104-84S185.438 36 128 36z" />
+          </svg>
+          카카오 로그인
         </button>
 
         <button
@@ -1300,7 +1302,7 @@ const ChangeBadge = ({ value, suffix = '%', showPlus = true }) => {
   const isZero = value === 0;
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${isZero ? 'bg-gray-100 text-gray-500' :
-        isPositive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'
+      isPositive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'
       }`}>
       {isPositive && showPlus ? '+' : ''}{value}{suffix}
     </span>
@@ -1458,8 +1460,8 @@ const YReportView = () => {
                   key={key}
                   onClick={() => setActiveRatingTab(key)}
                   className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${activeRatingTab === key
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
                     }`}
                 >
                   {ratingLabels[key]}
