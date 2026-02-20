@@ -50,14 +50,14 @@ export default function SimulationMap({ storeData, onComplete }) {
             setAgents(prevAgents => {
                 const centerLat = storeData?.lat || 37.556;
                 const centerLng = storeData?.lng || 126.906;
-                // 한강 경계 — 이 위도보다 북쪽은 강이므로 에이전트 진입 금지
-                const RIVER_BOUNDARY_LAT = 37.5615;
+                // 한강 경계 — 망원한강공원 남단 기준, 이 위도 이상 진입 금지
+                const RIVER_BOUNDARY_LAT = 37.557;
 
                 if (prevAgents.length === 0) {
                     // Initialize random agents (160 agents for simulation)
                     return Array.from({ length: 160 }).map((_, i) => {
-                        // 남쪽으로 더 넓게, 북쪽은 한강 경계까지만
-                        const lat = centerLat + (Math.random() - 0.6) * 0.015;
+                        // 남쪽 편향 — 매장 주변 상권에 밀집
+                        const lat = centerLat + (Math.random() - 0.7) * 0.012;
                         const lng = centerLng + (Math.random() - 0.5) * 0.015;
                         return {
                             id: i,
@@ -193,6 +193,36 @@ export default function SimulationMap({ storeData, onComplete }) {
                         >
                             결과 리포트 보기 <ArrowRight size={18} />
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* 동종 업계 성공 사례 */}
+            <div className="absolute bottom-4 left-4 right-4 flex gap-3">
+                <div className="flex-1 bg-black/70 backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="bg-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-500/30">성공 사례 1</span>
+                    </div>
+                    <h4 className="text-white font-bold text-sm mb-1">오시 망원본점</h4>
+                    <p className="text-gray-400 text-[11px] leading-relaxed">
+                        인스타 감성 인테리어 + 디지털 웨이팅 도입 → <span className="text-green-400 font-bold">Z세대 방문 +35%</span>, 재방문율 42%
+                    </p>
+                    <div className="flex gap-2 mt-2">
+                        <span className="text-[10px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full">#SNS바이럴</span>
+                        <span className="text-[10px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full">#디지털웨이팅</span>
+                    </div>
+                </div>
+                <div className="flex-1 bg-black/70 backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="bg-blue-500/20 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-500/30">성공 사례 2</span>
+                    </div>
+                    <h4 className="text-white font-bold text-sm mb-1">마마무식당 합정점</h4>
+                    <p className="text-gray-400 text-[11px] leading-relaxed">
+                        프리미엄 런치 세트 + 가족 테이블 확대 → <span className="text-blue-400 font-bold">점심 매출 +28%</span>, 만족도 4.2점
+                    </p>
+                    <div className="flex gap-2 mt-2">
+                        <span className="text-[10px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full">#런치세트</span>
+                        <span className="text-[10px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full">#가족고객</span>
                     </div>
                 </div>
             </div>

@@ -1298,10 +1298,11 @@ const yReportMockData = {
     { label: '여', sim1: 38.5, sim2: 41.6 },
     { label: '혼성', sim1: 16.3, sim2: 15.6 },
   ],
-  // 지표 7: 경쟁 매장 레이더 차트
+  // 지표 7: 경쟁 매장 레이더 차트 (0~100 백분위 정규화)
+  // 원본 → 정규화: 방문수(max 250), 평점(max 5.0 →×20), 재방문율·만족도·Z세대비율 이미 %
   radar: [
-    { metric: '방문수', target_before: 142, target_after: 189, comp1: 210, comp2: 165, comp3: 130 },
-    { metric: '평점', target_before: 3.42, target_after: 3.81, comp1: 3.65, comp2: 3.90, comp3: 3.30 },
+    { metric: '방문수', target_before: 57, target_after: 76, comp1: 84, comp2: 66, comp3: 52 },
+    { metric: '평점', target_before: 68, target_after: 76, comp1: 73, comp2: 78, comp3: 66 },
     { metric: '재방문율', target_before: 31, target_after: 44, comp1: 38, comp2: 42, comp3: 28 },
     { metric: '만족도', target_before: 31, target_after: 55, comp1: 45, comp2: 52, comp3: 35 },
     { metric: 'Z세대비율', target_before: 41, target_after: 50, comp1: 55, comp2: 48, comp3: 32 },
@@ -1703,7 +1704,7 @@ const YReportView = () => {
               <Area type="monotone" dataKey="sim1" stroke="#9ca3af" fill="#9ca3af" fillOpacity={0.15} strokeWidth={2} name="전략 전" dot={false} />
               <Area type="monotone" dataKey="sim2" stroke="#10b981" fill="#10b981" fillOpacity={0.2} strokeWidth={2.5} name="전략 후" dot={false} />
               <Legend
-                formatter={(val) => val === 'sim1' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
+                formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
                 wrapperStyle={{ fontSize: '12px' }}
               />
             </AreaChart>
@@ -1719,13 +1720,13 @@ const YReportView = () => {
               <XAxis dataKey="name" tick={{ fontSize: 12, fontWeight: 600 }} />
               <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} unit="%" />
               <Tooltip
-                formatter={(val, name) => [`${val}%`, name === 'sim1' ? '전략 전' : '전략 후']}
+                formatter={(val, name) => [`${val}%`, name === '전략 전' ? '전략 전' : '전략 후']}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
               />
               <Bar dataKey="sim1" fill="#d1d5db" radius={[4, 4, 0, 0]} name="전략 전" barSize={32} />
               <Bar dataKey="sim2" fill="#10b981" radius={[4, 4, 0, 0]} name="전략 후" barSize={32} />
               <Legend
-                formatter={(val) => val === 'sim1' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
+                formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
                 wrapperStyle={{ fontSize: '12px' }}
               />
             </BarChart>
@@ -1767,31 +1768,25 @@ const YReportView = () => {
           </div>
         </div>
 
-        {/* Line Chart */}
+        {/* Bar Chart — 이산 시간대이므로 바 차트가 정확 */}
         <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
           <h3 className="font-bold text-gray-900 text-sm mb-4">시간대별 방문 트래픽</h3>
           <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={d.hourlyTraffic} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <defs>
-                <linearGradient id="gradSim2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="slot" tick={{ fontSize: 12, fontWeight: 600 }} />
+            <BarChart data={d.hourlyTraffic} barGap={2} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+              <XAxis dataKey="slot" tick={{ fontSize: 11, fontWeight: 600 }} />
               <YAxis tick={{ fontSize: 11 }} label={{ value: '방문 횟수', angle: -90, position: 'insideLeft', fontSize: 11 }} />
               <Tooltip
-                formatter={(val, name) => [`${val}회`, name === 'sim1' ? '전략 전' : '전략 후']}
+                formatter={(val, name) => [`${val}회`, name === '전략 전' ? '전략 전' : '전략 후']}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
               />
-              <Area type="monotone" dataKey="sim1" stroke="#9ca3af" fill="none" strokeWidth={2} strokeDasharray="6 3" name="전략 전" dot={{ r: 4, fill: '#9ca3af' }} />
-              <Area type="monotone" dataKey="sim2" stroke="#f59e0b" fill="url(#gradSim2)" strokeWidth={2.5} name="전략 후" dot={{ r: 5, fill: '#f59e0b', stroke: '#fff', strokeWidth: 2 }} />
+              <Bar dataKey="sim1" fill="#d1d5db" radius={[4, 4, 0, 0]} name="전략 전" barSize={18} />
+              <Bar dataKey="sim2" fill="#f59e0b" radius={[4, 4, 0, 0]} name="전략 후" barSize={18} />
               <Legend
-                formatter={(val) => val === 'sim1' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
+                formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
                 wrapperStyle={{ fontSize: '12px' }}
               />
-            </AreaChart>
+            </BarChart>
           </ResponsiveContainer>
           <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
             <p className="text-xs text-amber-700">
@@ -1819,10 +1814,10 @@ const YReportView = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
               <XAxis dataKey="gen" tick={{ fontSize: 12, fontWeight: 600 }} />
               <YAxis tick={{ fontSize: 11 }} unit="%" domain={[0, 'auto']} />
-              <Tooltip formatter={(val, name) => [`${val}%`, name === 'sim1' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
+              <Tooltip formatter={(val, name) => [`${val}%`, name === '전략 전' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
               <Bar dataKey="sim1" fill="#c7d2fe" radius={[4, 4, 0, 0]} name="전략 전" barSize={28} />
               <Bar dataKey="sim2" fill="#6366f1" radius={[4, 4, 0, 0]} name="전략 후" barSize={28} />
-              <Legend formatter={(val) => val === 'sim1' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
+              <Legend formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
             </BarChart>
           </ResponsiveContainer>
           <div className="mt-3 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
@@ -1937,7 +1932,7 @@ const YReportView = () => {
             <RadarChart cx="50%" cy="50%" outerRadius="70%" data={d.radar}>
               <PolarGrid stroke="#e5e7eb" />
               <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12, fontWeight: 600 }} />
-              <PolarRadiusAxis tick={{ fontSize: 10 }} />
+              <PolarRadiusAxis tick={{ fontSize: 10 }} domain={[0, 100]} tickCount={6} />
               <Radar name="류진 (전)" dataKey="target_before" stroke="#9ca3af" fill="#9ca3af" fillOpacity={0.1} strokeWidth={1.5} strokeDasharray="4 3" />
               <Radar name="류진 (후)" dataKey="target_after" stroke="#10b981" fill="#10b981" fillOpacity={0.2} strokeWidth={2.5} />
               <Radar name={d.radarStores.comp1} dataKey="comp1" stroke="#60a5fa" fill="none" strokeWidth={1.5} strokeDasharray="3 3" />
@@ -1971,10 +1966,10 @@ const YReportView = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
               <XAxis type="number" tick={{ fontSize: 11 }} unit="%" domain={[0, 70]} />
               <YAxis dataKey="type" type="category" tick={{ fontSize: 13, fontWeight: 700 }} />
-              <Tooltip formatter={(val, name) => [`${val}%`, name === 'sim1' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
+              <Tooltip formatter={(val, name) => [`${val}%`, name === '전략 전' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
               <Bar dataKey="sim1" fill="#fed7aa" radius={[0, 4, 4, 0]} name="전략 전" barSize={20} />
               <Bar dataKey="sim2" fill="#f97316" radius={[0, 4, 4, 0]} name="전략 후" barSize={20} />
-              <Legend formatter={(val) => val === 'sim1' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
+              <Legend formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -1997,10 +1992,10 @@ const YReportView = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
               <XAxis dataKey="label" tick={{ fontSize: 13, fontWeight: 700 }} />
               <YAxis tick={{ fontSize: 11 }} unit="%" domain={[0, 'auto']} />
-              <Tooltip formatter={(val, name) => [`${val}%`, name === 'sim1' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
+              <Tooltip formatter={(val, name) => [`${val}%`, name === '전략 전' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
               <Bar dataKey="sim1" fill="#fbb6ce" radius={[4, 4, 0, 0]} name="전략 전" barSize={32} />
               <Bar dataKey="sim2" fill="#ec4899" radius={[4, 4, 0, 0]} name="전략 후" barSize={32} />
-              <Legend formatter={(val) => val === 'sim1' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
+              <Legend formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -2059,7 +2054,7 @@ const YReportView = () => {
             <Sparkles size={18} className="text-emerald-600" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">종합 평가 — AI Summary (GPT-4o)</h2>
+            <h2 className="text-lg font-bold text-gray-900">종합 평가 — AI Summary (GPT-5.2)</h2>
             <p className="text-xs text-gray-400">모든 지표를 종합한 AI 전략 분석가의 총평</p>
           </div>
         </div>
@@ -2070,7 +2065,7 @@ const YReportView = () => {
             </div>
             <div>
               <p className="text-white font-bold text-sm">AI 전략 분석 리포트</p>
-              <p className="text-white/70 text-xs">GPT-4o 기반 자동 생성 · 시뮬레이션 데이터 근거</p>
+              <p className="text-white/70 text-xs">GPT-5.2 기반 자동 생성 · 시뮬레이션 데이터 근거</p>
             </div>
           </div>
           <div className="p-6">
