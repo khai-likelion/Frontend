@@ -33,6 +33,10 @@ import {
   Clock, // Added Clock icon
   Sparkles, // Added Sparkles icon
   RefreshCw, // Added for retention metric
+  AlertTriangle, // Side effect alerts
+  Shield, // Risk score
+  ArrowDownRight, // Trade-off negative
+  ArrowUpRight, // Trade-off positive
 } from 'lucide-react';
 import SimulationMap from './components/simulation/SimulationMap'; // Import SimulationMap
 import {
@@ -1316,6 +1320,26 @@ const yReportMockData = {
     ],
   },
   // 지표 8: LLM 요약
+  // ═══ 역효과 감지 데이터 ═══
+  sideEffects: [
+    { type: 'warning', metric: 'Y세대 방문 비중', change: -5.1, unit: '%p', detail: '2인 세트 메뉴 도입이 1인 직장인(Y세대) 방문을 감소시킬 수 있음' },
+    { type: 'warning', metric: '점심 시간대 트래픽', change: -12, unit: '%', detail: '피크타임이 저녁으로 전환되며 점심 매출 공백 발생 위험' },
+    { type: 'watch', metric: '가성비 인식', change: -0.3, unit: '점', detail: '인테리어 개선 후 "비싸 보인다"는 인식이 소폭 증가' },
+  ],
+  tradeoffs: [
+    { gain: 'Z세대(Z1+Z2) 유입', gainVal: '+8.9%p', loss: 'Y세대 이탈', lossVal: '-5.1%p' },
+    { gain: '사적모임형 방문', gainVal: '+7.3%p', loss: '생활베이스형 감소', lossVal: '-6.5%p' },
+    { gain: '저녁 트래픽 급증', gainVal: '+50%', loss: '점심 트래픽 하락', lossVal: '-12%' },
+    { gain: '분위기 만족도', gainVal: '+0.5점', loss: '가성비 인식', lossVal: '-0.3점' },
+  ],
+  riskScore: {
+    score: 23,
+    level: '낮은 위험',
+    positive: 8,
+    watch: 1,
+    negative: 2,
+    totalMetrics: 11,
+  },
   llmSummary: `**전략의 효과 분석**\n\n전략 적용 후 '류진'의 방문 수는 +33.1%로 유의미한 증가를 보였습니다. 평균 평점은 3.42점에서 3.81점으로 0.39점 상승하였으며, 만족도(4점 이상)는 31.0%에서 54.5%로 23.5%p 급증하였습니다.\n\n**바뀐 주 고객층의 특성**\n\nZ세대(Z1+Z2) 비율이 40.8%에서 49.7%로 확대되며 젊은 고객층 유입이 두드러졌습니다. 사적모임형 방문이 25.1%→32.4%로 증가하며, 데이트·모임 수요를 성공적으로 흡수했습니다.\n\n**재방문율 및 고객 충성도**\n\n기존 고객 유지율 61.8%로 양호하며, 신규 유입 47명이 이탈 26명을 크게 상회합니다. 장기 충성도 강화를 위해 포인트/쿠폰 제도 도입을 권장합니다.\n\n**향후 권장 사항**\n\n1. 저녁 시간대 집중 프로모션으로 신규 피크타임 매출을 극대화하세요.\n2. Z세대 타겟 SNS 마케팅(인스타감성, 분위기맛집)을 지속 강화하세요.\n3. 점심 시간대 방문 유지를 위해 직장인 대상 신속 서비스 유지가 필요합니다.`,
 };
 
@@ -1413,6 +1437,143 @@ const YReportView = () => {
           <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-black transition-colors">
             <Printer size={16} /> PDF 저장
           </button>
+        </div>
+      </div>
+
+      {/* ══════════════════ 솔루션 안전성 진단 ══════════════════ */}
+
+      {/* ── 리스크 스코어 ── */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
+              <Shield size={20} className="text-white" />
+            </div>
+            <div>
+              <h2 className="text-white font-bold text-lg">솔루션 안전성 진단</h2>
+              <p className="text-gray-400 text-xs">시뮬레이션 11개 지표 기반 역효과 자동 탐지 결과</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-white text-3xl font-bold font-space">{d.riskScore.score}<span className="text-lg text-gray-400">/100</span></p>
+              <p className={`text-xs font-bold ${d.riskScore.score <= 30 ? 'text-emerald-400' : d.riskScore.score <= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
+                {d.riskScore.level}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-5">
+          {/* 게이지 바 */}
+          <div className="mb-4">
+            <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ${d.riskScore.score <= 30 ? 'bg-gradient-to-r from-emerald-400 to-emerald-500' : d.riskScore.score <= 60 ? 'bg-gradient-to-r from-yellow-400 to-orange-400' : 'bg-gradient-to-r from-red-400 to-red-600'}`}
+                style={{ width: `${d.riskScore.score}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between mt-1.5 text-[10px] text-gray-400 font-bold">
+              <span>0 안전</span>
+              <span>30</span>
+              <span>60</span>
+              <span>100 위험</span>
+            </div>
+          </div>
+          {/* 지표 요약 */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-emerald-50 rounded-xl p-3 text-center border border-emerald-100">
+              <CheckCircle size={18} className="text-emerald-500 mx-auto mb-1" />
+              <p className="text-xl font-bold text-emerald-600">{d.riskScore.positive}</p>
+              <p className="text-[10px] text-emerald-600 font-bold">순기능</p>
+            </div>
+            <div className="bg-amber-50 rounded-xl p-3 text-center border border-amber-100">
+              <AlertCircle size={18} className="text-amber-500 mx-auto mb-1" />
+              <p className="text-xl font-bold text-amber-600">{d.riskScore.watch}</p>
+              <p className="text-[10px] text-amber-600 font-bold">관찰 필요</p>
+            </div>
+            <div className="bg-red-50 rounded-xl p-3 text-center border border-red-100">
+              <AlertTriangle size={18} className="text-red-500 mx-auto mb-1" />
+              <p className="text-xl font-bold text-red-600">{d.riskScore.negative}</p>
+              <p className="text-[10px] text-red-600 font-bold">역효과 감지</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 역효과 감지 경고 ── */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <AlertTriangle size={18} className="text-red-500" />
+          <h3 className="text-sm font-bold text-gray-900">역효과 감지 알림</h3>
+          <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-[10px] font-bold">{d.sideEffects.length}건</span>
+        </div>
+        {d.sideEffects.map((se, i) => (
+          <div
+            key={i}
+            className={`rounded-xl p-4 flex items-start gap-3 border ${se.type === 'warning' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}
+          >
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${se.type === 'warning' ? 'bg-red-100' : 'bg-amber-100'}`}>
+              {se.type === 'warning'
+                ? <AlertTriangle size={16} className="text-red-500" />
+                : <AlertCircle size={16} className="text-amber-500" />
+              }
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-bold text-sm text-gray-900">{se.metric}</span>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${se.type === 'warning' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                  {se.change > 0 ? '+' : ''}{se.change}{se.unit}
+                </span>
+                <span className={`text-[10px] font-bold ${se.type === 'warning' ? 'text-red-500' : 'text-amber-500'}`}>
+                  {se.type === 'warning' ? '⚠️ 역효과' : '🔍 관찰 필요'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-600 leading-relaxed">{se.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── 트레이드오프 시각화 (Gain vs Loss) ── */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-gray-100 flex items-center gap-2">
+          <TrendingUp size={16} className="text-gray-700" />
+          <h3 className="font-bold text-sm text-gray-900">전략 트레이드오프 — 얻은 것 vs 잃은 것</h3>
+        </div>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-200 text-xs">
+              <th className="text-left py-2.5 px-4 font-bold text-emerald-600 w-5/12">
+                <span className="flex items-center gap-1"><ArrowUpRight size={14} /> 얻은 것 (Gain)</span>
+              </th>
+              <th className="text-center py-2.5 px-2 w-2/12"></th>
+              <th className="text-right py-2.5 px-4 font-bold text-red-500 w-5/12">
+                <span className="flex items-center gap-1 justify-end">잃은 것 (Loss) <ArrowDownRight size={14} /></span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {d.tradeoffs.map((t, i) => (
+              <tr key={i} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                <td className="py-3 px-4">
+                  <span className="font-bold text-gray-900">{t.gain}</span>
+                  <span className="ml-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{t.gainVal}</span>
+                </td>
+                <td className="text-center py-3 px-2">
+                  <span className="text-gray-300 text-lg">⇄</span>
+                </td>
+                <td className="py-3 px-4 text-right">
+                  <span className="font-bold text-gray-900">{t.loss}</span>
+                  <span className="ml-2 text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">{t.lossVal}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="p-3 bg-blue-50 border-t border-blue-100">
+          <p className="text-xs text-blue-700">
+            <strong>💡 판단 가이드:</strong> 좌측(순기능)이 우측(역효과)보다 크면 전략을 유지하되, 역효과 항목에 대한 <strong>보완 솔루션</strong>을 검토하세요. 역효과가 치명적이면 해당 솔루션만 제외 후 재시뮬레이션을 추천합니다.
+          </p>
         </div>
       </div>
 
