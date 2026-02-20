@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { AgentMarker } from './AgentMarker';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, MapPin } from 'lucide-react';
 
 // Fallback to empty string if not set, user will need to add it later
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
@@ -15,8 +15,27 @@ const MANGWON_COORDS = {
     bearing: -17.6,
 };
 
-export default function SimulationMap({ onComplete }) {
-    const [viewState, setViewState] = useState(MANGWON_COORDS);
+export default function SimulationMap({ storeData, onComplete }) {
+    const [viewState, setViewState] = useState({
+        ...MANGWON_COORDS,
+        latitude: storeData?.lat || MANGWON_COORDS.latitude,
+        longitude: storeData?.lng || MANGWON_COORDS.longitude,
+    });
+
+    // Update viewState when storeData changes
+    useEffect(() => {
+        if (storeData) {
+            setViewState(prev => ({
+                ...prev,
+                latitude: storeData.lat,
+                longitude: storeData.lng,
+                zoom: 15, // Reset zoom or keep current? Let's reset to ensure visibility
+                transitionDuration: 1000 // Smooth fly-to
+            }));
+            // Reset agents to force regeneration at new location
+            setAgents([]);
+        }
+    }, [storeData]);
     const [agents, setAgents] = useState([]);
     const [speed, setSpeed] = useState(1); // 1x, 10x, 60x, etc.
     const [simTime, setSimTime] = useState(new Date());
@@ -30,12 +49,12 @@ export default function SimulationMap({ onComplete }) {
             // Simulate moving agents
             setAgents(prevAgents => {
                 if (prevAgents.length === 0) {
-                    // Initialize random agents
-                    return Array.from({ length: 50 }).map((_, i) => ({
+                    // Initialize random agents (160 agents for simulation)
+                    return Array.from({ length: 160 }).map((_, i) => ({
                         id: i,
                         type: i % 2 === 0 ? 'resident' : 'floating',
-                        lat: 37.556 + (Math.random() - 0.5) * 0.01,
-                        lng: 126.906 + (Math.random() - 0.5) * 0.01,
+                        lat: (storeData?.lat || 37.556) + (Math.random() - 0.5) * 0.015,
+                        lng: (storeData?.lng || 126.906) + (Math.random() - 0.5) * 0.015,
                         name: `Agent-${i}`,
                         info: i % 2 === 0 ? 'Resident (Z-Gen)' : 'Floating (Tourist)',
                     }));
@@ -52,13 +71,36 @@ export default function SimulationMap({ onComplete }) {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [speed]);
+    }, [speed, storeData]);
 
     const formattedTime = simTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-    const markers = useMemo(() => agents.map(agent => (
-        <AgentMarker key={agent.id} agent={agent} />
-    )), [agents]);
+    const markers = useMemo(() => ([
+        // Moving Agents
+        ...agents.map(agent => (
+            <AgentMarker key={agent.id} agent={agent} />
+        )),
+
+        // Selected Store Marker (Red Pin)
+        storeData && (
+            <Marker
+                key="store-marker" // Added a key for the store marker
+                latitude={storeData.lat}
+                longitude={storeData.lng}
+                anchor="bottom"
+            >
+                <div className="flex flex-col items-center">
+                    <div className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full mb-1 shadow-lg whitespace-nowrap border border-white">
+                        {storeData.name}
+                    </div>
+                    <div className="relative">
+                        <MapPin size={32} className="text-red-600 fill-white stroke-[2.5px] drop-shadow-md" />
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-red-600 rounded-full blur-[1px] opacity-50" />
+                    </div>
+                </div>
+            </Marker>
+        )
+    ]), [agents, storeData]); // Added storeData to dependency array
 
     if (!MAPBOX_TOKEN) {
         return (
