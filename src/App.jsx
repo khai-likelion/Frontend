@@ -31,7 +31,8 @@ import {
   LogIn,
   Globe,
   Clock, // Added Clock icon
-  Sparkles // Added Sparkles icon
+  Sparkles, // Added Sparkles icon
+  RefreshCw, // Added for retention metric
 } from 'lucide-react';
 import SimulationMap from './components/simulation/SimulationMap'; // Import SimulationMap
 import {
@@ -1261,6 +1262,52 @@ const yReportMockData = {
     { slot: '야식(22)', sim1: 34, sim2: 37 },
   ],
   peakSlot: { sim1: '점심(12)', sim2: '저녁(18)' },
+  // 지표 4: 세대별 증감
+  generation: [
+    { gen: 'Z1', sim1: 12.5, sim2: 18.2 },
+    { gen: 'Z2', sim1: 28.3, sim2: 31.5 },
+    { gen: 'Y', sim1: 35.2, sim2: 30.1 },
+    { gen: 'X', sim1: 18.0, sim2: 14.8 },
+    { gen: 'S', sim1: 6.0, sim2: 5.4 },
+  ],
+  // 지표 5: 방문 목적
+  purpose: [
+    { type: '생활베이스형', sim1Pct: 42.3, sim2Pct: 35.8, sim1Sat: 3.2, sim2Sat: 3.9 },
+    { type: '사적모임형', sim1Pct: 25.1, sim2Pct: 32.4, sim1Sat: 3.5, sim2Sat: 4.1 },
+    { type: '공적모임형', sim1Pct: 18.7, sim2Pct: 19.0, sim1Sat: 3.4, sim2Sat: 3.7 },
+    { type: '가족모임형', sim1Pct: 13.9, sim2Pct: 12.8, sim1Sat: 3.6, sim2Sat: 3.8 },
+  ],
+  // 지표 6: 재방문율
+  retention: {
+    sim1Agents: 68, sim2Agents: 89,
+    retained: 42, newUsers: 47, churned: 26,
+    retentionRate: 61.8, newRatio: 52.8,
+  },
+  // 지표 9: 에이전트 유형
+  agentType: [
+    { type: '유동', sim1: 58.2, sim2: 52.3 },
+    { type: '상주', sim1: 41.8, sim2: 47.7 },
+  ],
+  // 지표 10: 성별 구성
+  gender: [
+    { label: '남', sim1: 45.2, sim2: 42.8 },
+    { label: '여', sim1: 38.5, sim2: 41.6 },
+    { label: '혼성', sim1: 16.3, sim2: 15.6 },
+  ],
+  // 지표 11: 크로스탭 (세대 × 방문목적) — 비율
+  crosstab: {
+    generations: ['Z1', 'Z2', 'Y', 'X', 'S'],
+    purposes: ['생활베이스형', '사적모임형', '공적모임형', '가족모임형'],
+    sim2: [
+      [30, 40, 20, 10],
+      [25, 35, 25, 15],
+      [40, 20, 25, 15],
+      [45, 15, 20, 20],
+      [50, 10, 15, 25],
+    ],
+  },
+  // 지표 8: LLM 요약
+  llmSummary: `**전략의 효과 분석**\n\n전략 적용 후 '류진'의 방문 수는 +33.1%로 유의미한 증가를 보였습니다. 평균 평점은 3.42점에서 3.81점으로 0.39점 상승하였으며, 만족도(4점 이상)는 31.0%에서 54.5%로 23.5%p 급증하였습니다.\n\n**바뀐 주 고객층의 특성**\n\nZ세대(Z1+Z2) 비율이 40.8%에서 49.7%로 확대되며 젊은 고객층 유입이 두드러졌습니다. 사적모임형 방문이 25.1%→32.4%로 증가하며, 데이트·모임 수요를 성공적으로 흡수했습니다.\n\n**재방문율 및 고객 충성도**\n\n기존 고객 유지율 61.8%로 양호하며, 신규 유입 47명이 이탈 26명을 크게 상회합니다. 장기 충성도 강화를 위해 포인트/쿠폰 제도 도입을 권장합니다.\n\n**향후 권장 사항**\n\n1. 저녁 시간대 집중 프로모션으로 신규 피크타임 매출을 극대화하세요.\n2. Z세대 타겟 SNS 마케팅(인스타감성, 분위기맛집)을 지속 강화하세요.\n3. 점심 시간대 방문 유지를 위해 직장인 대상 신속 서비스 유지가 필요합니다.`,
 };
 
 // 워드클라우드 시각화 컴포넌트
@@ -1580,20 +1627,249 @@ const YReportView = () => {
         </div>
       </div>
 
-      {/* Coming Soon */}
-      <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-6 text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl">
-        <div className="flex-1">
-          <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-            <Sparkles className="text-yellow-400" size={20} />
-            지표 4~11 업데이트 예정
-          </h3>
-          <p className="text-gray-300 text-sm leading-relaxed opacity-90">
-            세대별 증감, 방문 목적별 분석, 재방문율, 경쟁 레이더 차트, 에이전트 유형, 성별 구성, 크로스탭 히트맵, LLM 종합 평가가 추가됩니다.
-          </p>
+      {/* ────────────────── 지표 4: 세대별 증감 분석 ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+            <Users size={18} className="text-indigo-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">지표 4 — 세대별 증감 분석 (Generation Impact)</h2>
+            <p className="text-xs text-gray-400">어떤 세대의 방문이 늘었고, 어떤 세대에서 감소했는가?</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-gray-400 whitespace-nowrap">
-          <Clock size={16} />
-          <span className="text-sm font-medium">Coming Soon</span>
+
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={d.generation} barGap={4} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+              <XAxis dataKey="gen" tick={{ fontSize: 12, fontWeight: 600 }} />
+              <YAxis tick={{ fontSize: 11 }} unit="%" domain={[0, 'auto']} />
+              <Tooltip formatter={(val, name) => [`${val}%`, name === 'sim1' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
+              <Bar dataKey="sim1" fill="#c7d2fe" radius={[4, 4, 0, 0]} name="전략 전" barSize={28} />
+              <Bar dataKey="sim2" fill="#6366f1" radius={[4, 4, 0, 0]} name="전략 후" barSize={28} />
+              <Legend formatter={(val) => val === 'sim1' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
+            </BarChart>
+          </ResponsiveContainer>
+          <div className="mt-3 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+            <p className="text-xs text-indigo-700">
+              <strong>💡 인사이트:</strong> Z세대(Z1+Z2) 비율이 <strong>40.8% → 49.7%</strong>로 급증. 데이트코스·인스타감성 솔루션이 젊은 층 유입에 직접 기여.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ────────────────── 지표 5: 방문 목적별 분석 ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-rose-100 rounded-lg flex items-center justify-center">
+            <Target size={18} className="text-rose-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">지표 5 — 방문 목적별 상세 분석 (Purpose Analysis)</h2>
+            <p className="text-xs text-gray-400">어떤 목적의 손님이 늘었고, 만족도는 어떻게 달라졌는가?</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="text-left py-3 px-4 font-bold text-gray-600">방문 목적</th>
+                <th className="text-center py-3 px-4 font-bold text-gray-400">비중(전)</th>
+                <th className="text-center py-3 px-4 font-bold text-emerald-600">비중(후)</th>
+                <th className="text-center py-3 px-4 font-bold text-gray-400">만족도(전)</th>
+                <th className="text-center py-3 px-4 font-bold text-emerald-600">만족도(후)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {d.purpose.map((p, i) => (
+                <tr key={i} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  <td className="py-3 px-4 font-bold text-gray-900">{p.type}</td>
+                  <td className="text-center py-3 px-4 text-gray-400">{p.sim1Pct}%</td>
+                  <td className="text-center py-3 px-4 font-bold text-gray-900">{p.sim2Pct}%
+                    <ChangeBadge value={parseFloat((p.sim2Pct - p.sim1Pct).toFixed(1))} suffix="%p" />
+                  </td>
+                  <td className="text-center py-3 px-4 text-gray-400">{p.sim1Sat}</td>
+                  <td className="text-center py-3 px-4 font-bold text-emerald-600">{p.sim2Sat}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="p-3 bg-rose-50 border-t border-rose-100">
+            <p className="text-xs text-rose-700">
+              <strong>💡 인사이트:</strong> 사적모임형 비중이 <strong>+7.3%p</strong> 증가하며 가장 큰 변화. 2인 세트 메뉴가 데이트 수요 흡수에 효과적.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ────────────────── 지표 6: 재방문율 분석 ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
+            <RefreshCw size={18} className="text-cyan-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">지표 6 — 재방문율 분석 (Retention)</h2>
+            <p className="text-xs text-gray-400">기존 고객이 유지되었는가? 신규 유입 vs 이탈 비율은?</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm text-center">
+            <p className="text-xs text-gray-400 mb-1">기존 고객 유지</p>
+            <p className="text-2xl font-bold text-cyan-600">{d.retention.retained}명</p>
+            <p className="text-xs text-cyan-500 font-bold mt-1">유지율 {d.retention.retentionRate}%</p>
+          </div>
+          <div className="bg-white p-5 rounded-xl border-2 border-emerald-200 shadow-sm text-center">
+            <p className="text-xs text-emerald-600 mb-1">신규 유입</p>
+            <p className="text-2xl font-bold text-emerald-600">{d.retention.newUsers}명</p>
+            <p className="text-xs text-emerald-500 font-bold mt-1">Sim2의 {d.retention.newRatio}%</p>
+          </div>
+          <div className="bg-white p-5 rounded-xl border border-red-200 shadow-sm text-center">
+            <p className="text-xs text-red-500 mb-1">이탈 (Churn)</p>
+            <p className="text-2xl font-bold text-red-500">{d.retention.churned}명</p>
+          </div>
+          <div className="bg-gradient-to-br from-cyan-50 to-emerald-50 p-5 rounded-xl border border-cyan-200 shadow-sm text-center">
+            <p className="text-xs text-gray-500 mb-1">순 증가</p>
+            <p className="text-2xl font-bold text-gray-900">+{d.retention.newUsers - d.retention.churned}명</p>
+            <p className="text-xs text-gray-400 mt-1">{d.retention.sim1Agents} → {d.retention.sim2Agents} 에이전트</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ────────────────── 지표 9: 에이전트 유형 (상주/유동) ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+            <MapPin size={18} className="text-orange-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">지표 9 — 에이전트 유형별 분석 (Agent Type)</h2>
+            <p className="text-xs text-gray-400">유동 인구 vs 상주 고객, 어느 쪽이 더 증가했는가?</p>
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={d.agentType} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 11 }} unit="%" domain={[0, 70]} />
+              <YAxis dataKey="type" type="category" tick={{ fontSize: 13, fontWeight: 700 }} />
+              <Tooltip formatter={(val, name) => [`${val}%`, name === 'sim1' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
+              <Bar dataKey="sim1" fill="#fed7aa" radius={[0, 4, 4, 0]} name="전략 전" barSize={20} />
+              <Bar dataKey="sim2" fill="#f97316" radius={[0, 4, 4, 0]} name="전략 후" barSize={20} />
+              <Legend formatter={(val) => val === 'sim1' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* ────────────────── 지표 10: 성별 구성 ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+            <Users size={18} className="text-pink-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">지표 10 — 성별 구성 분석 (Gender Composition)</h2>
+            <p className="text-xs text-gray-400">전략 전후 성별 비율이 달라졌는가?</p>
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={d.gender} barGap={4} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 13, fontWeight: 700 }} />
+              <YAxis tick={{ fontSize: 11 }} unit="%" domain={[0, 'auto']} />
+              <Tooltip formatter={(val, name) => [`${val}%`, name === 'sim1' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
+              <Bar dataKey="sim1" fill="#fbb6ce" radius={[4, 4, 0, 0]} name="전략 전" barSize={32} />
+              <Bar dataKey="sim2" fill="#ec4899" radius={[4, 4, 0, 0]} name="전략 후" barSize={32} />
+              <Legend formatter={(val) => val === 'sim1' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* ────────────────── 지표 11: 세대×방문목적 크로스탭 히트맵 ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+            <Sparkles size={18} className="text-red-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">지표 11 — 세대 × 방문목적 크로스탭 (Heatmap)</h2>
+            <p className="text-xs text-gray-400">어떤 세대가 어떤 목적으로 방문했는가? 전략 후 분포.</p>
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th className="text-left py-3 px-3 font-bold text-gray-600">세대 ↓ \ 목적 →</th>
+                {d.crosstab.purposes.map(p => (
+                  <th key={p} className="text-center py-3 px-3 font-bold text-gray-600">{p}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {d.crosstab.generations.map((gen, gi) => (
+                <tr key={gen} className="border-b border-gray-50">
+                  <td className="py-3 px-3 font-bold text-gray-900">{gen}</td>
+                  {d.crosstab.sim2[gi].map((val, pi) => {
+                    const intensity = val / 50;
+                    const bg = `rgba(239, 68, 68, ${Math.min(intensity, 1) * 0.6})`;
+                    return (
+                      <td key={pi} className="text-center py-3 px-3 font-bold text-sm" style={{ backgroundColor: bg, color: intensity > 0.5 ? '#fff' : '#374151' }}>
+                        {val}%
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-100">
+            <p className="text-xs text-red-700">
+              <strong>💡 인사이트:</strong> Z1세대는 사적모임(40%)이 압도적, S세대는 생활베이스(50%)가 지배적. 세대별 맞춤 마케팅이 필요합니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ────────────────── 지표 8: LLM 종합 평가 ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+            <Sparkles size={18} className="text-emerald-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">종합 평가 — AI Summary (GPT-4o)</h2>
+            <p className="text-xs text-gray-400">모든 지표를 종합한 AI 전략 분석가의 총평</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 flex items-center gap-3">
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+              <Sparkles size={16} className="text-white" />
+            </div>
+            <div>
+              <p className="text-white font-bold text-sm">AI 전략 분석 리포트</p>
+              <p className="text-white/70 text-xs">GPT-4o 기반 자동 생성 · 시뮬레이션 데이터 근거</p>
+            </div>
+          </div>
+          <div className="p-6">
+            <ReactMarkdown
+              components={{
+                p: ({ children }) => <p className="text-sm text-gray-700 leading-relaxed mb-4">{children}</p>,
+                strong: ({ children }) => <strong className="font-bold text-gray-900">{children}</strong>,
+                ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700 mb-4">{children}</ol>,
+                li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+              }}
+            >
+              {d.llmSummary}
+            </ReactMarkdown>
+          </div>
         </div>
       </div>
     </div>
