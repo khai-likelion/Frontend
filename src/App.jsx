@@ -1434,6 +1434,10 @@ const YReportView = () => {
           <p className="text-gray-500 text-sm">전략 적용 전(Sim 1) vs 후(Sim 2) 시뮬레이션 비교 보고서  ·  96명 에이전트 × 7일</p>
         </div>
         <div className="flex gap-3">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+            <FileText size={16} className="text-red-500" />
+            전문 보기
+          </button>
           <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-black transition-colors">
             <Printer size={16} /> PDF 저장
           </button>
