@@ -1,19 +1,93 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { AgentMarker } from './AgentMarker';
 import { ArrowRight, MapPin, TrendingUp, Zap } from 'lucide-react';
 
-// Fallback to empty string if not set, user will need to add it later
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
 
 const MANGWON_COORDS = {
     latitude: 37.556,
     longitude: 126.906,
     zoom: 15,
-    pitch: 60, // 3D effect
+    pitch: 60,
     bearing: -17.6,
 };
+
+// ── 한강 북안 경계 위도 (이 위도 이상은 한강) ──
+const RIVER_BOUNDARY_LAT = 37.5545;
+
+// ── 에이전트 생성: 극좌표 기반 원형 분포 ──
+function spawnAgent(id, centerLat, centerLng) {
+    const isResident = Math.random() < 0.5;
+    const type = isResident ? 'resident' : 'floating';
+
+    // resident: 매장 반경 ~200m 이내 / floating: ~400m 이내
+    const maxRadius = isResident ? 0.002 : 0.004;
+
+    let lat, lng;
+    let attempts = 0;
+
+    // 안전 영역 내에 생성될 때까지 재시도 (클램핑 X)
+    do {
+        const angle = Math.random() * 2 * Math.PI;
+        const radius = Math.sqrt(Math.random()) * maxRadius; // sqrt로 균일 분포
+        lat = centerLat + radius * Math.sin(angle);
+        lng = centerLng + radius * Math.cos(angle) * 1.25; // 경도 보정 (위도에 따른 비율)
+        attempts++;
+    } while (lat >= RIVER_BOUNDARY_LAT && attempts < 20);
+
+    // 만약 20번 시도 후에도 한강 위면, 남쪽으로 강제 배치
+    if (lat >= RIVER_BOUNDARY_LAT) {
+        lat = centerLat - Math.random() * maxRadius;
+    }
+
+    // 목적지 생성
+    const target = generateTarget(centerLat, centerLng, type);
+
+    // 에이전트별 이동 속도 다양성 (0.3 ~ 1.0)
+    const moveSpeed = 0.3 + Math.random() * 0.7;
+
+    return {
+        id,
+        type,
+        lat,
+        lng,
+        targetLat: target.lat,
+        targetLng: target.lng,
+        moveSpeed,
+        name: `Agent-${id}`,
+        info: isResident ? '상주 고객 (Resident)' : '유동 고객 (Floating)',
+    };
+}
+
+// ── 목적지 생성 (안전 영역 내) ──
+function generateTarget(centerLat, centerLng, type) {
+    const maxRadius = type === 'resident' ? 0.002 : 0.004;
+    let lat, lng;
+    let attempts = 0;
+
+    do {
+        const angle = Math.random() * 2 * Math.PI;
+        const radius = Math.sqrt(Math.random()) * maxRadius;
+        lat = centerLat + radius * Math.sin(angle);
+        lng = centerLng + radius * Math.cos(angle) * 1.25;
+        attempts++;
+    } while (lat >= RIVER_BOUNDARY_LAT && attempts < 20);
+
+    if (lat >= RIVER_BOUNDARY_LAT) {
+        lat = centerLat - Math.random() * maxRadius;
+    }
+
+    return { lat, lng };
+}
+
+// ── lerp 보간 이동 ──
+function lerp(current, target, t) {
+    return current + (target - current) * t;
+}
+
+const AGENT_COUNT = 160;
 
 export default function SimulationMap({ storeData, onComplete }) {
     const [viewState, setViewState] = useState({
@@ -29,63 +103,71 @@ export default function SimulationMap({ storeData, onComplete }) {
                 ...prev,
                 latitude: storeData.lat,
                 longitude: storeData.lng,
-                zoom: 15, // Reset zoom or keep current? Let's reset to ensure visibility
-                transitionDuration: 1000 // Smooth fly-to
+                zoom: 15,
+                transitionDuration: 1000,
             }));
-            // Reset agents to force regeneration at new location
             setAgents([]);
         }
     }, [storeData]);
+
     const [agents, setAgents] = useState([]);
-    const [speed, setSpeed] = useState(1); // 1x, 10x, 60x, etc.
+    const [speed, setSpeed] = useState(1);
     const [simTime, setSimTime] = useState(new Date());
 
-    // Mock Data Generation (Temporary)
+    // ── 메인 시뮬레이션 루프 ──
     useEffect(() => {
         const interval = setInterval(() => {
-            // Increment simulation time based on speed
             setSimTime(prevTime => new Date(prevTime.getTime() + 1000 * speed));
 
-            // Simulate moving agents
             setAgents(prevAgents => {
                 const centerLat = storeData?.lat || 37.556;
                 const centerLng = storeData?.lng || 126.906;
-                // 한강 경계 — 실제 한강 북안 기준 위도
-                // 매장 위치에 상관없이 항상 이 값 이상으로 진입 불가
-                const ACTUAL_RIVER_LAT = 37.5625;
-                // 매장이 한강에 가까울수록 경계선을 매장 기준으로 약간 남쪽으로 당겨낌
-                const RIVER_BOUNDARY_LAT = Math.min(ACTUAL_RIVER_LAT, centerLat - 0.002);
 
+                // 초기 에이전트 생성
                 if (prevAgents.length === 0) {
-                    // Initialize random agents (160 agents for simulation)
-                    return Array.from({ length: 160 }).map((_, i) => {
-                        // 남쪽 편향 — 매장 주변 상권에 밀집 (-0.6 편향으로 더 남쪽에 분산)
-                        const lat = centerLat + (Math.random() - 0.6) * 0.012;
-                        const lng = centerLng + (Math.random() - 0.5) * 0.015;
-                        return {
-                            id: i,
-                            type: i % 2 === 0 ? 'resident' : 'floating',
-                            lat: Math.min(lat, RIVER_BOUNDARY_LAT),
-                            lng,
-                            name: `Agent-${i}`,
-                            info: i % 2 === 0 ? 'Resident (Z-Gen)' : 'Floating (Tourist)',
-                        };
-                    });
+                    return Array.from({ length: AGENT_COUNT }).map((_, i) =>
+                        spawnAgent(i, centerLat, centerLng)
+                    );
                 }
 
-                // Move existing agents — 한강 넘어가지 않도록 클램핑
-                const movementScale = 0.0001 * (1 + Math.log10(speed));
+                // 기존 에이전트 이동 (lerp 보간)
+                const lerpSpeed = 0.02 * (1 + Math.log10(Math.max(speed, 1)));
+
                 return prevAgents.map(agent => {
-                    const newLat = agent.lat + (Math.random() - 0.5) * movementScale;
-                    const newLng = agent.lng + (Math.random() - 0.5) * movementScale;
+                    const t = lerpSpeed * agent.moveSpeed;
+                    let newLat = lerp(agent.lat, agent.targetLat, t);
+                    let newLng = lerp(agent.lng, agent.targetLng, t);
+
+                    // 약간의 자연스러운 흔들림 추가
+                    newLat += (Math.random() - 0.5) * 0.00003;
+                    newLng += (Math.random() - 0.5) * 0.00003;
+
+                    // 목적지 도달 체크 (약 10m 이내)
+                    const distToTarget = Math.sqrt(
+                        Math.pow(newLat - agent.targetLat, 2) +
+                        Math.pow(newLng - agent.targetLng, 2)
+                    );
+
+                    let targetLat = agent.targetLat;
+                    let targetLng = agent.targetLng;
+
+                    if (distToTarget < 0.0001) {
+                        // 새 목적지 할당
+                        const newTarget = generateTarget(centerLat, centerLng, agent.type);
+                        targetLat = newTarget.lat;
+                        targetLng = newTarget.lng;
+                    }
+
                     return {
                         ...agent,
-                        lat: Math.min(newLat, RIVER_BOUNDARY_LAT),
+                        lat: newLat,
                         lng: newLng,
+                        targetLat,
+                        targetLng,
                     };
                 });
             });
-        }, 1000);
+        }, 100); // 100ms 간격으로 부드러운 업데이트
 
         return () => clearInterval(interval);
     }, [speed, storeData]);
@@ -94,13 +176,11 @@ export default function SimulationMap({ storeData, onComplete }) {
     const [loadingText, setLoadingText] = useState("시뮬레이션 중입니다...");
 
     useEffect(() => {
-        console.log("[Lovelop] SimulationMap mounted - loading starts");
         const textTimer = setTimeout(() => {
             setLoadingText("완료되면 알려드릴게요!");
         }, 1500);
 
         const loadingTimer = setTimeout(() => {
-            console.log("[Lovelop] SimulationMap loading finished");
             setIsLoading(false);
         }, 3000);
 
@@ -113,15 +193,13 @@ export default function SimulationMap({ storeData, onComplete }) {
     const formattedTime = simTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     const markers = useMemo(() => ([
-        // Moving Agents
         ...agents.map(agent => (
             <AgentMarker key={agent.id} agent={agent} />
         )),
 
-        // Selected Store Marker (Red Pin)
         storeData && (
             <Marker
-                key="store-marker" // Added a key for the store marker
+                key="store-marker"
                 latitude={storeData.lat}
                 longitude={storeData.lng}
                 anchor="bottom"
@@ -137,7 +215,7 @@ export default function SimulationMap({ storeData, onComplete }) {
                 </div>
             </Marker>
         )
-    ]), [agents, storeData]); // Added storeData to dependency array
+    ]), [agents, storeData]);
 
     if (!MAPBOX_TOKEN) {
         return (
@@ -162,7 +240,7 @@ export default function SimulationMap({ storeData, onComplete }) {
         <div className="flex flex-col gap-8 animate-fade-in">
             {/* Map Container */}
             <div className="relative w-full h-[550px] rounded-3xl overflow-hidden border border-gray-100 shadow-2xl">
-                {/* 3초 로딩 오바레이 - 확실한 반영 확인을 위해 z-index와 배경 강화 */}
+                {/* 로딩 오버레이 */}
                 {isLoading && (
                     <div className="absolute inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center text-center p-8">
                         <div className="relative mb-8">
@@ -208,6 +286,18 @@ export default function SimulationMap({ storeData, onComplete }) {
                         <div className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
                             <span className="text-sm text-gray-400">Total Agents</span>
                             <span className="font-mono text-xl font-bold text-blue-400">{agents.length}</span>
+                        </div>
+
+                        {/* 에이전트 타입 범례 */}
+                        <div className="flex gap-4 text-[10px] text-gray-400">
+                            <span className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#10B981]"></span>
+                                상주 고객
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-full bg-blue-400 shadow-[0_0_6px_#3B82F6]"></span>
+                                유동 고객
+                            </span>
                         </div>
 
                         <div className="pt-2">
