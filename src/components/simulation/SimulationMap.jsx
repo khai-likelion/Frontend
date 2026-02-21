@@ -131,12 +131,12 @@ export default function SimulationMap({ storeData, onComplete }) {
     useEffect(() => {
         const textTimer = setTimeout(() => {
             setStatusText('완료되면 알려드릴게요!');
-        }, 2000);
+        }, 5000);
 
         const doneTimer = setTimeout(() => {
             setSimStatus('done');
             setStatusText('최종 보고서가 준비되었습니다!');
-        }, 5000);
+        }, 10000);
 
         return () => {
             clearTimeout(textTimer);
