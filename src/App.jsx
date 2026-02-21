@@ -76,7 +76,7 @@ const simulationData = [
   { day: '일', before: 45, after: 68 },
 ];
 
-const MyPageView = ({ data, onBack }) => {
+const MyPageView = ({ data, onBack, onManageMembership }) => {
   // Initialize Kakao Map with retry logic (similar to VerificationView)
   useEffect(() => {
     const loadMap = () => {
@@ -182,7 +182,10 @@ const MyPageView = ({ data, onBack }) => {
             <div className="text-sm text-gray-300 mb-4">
               다음 결제일: 2026. 03. 19
             </div>
-            <button className="w-full bg-white text-gray-900 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition-colors">
+            <button
+              onClick={onManageMembership}
+              className="w-full bg-white text-gray-900 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition-colors"
+            >
               멤버십 관리
             </button>
           </div>
@@ -2192,8 +2195,8 @@ const PricingView = () => {
               </ul>
 
               <button className={`w-full py-4 rounded-xl font-bold transition-all ${plan.buttonVariant === 'white' ? 'bg-white text-gray-900 hover:bg-gray-100' :
-                  plan.buttonVariant === 'primary' ? 'bg-gray-900 text-white hover:bg-black' :
-                    'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                plan.buttonVariant === 'primary' ? 'bg-gray-900 text-white hover:bg-black' :
+                  'bg-gray-100 text-gray-900 hover:bg-gray-200'
                 }`}>
                 구독 시작하기
               </button>
@@ -2334,6 +2337,7 @@ const App = () => {
         <MyPageView
           data={selectedStoreData}
           onBack={() => changeTab('dashboard')}
+          onManageMembership={() => setActiveTab('pricing')}
         />
       );
       case 'y-report': return <YReportView />;
