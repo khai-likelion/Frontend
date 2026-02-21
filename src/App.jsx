@@ -1584,7 +1584,7 @@ const YReportView = () => {
         </div>
       </div>
 
-      {/* ────────────────── 지표 1: 기본 방문 지표 + 워드클라우드 ────────────────── */}
+      {/* ────────────────── 지표 1: 기본 방문 지표 (Overview) ────────────────── */}
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -1592,7 +1592,7 @@ const YReportView = () => {
           </div>
           <div>
             <h2 className="text-lg font-bold text-gray-900">지표 1 — 기본 방문 지표 (Overview)</h2>
-            <p className="text-xs text-gray-400">전략 후 손님이 실제로 늘었는가? 방문자 리뷰 키워드가 달라졌는가?</p>
+            <p className="text-xs text-gray-400">전략 후 손님이 실제로 늘었는가?</p>
           </div>
         </div>
 
@@ -1621,11 +1621,33 @@ const YReportView = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ────────────────── 지표 2: 방문 키워드 & 평균 평점 ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+            <MessageSquare size={18} className="text-purple-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">지표 2 — 방문 키워드 & 평균 평점</h2>
+            <p className="text-xs text-gray-400">방문자 리뷰 키워드가 달라졌는가? 평점이 올랐는가?</p>
+          </div>
+        </div>
+
+        {/* 평균 종합 평점 카드 */}
+        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-xs text-gray-400 mb-1">평균 종합 평점</p>
+            <p className="text-xl font-bold text-gray-600">{d.ratingSummary.sim1.avg}점 → <span className="text-emerald-600">{d.ratingSummary.sim2.avg}점</span></p>
+          </div>
+          <ChangeBadge value={parseFloat(avgChange)} suffix="" showPlus={true} />
+        </div>
 
         {/* Word Cloud */}
         <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
           <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2 text-sm">
-            <MessageSquare size={16} className="text-blue-500" /> 방문 키워드 워드클라우드 비교
+            <MessageSquare size={16} className="text-purple-500" /> 방문 키워드 워드클라우드 비교
           </h3>
           <div className="flex flex-col md:flex-row gap-6">
             <WordCloudVisual keywords={d.keywords.sim1} label="Sim 1 — 전략 전" accentColor="gray" />
@@ -1636,106 +1658,9 @@ const YReportView = () => {
             </div>
             <WordCloudVisual keywords={d.keywords.sim2} label="Sim 2 — 전략 후" accentColor="emerald" />
           </div>
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-            <p className="text-xs text-blue-700">
-              <strong>💡 인사이트:</strong> 전략 전 <span className="font-bold">#웨이팅길다</span>(14회)가 상위 키워드였으나, 전략 후 <span className="font-bold">#원격줄서기</span>(19회), <span className="font-bold">#분위기맛집</span>(22회)으로 전환. 솔루션이 고객 인식에 직접 반영됨.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ────────────────── 지표 2: 평점 분포 분석 (Rating Spread) ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-            <TrendingUp size={18} className="text-purple-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 2 — 평점 분포 분석 (Rating Spread)</h2>
-            <p className="text-xs text-gray-400">평균이 오른 게 아니라, 분포 자체가 바뀌었는가?</p>
-          </div>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-400 mb-1">평균 종합 평점</p>
-              <p className="text-lg font-bold text-gray-600">{d.ratingSummary.sim1.avg}점 → <span className="text-emerald-600">{d.ratingSummary.sim2.avg}점</span></p>
-            </div>
-            <ChangeBadge value={parseFloat(avgChange)} suffix="" showPlus={true} />
-          </div>
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-400 mb-1">만족도 (4점 이상)</p>
-              <p className="text-lg font-bold text-gray-600">{d.ratingSummary.sim1.satisfaction}% → <span className="text-emerald-600">{d.ratingSummary.sim2.satisfaction}%</span></p>
-            </div>
-            <ChangeBadge value={parseFloat(satChange)} suffix="%p" />
-          </div>
-        </div>
-
-        {/* KDE Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-gray-900 text-sm">평점 밀도 분포 (KDE)</h3>
-            <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
-              {Object.keys(ratingLabels).map(key => (
-                <button
-                  key={key}
-                  onClick={() => setActiveRatingTab(key)}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${activeRatingTab === key
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                >
-                  {ratingLabels[key]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={kdeChartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="score" tick={{ fontSize: 12 }} label={{ value: '점수', position: 'insideBottomRight', offset: -5, fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} label={{ value: '밀도', angle: -90, position: 'insideLeft', fontSize: 11 }} />
-              <Tooltip
-                formatter={(val, name) => [val.toFixed(3), name === 'sim1' ? '전략 전' : '전략 후']}
-                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
-              />
-              <Area type="monotone" dataKey="sim1" stroke="#9ca3af" fill="#9ca3af" fillOpacity={0.15} strokeWidth={2} name="전략 전" dot={false} />
-              <Area type="monotone" dataKey="sim2" stroke="#10b981" fill="#10b981" fillOpacity={0.2} strokeWidth={2.5} name="전략 후" dot={false} />
-              <Legend
-                formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
-                wrapperStyle={{ fontSize: '12px' }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Satisfaction Rate Bar Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          <h3 className="font-bold text-gray-900 text-sm mb-4">항목별 만족도 비율 (4점 이상)</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={satisfactionData} barGap={4} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 12, fontWeight: 600 }} />
-              <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} unit="%" />
-              <Tooltip
-                formatter={(val, name) => [`${val}%`, name === '전략 전' ? '전략 전' : '전략 후']}
-                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
-              />
-              <Bar dataKey="sim1" fill="#d1d5db" radius={[4, 4, 0, 0]} name="전략 전" barSize={32} />
-              <Bar dataKey="sim2" fill="#10b981" radius={[4, 4, 0, 0]} name="전략 후" barSize={32} />
-              <Legend
-                formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
-                wrapperStyle={{ fontSize: '12px' }}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-100">
+          <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-100">
             <p className="text-xs text-purple-700">
-              <strong>💡 인사이트:</strong> 가성비 만족도(4점↑)가 가장 크게 개선됨. 2인 세트 도입이 "가격 대비 만족"에 직접적 영향.
+              <strong>💡 인사이트:</strong> 전략 전 <span className="font-bold">#웨이팅길다</span>(14회)가 상위 키워드였으나, 전략 후 <span className="font-bold">#원격줄서기</span>(19회), <span className="font-bold">#분위기맛집</span>(22회)으로 전환. 솔루션이 고객 인식에 직접 반영됨.
             </p>
           </div>
         </div>
