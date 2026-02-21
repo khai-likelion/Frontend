@@ -359,8 +359,8 @@ const LoginView = ({ onLogin, onSignup }) => {
         <div className="inline-flex items-center justify-center w-16 h-16 bg-red-50 rounded-full mb-6 text-red-600">
           <Zap size={32} fill="currentColor" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 font-space mb-2">장사 돋보기</h2>
-        <p className="text-gray-500">지능형 상권 분석 솔루션</p>
+        <h2 className="text-3xl font-bold text-gray-900 font-space mb-2">로벨롭(Lovelop)</h2>
+        <p className="text-gray-500">AI가 실험해주는 내 가게의 미래</p>
       </div>
 
       <div className="p-8 space-y-6">
@@ -431,7 +431,7 @@ const SignupView = ({ onSignup, onLogin }) => {
     <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 animate-fade-in">
       <div className="p-8 pb-0 text-center">
         <h2 className="text-2xl font-bold text-gray-900 font-space mb-2">회원가입</h2>
-        <p className="text-gray-500">사장님의 성공 파트너, 장사 돋보기</p>
+        <p className="text-gray-500">AI가 실험해주는 내 가게의 미래</p>
       </div>
 
       <div className="p-8 space-y-5">
