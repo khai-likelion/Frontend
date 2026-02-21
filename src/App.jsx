@@ -1880,7 +1880,7 @@ const YReportView = () => {
                         <span className={`text-[11px] font-semibold w-24 text-right truncate ${bar.nameColor}`}>{bar.label}</span>
                         <div className="flex-1 bg-gray-100 rounded-full h-5 relative overflow-hidden">
                           <div
-                            className="bg-slate-400 h-full rounded-full transition-all duration-500"
+                            className="bg-teal-500 h-full rounded-full transition-all duration-500"
                             style={{ width: `${pct}%` }}
                           ></div>
                         </div>
