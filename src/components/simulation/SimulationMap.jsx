@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
+import Map, { Marker } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { AgentMarker } from './AgentMarker';
 import { ArrowRight, MapPin, TrendingUp, Zap } from 'lucide-react';
@@ -274,8 +274,10 @@ export default function SimulationMap({ storeData, onComplete }) {
                     mapStyle="mapbox://styles/mapbox/dark-v11"
                     mapboxAccessToken={MAPBOX_TOKEN}
                     terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
+                    scrollZoom={false}
+                    doubleClickZoom={false}
+                    touchZoomRotate={false}
                 >
-                    <NavigationControl position="top-right" />
                     {markers}
                 </Map>
 
