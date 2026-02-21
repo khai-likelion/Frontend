@@ -14,8 +14,17 @@ const MANGWON_COORDS = {
     bearing: -17.6,
 };
 
-// ── 한강 북안 경계 위도 (이 위도 이상은 한강) ──
-const RIVER_BOUNDARY_LAT = 37.5545;
+// ── 한강 북안 실제 위도 (망원/합정 기준 — 이 아래가 한강) ──
+const ACTUAL_RIVER_LAT = 37.543;
+
+// ── 에이전트가 진입 불가한 위도를 동적으로 계산 ──
+// 매장이 강에서 멀면 경계를 신경 쓸 필요 없음
+function getRiverBoundary(centerLat) {
+    // 매장이 한강에서 충분히 멀면 (500m+), 경계 제한 없음
+    if (centerLat > ACTUAL_RIVER_LAT + 0.006) return Infinity;
+    // 매장이 한강 근처면, 실제 강 위도를 경계로 사용
+    return ACTUAL_RIVER_LAT;
+}
 
 // ── 에이전트 생성: 극좌표 기반 원형 분포 ──
 function spawnAgent(id, centerLat, centerLng) {
@@ -24,6 +33,7 @@ function spawnAgent(id, centerLat, centerLng) {
 
     // resident: 매장 반경 ~200m 이내 / floating: ~400m 이내
     const maxRadius = isResident ? 0.002 : 0.004;
+    const riverBound = getRiverBoundary(centerLat);
 
     let lat, lng;
     let attempts = 0;
@@ -35,10 +45,10 @@ function spawnAgent(id, centerLat, centerLng) {
         lat = centerLat + radius * Math.sin(angle);
         lng = centerLng + radius * Math.cos(angle) * 1.25; // 경도 보정 (위도에 따른 비율)
         attempts++;
-    } while (lat >= RIVER_BOUNDARY_LAT && attempts < 20);
+    } while (lat >= riverBound && attempts < 20);
 
-    // 만약 20번 시도 후에도 한강 위면, 남쪽으로 강제 배치
-    if (lat >= RIVER_BOUNDARY_LAT) {
+    // 만약 20번 시도 후에도 한강 위면, 남쪽으로 배치
+    if (lat >= riverBound) {
         lat = centerLat - Math.random() * maxRadius;
     }
 
@@ -64,6 +74,7 @@ function spawnAgent(id, centerLat, centerLng) {
 // ── 목적지 생성 (안전 영역 내) ──
 function generateTarget(centerLat, centerLng, type) {
     const maxRadius = type === 'resident' ? 0.002 : 0.004;
+    const riverBound = getRiverBoundary(centerLat);
     let lat, lng;
     let attempts = 0;
 
@@ -73,9 +84,9 @@ function generateTarget(centerLat, centerLng, type) {
         lat = centerLat + radius * Math.sin(angle);
         lng = centerLng + radius * Math.cos(angle) * 1.25;
         attempts++;
-    } while (lat >= RIVER_BOUNDARY_LAT && attempts < 20);
+    } while (lat >= riverBound && attempts < 20);
 
-    if (lat >= RIVER_BOUNDARY_LAT) {
+    if (lat >= riverBound) {
         lat = centerLat - Math.random() * maxRadius;
     }
 
