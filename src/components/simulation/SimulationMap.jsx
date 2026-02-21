@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Map, { Marker } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { AgentMarker } from './AgentMarker';
@@ -107,7 +107,6 @@ export default function SimulationMap({ storeData, onComplete }) {
         longitude: storeData?.lng || MANGWON_COORDS.longitude,
     });
 
-    // Update viewState when storeData changes
     useEffect(() => {
         if (storeData) {
             setViewState(prev => ({
@@ -122,38 +121,56 @@ export default function SimulationMap({ storeData, onComplete }) {
     }, [storeData]);
 
     const [agents, setAgents] = useState([]);
-    const [speed, setSpeed] = useState(1);
     const [simTime, setSimTime] = useState(new Date());
 
-    // ── 메인 시뮬레이션 루프 ──
+    // ── 시뮬레이션 상태: 'running' → 'done' ──
+    const [simStatus, setSimStatus] = useState('running');
+    const [statusText, setStatusText] = useState('시뮬레이션 중입니다...');
+
+    // ── 5초 후 시뮬레이션 완료 타이머 ──
+    useEffect(() => {
+        const textTimer = setTimeout(() => {
+            setStatusText('완료되면 알려드릴게요!');
+        }, 2000);
+
+        const doneTimer = setTimeout(() => {
+            setSimStatus('done');
+            setStatusText('최종 보고서가 준비되었습니다!');
+        }, 5000);
+
+        return () => {
+            clearTimeout(textTimer);
+            clearTimeout(doneTimer);
+        };
+    }, []);
+
+    // ── 메인 시뮬레이션 루프 (simStatus === 'running'일 때만 이동) ──
     useEffect(() => {
         const interval = setInterval(() => {
-            setSimTime(prevTime => new Date(prevTime.getTime() + 1000 * speed));
+            if (simStatus === 'done') return; // 완료되면 이동 중지
+
+            setSimTime(prevTime => new Date(prevTime.getTime() + 1000));
 
             setAgents(prevAgents => {
                 const centerLat = storeData?.lat || 37.556;
                 const centerLng = storeData?.lng || 126.906;
 
-                // 초기 에이전트 생성
                 if (prevAgents.length === 0) {
                     return Array.from({ length: AGENT_COUNT }).map((_, i) =>
                         spawnAgent(i, centerLat, centerLng)
                     );
                 }
 
-                // 기존 에이전트 이동 (lerp 보간)
-                const lerpSpeed = 0.02 * (1 + Math.log10(Math.max(speed, 1)));
+                const lerpSpeed = 0.02;
 
                 return prevAgents.map(agent => {
                     const t = lerpSpeed * agent.moveSpeed;
                     let newLat = lerp(agent.lat, agent.targetLat, t);
                     let newLng = lerp(agent.lng, agent.targetLng, t);
 
-                    // 약간의 자연스러운 흔들림 추가
                     newLat += (Math.random() - 0.5) * 0.00003;
                     newLng += (Math.random() - 0.5) * 0.00003;
 
-                    // 목적지 도달 체크 (약 10m 이내)
                     const distToTarget = Math.sqrt(
                         Math.pow(newLat - agent.targetLat, 2) +
                         Math.pow(newLng - agent.targetLng, 2)
@@ -163,7 +180,6 @@ export default function SimulationMap({ storeData, onComplete }) {
                     let targetLng = agent.targetLng;
 
                     if (distToTarget < 0.0001) {
-                        // 새 목적지 할당
                         const newTarget = generateTarget(centerLat, centerLng, agent.type);
                         targetLat = newTarget.lat;
                         targetLng = newTarget.lng;
@@ -178,28 +194,10 @@ export default function SimulationMap({ storeData, onComplete }) {
                     };
                 });
             });
-        }, 100); // 100ms 간격으로 부드러운 업데이트
+        }, 100);
 
         return () => clearInterval(interval);
-    }, [speed, storeData]);
-
-    const [isLoading, setIsLoading] = useState(true);
-    const [loadingText, setLoadingText] = useState("시뮬레이션 중입니다...");
-
-    useEffect(() => {
-        const textTimer = setTimeout(() => {
-            setLoadingText("완료되면 알려드릴게요!");
-        }, 1500);
-
-        const loadingTimer = setTimeout(() => {
-            setIsLoading(false);
-        }, 3000);
-
-        return () => {
-            clearTimeout(textTimer);
-            clearTimeout(loadingTimer);
-        };
-    }, []);
+    }, [simStatus, storeData]);
 
     const formattedTime = simTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
@@ -251,21 +249,6 @@ export default function SimulationMap({ storeData, onComplete }) {
         <div className="flex flex-col gap-8 animate-fade-in">
             {/* Map Container */}
             <div className="relative w-full h-[550px] rounded-3xl overflow-hidden border border-gray-100 shadow-2xl">
-                {/* 로딩 오버레이 */}
-                {isLoading && (
-                    <div className="absolute inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center text-center p-8">
-                        <div className="relative mb-8">
-                            <div className="w-20 h-20 border-4 border-white/10 border-t-green-500 rounded-full animate-spin"></div>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-10 h-10 bg-green-500/20 rounded-full animate-pulse"></div>
-                            </div>
-                        </div>
-                        <h2 className="text-2xl font-bold text-white mb-2 font-space tracking-tight animate-pulse">
-                            {loadingText}
-                        </h2>
-                        <p className="text-gray-400 text-sm">망원동 디지털 트윈 엔진 가동 중...</p>
-                    </div>
-                )}
 
                 <Map
                     {...viewState}
@@ -281,8 +264,8 @@ export default function SimulationMap({ storeData, onComplete }) {
                     {markers}
                 </Map>
 
-                {/* Simulation Info Overlay */}
-                <div className="absolute top-4 left-4 bg-black/70 text-white p-6 rounded-2xl backdrop-blur-md border border-white/10 shadow-2xl min-w-[240px]">
+                {/* Simulation Info Overlay — 좌측 상단 */}
+                <div className="absolute top-4 left-4 bg-black/70 text-white p-6 rounded-2xl backdrop-blur-md border border-white/10 shadow-2xl min-w-[260px]">
                     <div className="flex justify-between items-start mb-4">
                         <div>
                             <h3 className="text-xl font-bold font-space tracking-tight">Mangwon Digital Twin</h3>
@@ -313,30 +296,29 @@ export default function SimulationMap({ storeData, onComplete }) {
                             </span>
                         </div>
 
-                        <div className="pt-2">
-                            <div className="text-[10px] font-bold text-gray-500 mb-2 tracking-widest uppercase">Simulation Speed</div>
-                            <div className="grid grid-cols-3 gap-2">
-                                {[1, 10, 60].map((s) => (
-                                    <button
-                                        key={s}
-                                        onClick={() => setSpeed(s)}
-                                        className={`py-2 rounded-lg text-xs font-bold transition-all ${speed === s
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                                            : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                                            }`}
-                                    >
-                                        {s}x
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                        {/* 시뮬레이션 상태 표시 */}
                         <div className="pt-4 border-t border-white/10">
-                            <button
-                                onClick={onComplete}
-                                className="w-full bg-green-600 hover:bg-green-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-green-500/20"
-                            >
-                                결과 리포트 보기 <ArrowRight size={18} />
-                            </button>
+                            {simStatus === 'running' ? (
+                                <div className="text-center space-y-2">
+                                    <div className="flex items-center justify-center gap-2">
+                                        <div className="w-3 h-3 border-2 border-white/20 border-t-green-400 rounded-full animate-spin"></div>
+                                        <span className="text-sm font-bold text-green-400 animate-pulse">{statusText}</span>
+                                    </div>
+                                    <p className="text-[10px] text-gray-500">Y-Report 생성을 위해 데이터를 수집하고 있습니다</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3 animate-fade-in">
+                                    <div className="text-center">
+                                        <div className="text-sm font-bold text-green-400 mb-1">✅ {statusText}</div>
+                                    </div>
+                                    <button
+                                        onClick={onComplete}
+                                        className="w-full bg-green-600 hover:bg-green-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-green-500/20"
+                                    >
+                                        최종 보고서 보러 가기 <ArrowRight size={18} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
