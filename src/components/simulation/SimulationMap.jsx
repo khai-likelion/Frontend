@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Map, { Marker } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { AgentMarker } from './AgentMarker';
-import { ArrowRight, MapPin, TrendingUp, Zap } from 'lucide-react';
+import { ArrowRight, MapPin } from 'lucide-react';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
 
@@ -319,63 +319,6 @@ export default function SimulationMap({ storeData, onComplete }) {
                                     </button>
                                 </div>
                             )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* 동종 업계 성공 사례 - 지도 아래 독립 섹션 */}
-            <div className="bg-gray-50 rounded-3xl p-8 border border-gray-100">
-                {/* 섹션 헤더 */}
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center">
-                        <TrendingUp size={16} className="text-green-600" />
-                    </div>
-                    <div>
-                        <h3 className="text-base font-bold text-gray-900">동종 업계 성공 사례</h3>
-                        <p className="text-xs text-gray-400">망원동 인근 유사 업종의 개선 전략 및 성과</p>
-                    </div>
-                </div>
-
-                {/* 카드 그리드 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* 성공 사례 1 */}
-                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="bg-green-50 text-green-600 text-[10px] font-bold px-3 py-1 rounded-full border border-green-100 tracking-wide">성공 사례 01</span>
-                            <div className="flex items-center gap-1 text-green-600">
-                                <TrendingUp size={14} />
-                                <span className="text-[11px] font-bold">+35%</span>
-                            </div>
-                        </div>
-                        <h4 className="text-gray-900 font-bold text-base mb-1.5 group-hover:text-green-600 transition-colors">오시 망원본점</h4>
-                        <p className="text-gray-500 text-xs leading-relaxed mb-3">
-                            인스타 감성 인테리어 + 디지털 웨이팅 도입으로 <span className="text-green-600 font-semibold">Z세대 방문 +35%</span>, 재방문율 42% 달성
-                        </p>
-                        <div className="flex gap-1.5 flex-wrap">
-                            <span className="text-[10px] bg-green-50 text-green-600 px-2.5 py-1 rounded-full border border-green-100 font-medium">#SNS바이럴</span>
-                            <span className="text-[10px] bg-green-50 text-green-600 px-2.5 py-1 rounded-full border border-green-100 font-medium">#디지털웨이팅</span>
-                            <span className="text-[10px] bg-green-50 text-green-600 px-2.5 py-1 rounded-full border border-green-100 font-medium">#공간개선</span>
-                        </div>
-                    </div>
-
-                    {/* 성공 사례 2 */}
-                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="bg-blue-50 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full border border-blue-100 tracking-wide">성공 사례 02</span>
-                            <div className="flex items-center gap-1 text-blue-600">
-                                <Zap size={14} />
-                                <span className="text-[11px] font-bold">+28%</span>
-                            </div>
-                        </div>
-                        <h4 className="text-gray-900 font-bold text-base mb-1.5 group-hover:text-blue-600 transition-colors">마마무식당 합정점</h4>
-                        <p className="text-gray-500 text-xs leading-relaxed mb-3">
-                            프리미엄 런치 세트 구성 + 가족 테이블 확대로 <span className="text-blue-600 font-semibold">점심 매출 +28%</span>, 고객 만족도 4.2점 기록
-                        </p>
-                        <div className="flex gap-1.5 flex-wrap">
-                            <span className="text-[10px] bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full border border-blue-100 font-medium">#런치세트</span>
-                            <span className="text-[10px] bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full border border-blue-100 font-medium">#가족고객</span>
-                            <span className="text-[10px] bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full border border-blue-100 font-medium">#메뉴개편</span>
                         </div>
                     </div>
                 </div>
