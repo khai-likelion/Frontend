@@ -1923,16 +1923,16 @@ const YReportView = () => {
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          {/* 범례 */}
+          {/* 범례 — 매장명만 색상으로 구분 */}
           <div className="flex flex-wrap gap-3 mb-6 text-xs font-bold">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-gray-300 inline-block"></span> 류진 (전략 전)</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> 류진 (전략 후)</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-blue-400 inline-block"></span> {d.radarStores.comp1}</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-purple-400 inline-block"></span> {d.radarStores.comp2}</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-orange-400 inline-block"></span> {d.radarStores.comp3}</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-gray-400 inline-block"></span> <span className="text-gray-500">류진 (전략 전)</span></span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> <span className="text-emerald-600">류진 (전략 후)</span></span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> <span className="text-blue-600">{d.radarStores.comp1}</span></span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-purple-500 inline-block"></span> <span className="text-purple-600">{d.radarStores.comp2}</span></span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-orange-500 inline-block"></span> <span className="text-orange-600">{d.radarStores.comp3}</span></span>
           </div>
 
-          {/* 항목별 개별 막대그래프 */}
+          {/* 항목별 개별 막대그래프 — 바 색상 통일 */}
           <div className="space-y-6">
             {d.radar.map((item, idx) => (
               <div key={idx}>
@@ -1942,24 +1942,24 @@ const YReportView = () => {
                 </div>
                 <div className="space-y-1.5">
                   {[
-                    { label: '류진 (전)', value: item.target_before, color: 'bg-gray-300', textColor: 'text-gray-600' },
-                    { label: '류진 (후)', value: item.target_after, color: 'bg-emerald-500', textColor: 'text-emerald-700' },
-                    { label: d.radarStores.comp1, value: item.comp1, color: 'bg-blue-400', textColor: 'text-blue-700' },
-                    { label: d.radarStores.comp2, value: item.comp2, color: 'bg-purple-400', textColor: 'text-purple-700' },
-                    { label: d.radarStores.comp3, value: item.comp3, color: 'bg-orange-400', textColor: 'text-orange-700' },
+                    { label: '류진 (전)', value: item.target_before, nameColor: 'text-gray-500' },
+                    { label: '류진 (후)', value: item.target_after, nameColor: 'text-emerald-600' },
+                    { label: d.radarStores.comp1, value: item.comp1, nameColor: 'text-blue-600' },
+                    { label: d.radarStores.comp2, value: item.comp2, nameColor: 'text-purple-600' },
+                    { label: d.radarStores.comp3, value: item.comp3, nameColor: 'text-orange-600' },
                   ].map((bar, bi) => {
                     const maxVal = Math.max(item.target_before, item.target_after, item.comp1, item.comp2, item.comp3);
                     const pct = (bar.value / maxVal) * 100;
                     return (
                       <div key={bi} className="flex items-center gap-2">
-                        <span className="text-[11px] text-gray-500 w-24 text-right truncate">{bar.label}</span>
+                        <span className={`text-[11px] font-semibold w-24 text-right truncate ${bar.nameColor}`}>{bar.label}</span>
                         <div className="flex-1 bg-gray-100 rounded-full h-5 relative overflow-hidden">
                           <div
-                            className={`${bar.color} h-full rounded-full transition-all duration-500`}
+                            className="bg-slate-400 h-full rounded-full transition-all duration-500"
                             style={{ width: `${pct}%` }}
                           ></div>
                         </div>
-                        <span className={`text-xs font-bold ${bar.textColor} w-14 text-right`}>{bar.value}{item.unit}</span>
+                        <span className="text-xs font-bold text-gray-600 w-14 text-right">{bar.value}{item.unit}</span>
                       </div>
                     );
                   })}
