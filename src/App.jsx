@@ -444,8 +444,8 @@ const SignupView = ({ onSignup, onLogin }) => {
             className="h-56 w-auto"
           />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 font-space mb-2">회원가입</h2>
         <p className="text-gray-500">AI가 실험해주는 내 가게의 미래</p>
+        <h2 className="text-2xl font-bold text-gray-900 font-space mb-2">회원가입</h2>
       </div>
 
       <div className="p-8 space-y-5">
