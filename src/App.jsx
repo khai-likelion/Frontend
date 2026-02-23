@@ -2312,15 +2312,15 @@ const App = () => {
       {/* Sidebar */}
       <aside className="w-64 border-r border-gray-100 flex flex-col bg-white z-10 hidden md:flex">
         <div className="p-8 pb-4">
-          <div className="mb-10 cursor-pointer group" onClick={() => changeTab('dashboard')}>
-            <div className="flex items-center gap-3">
+          <div className="mb-10 cursor-pointer group flex flex-col items-center" onClick={() => changeTab('dashboard')}>
+            <div className="flex items-center justify-center w-full">
               <img
                 src={logo}
                 alt="Lovelop"
-                className="h-24 w-auto transform group-hover:scale-105 transition-all duration-300"
+                className="h-32 w-auto transform group-hover:scale-105 transition-all duration-300"
               />
             </div>
-            <p className="text-[11px] text-gray-400 font-medium mt-3 tracking-wide pl-1">AI가 실험해주는 내 가게의 미래</p>
+            <p className="text-[11px] text-gray-400 font-medium mt-3 tracking-wide text-center w-full">AI가 실험해주는 내 가게의 미래</p>
           </div>
 
           <nav className="space-y-1">
