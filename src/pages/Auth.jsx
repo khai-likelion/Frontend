@@ -21,7 +21,7 @@ export const LoginView = ({ onLogin, onSignup }) => {
                     <img
                         src={logo}
                         alt="Lovelop"
-                        className="h-28 w-auto"
+                        className="h-64 w-auto"
                         style={{ filter: 'invert(21%) sepia(100%) saturate(3501%) hue-rotate(352deg) brightness(97%) contrast(92%)' }}
                     />
                 </div>
@@ -99,7 +99,7 @@ export const SignupView = ({ onSignup, onLogin }) => {
                     <img
                         src={logo}
                         alt="Lovelop"
-                        className="h-24 w-auto"
+                        className="h-56 w-auto"
                         style={{ filter: 'invert(21%) sepia(100%) saturate(3501%) hue-rotate(352deg) brightness(97%) contrast(92%)' }}
                     />
                 </div>

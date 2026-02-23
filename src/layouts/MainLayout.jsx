@@ -32,7 +32,7 @@ const MainLayout = ({
                             <img
                                 src={logo}
                                 alt="Lovelop"
-                                className="h-14 w-auto transform group-hover:scale-105 transition-all duration-300"
+                                className="h-24 w-auto transform group-hover:scale-105 transition-all duration-300"
                                 style={{ filter: 'invert(21%) sepia(100%) saturate(3501%) hue-rotate(352deg) brightness(97%) contrast(92%)' }}
                             />
                         </div>
