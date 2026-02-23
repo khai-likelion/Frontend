@@ -13,7 +13,7 @@ import SidebarItem from '../components/SidebarItem';
 import StepCard from '../components/StepCard';
 import AIChatButton from '../components/AIChatButton';
 
-import logo from '../assets/images/logo.png';
+import logo from '../assets/images/lovelop_logo_v2.png';
 
 const MainLayout = ({
     children,

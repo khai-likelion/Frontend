@@ -8,7 +8,7 @@ import {
     User,
 } from 'lucide-react';
 
-import logo from '../assets/images/logo.png';
+import logo from '../assets/images/lovelop_logo_v2.png';
 
 export const LoginView = ({ onLogin, onSignup }) => {
     const [email, setEmail] = useState('');
