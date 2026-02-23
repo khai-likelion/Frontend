@@ -365,7 +365,6 @@ const LoginView = ({ onLogin, onSignup }) => {
             src={logo}
             alt="Lovelop"
             className="h-64 w-auto"
-            style={{ filter: 'invert(21%) sepia(100%) saturate(3501%) hue-rotate(352deg) brightness(97%) contrast(92%)' }}
           />
         </div>
         <p className="text-gray-500">AI가 실험해주는 내 가게의 미래</p>
@@ -443,7 +442,6 @@ const SignupView = ({ onSignup, onLogin }) => {
             src={logo}
             alt="Lovelop"
             className="h-56 w-auto"
-            style={{ filter: 'invert(21%) sepia(100%) saturate(3501%) hue-rotate(352deg) brightness(97%) contrast(92%)' }}
           />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 font-space mb-2">회원가입</h2>
@@ -2381,7 +2379,6 @@ const App = () => {
                 src={logo}
                 alt="Lovelop"
                 className="h-24 w-auto transform group-hover:scale-105 transition-all duration-300"
-                style={{ filter: 'invert(21%) sepia(100%) saturate(3501%) hue-rotate(352deg) brightness(97%) contrast(92%)' }}
               />
             </div>
             <p className="text-[11px] text-gray-400 font-medium mt-3 tracking-wide pl-1">AI가 실험해주는 내 가게의 미래</p>
