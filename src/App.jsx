@@ -1063,8 +1063,8 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
                   <X size={24} />
                 </button>
               </div>
-              <div className="p-8 overflow-y-auto prose prose-red max-w-none text-left">
-                <ReactMarkdown>{data.fullReport}</ReactMarkdown>
+              <div className="p-8 overflow-y-auto prose prose-slate prose-headings:font-space prose-headings:text-gray-900 prose-p:text-gray-600 prose-strong:text-gray-900 max-w-none text-left bg-white">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.fullReport}</ReactMarkdown>
               </div>
               <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
                 <button
