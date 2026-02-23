@@ -437,14 +437,14 @@ const SignupView = ({ onSignup, onLogin }) => {
   return (
     <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 animate-fade-in">
       <div className="p-8 pb-0 text-center">
-        <div className="inline-flex items-center justify-center mb-6">
+        <div className="inline-flex items-center justify-center mb-2">
           <img
             src={logo}
             alt="Lovelop"
             className="h-56 w-auto"
           />
         </div>
-        <p className="text-gray-500">AI가 실험해주는 내 가게의 미래</p>
+        <p className="text-gray-500 mb-6">AI가 실험해주는 내 가게의 미래</p>
         <h2 className="text-2xl font-bold text-gray-900 font-space mb-2">회원가입</h2>
       </div>
 
