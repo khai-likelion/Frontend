@@ -2311,8 +2311,8 @@ const App = () => {
     <div className="flex h-screen bg-white text-gray-900 font-sans overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 border-r border-gray-100 flex flex-col bg-white z-10 hidden md:flex">
-        <div className="p-8 pb-4">
-          <div className="mb-10 cursor-pointer group flex flex-col items-center" onClick={() => changeTab('dashboard')}>
+        <div className="p-6 pb-4">
+          <div className="mb-6 cursor-pointer group flex flex-col items-center" onClick={() => changeTab('dashboard')}>
             <div className="flex items-center justify-center w-full">
               <img
                 src={logo}
