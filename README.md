@@ -1,20 +1,27 @@
-# lovelop-frontend
+# Lovelop Frontend
 
-This project is built with React + Vite.
+lovelop(러블롭) 서비스의 프론트엔드 저장소입니다. 소상공인을 위한 AI 기반 솔루션 플랫폼을 제공합니다.
 
-## React + Vite
+## 서비스 특징
+- **AI 기반 X-Report**: 상권 데이터 및 매장 데이터를 분석한 상세 리포트 제공.
+- **시뮬레이션 기반 Y-Report**: AI 페르소나를 통한 가상 고객 시뮬레이션 및 마케팅 효과 분석.
+- **데모 대시보드**: 현대적인 디자인(Glassmorphism)과 반응형 UI를 적용한 통합 대시보드.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 브랜치 구조 및 비교
 
-Currently, two official plugins are available:
+| 브랜치 | 상태 | 주요 내용 |
+| :--- | :--- | :--- |
+| **main** | **Base** | 초기 시뮬레이션 지도(`SimulationMap`) 및 마커(`AgentMarker`) 등 핵심 기능 위주의 가벼운 구조 |
+| **sub** | **Development** | 대시보드 UI, 리포트 상세 페이지(X/Y-Report), API 클라이언트, 레이아웃 시스템 등이 추가된 고도화된 버전 |
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 주요 차이점
+- **기능 확장**: `sub` 브랜치는 인증(Auth), 가격 정책(Pricing), 마이페이지(MyPage) 등 실제 서비스 운영에 필요한 다수의 페이지를 포함하고 있습니다.
+- **디자인 시스템**: `MainLayout`을 도입하여 전역 네비게이션과 사이드바 구조를 통합했습니다.
+- **데이터 통신**: `src/api` 모듈을 통해 서버와의 통신 규약이 정의되어 있습니다.
 
-## React Compiler
+## 시작하기
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run dev
+```
