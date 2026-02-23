@@ -13,6 +13,8 @@ import SidebarItem from '../components/SidebarItem';
 import StepCard from '../components/StepCard';
 import AIChatButton from '../components/AIChatButton';
 
+import logo from '../assets/images/logo.png';
+
 const MainLayout = ({
     children,
     activeTab,
@@ -27,12 +29,7 @@ const MainLayout = ({
                 <div className="p-8 pb-4">
                     <div className="mb-10 cursor-pointer group" onClick={() => onTabChange('dashboard')}>
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-200 text-white transform group-hover:rotate-12 transition-all duration-300">
-                                <Sparkles size={20} fill="currentColor" className="text-white" />
-                            </div>
-                            <div>
-                                <span className="text-2xl font-bold font-space text-gray-900 tracking-tight">Lovelop</span>
-                            </div>
+                            <img src={logo} alt="Lovelop" className="h-10 w-auto transform group-hover:scale-105 transition-all duration-300" />
                         </div>
                         <p className="text-[11px] text-gray-400 font-medium mt-3 tracking-wide pl-1">AI가 실험해주는 내 가게의 미래</p>
                     </div>

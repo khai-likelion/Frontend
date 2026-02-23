@@ -8,6 +8,8 @@ import {
     User,
 } from 'lucide-react';
 
+import logo from '../assets/images/logo.png';
+
 export const LoginView = ({ onLogin, onSignup }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -15,10 +17,9 @@ export const LoginView = ({ onLogin, onSignup }) => {
     return (
         <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 animate-fade-in">
             <div className="p-8 pb-0 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-red-50 rounded-full mb-6 text-red-600">
-                    <Zap size={32} fill="currentColor" />
+                <div className="inline-flex items-center justify-center mb-6">
+                    <img src={logo} alt="Lovelop" className="h-20 w-auto" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900 font-space mb-2">로벨롭(Lovelop)</h2>
                 <p className="text-gray-500">AI가 실험해주는 내 가게의 미래</p>
             </div>
 
@@ -89,6 +90,9 @@ export const SignupView = ({ onSignup, onLogin }) => {
     return (
         <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 animate-fade-in">
             <div className="p-8 pb-0 text-center">
+                <div className="inline-flex items-center justify-center mb-6">
+                    <img src={logo} alt="Lovelop" className="h-16 w-auto" />
+                </div>
                 <h2 className="text-2xl font-bold text-gray-900 font-space mb-2">회원가입</h2>
                 <p className="text-gray-500">AI가 실험해주는 내 가게의 미래</p>
             </div>
