@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'; // Force rebuild for Vercel
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   LayoutDashboard,
   FileText,
