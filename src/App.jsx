@@ -38,6 +38,7 @@ import {
   ArrowDownRight, // Trade-off negative
   ArrowUpRight, // Trade-off positive
 } from 'lucide-react';
+import logo from './assets/images/logo.png';
 import SimulationMap from './components/simulation/SimulationMap'; // Import SimulationMap
 import {
   AreaChart,
@@ -359,10 +360,9 @@ const LoginView = ({ onLogin, onSignup }) => {
   return (
     <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 animate-fade-in">
       <div className="p-8 pb-0 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-red-50 rounded-full mb-6 text-red-600">
-          <Zap size={32} fill="currentColor" />
+        <div className="inline-flex items-center justify-center mb-6">
+          <img src={logo} alt="Lovelop" className="h-20 w-auto" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 font-space mb-2">로벨롭(Lovelop)</h2>
         <p className="text-gray-500">AI가 실험해주는 내 가게의 미래</p>
       </div>
 
@@ -433,6 +433,9 @@ const SignupView = ({ onSignup, onLogin }) => {
   return (
     <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 animate-fade-in">
       <div className="p-8 pb-0 text-center">
+        <div className="inline-flex items-center justify-center mb-6">
+          <img src={logo} alt="Lovelop" className="h-16 w-auto" />
+        </div>
         <h2 className="text-2xl font-bold text-gray-900 font-space mb-2">회원가입</h2>
         <p className="text-gray-500">AI가 실험해주는 내 가게의 미래</p>
       </div>
@@ -2303,12 +2306,7 @@ const App = () => {
         <div className="p-8 pb-4">
           <div className="mb-10 cursor-pointer group" onClick={() => changeTab('dashboard')}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-200 text-white transform group-hover:rotate-12 transition-all duration-300">
-                <Sparkles size={20} fill="currentColor" className="text-white" />
-              </div>
-              <div>
-                <span className="text-2xl font-bold font-space text-gray-900 tracking-tight">Lovelop</span>
-              </div>
+              <img src={logo} alt="Lovelop" className="h-10 w-auto transform group-hover:scale-105 transition-all duration-300" />
             </div>
             <p className="text-[11px] text-gray-400 font-medium mt-3 tracking-wide pl-1">AI가 실험해주는 내 가게의 미래</p>
           </div>
