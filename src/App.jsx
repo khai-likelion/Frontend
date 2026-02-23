@@ -38,7 +38,7 @@ import {
   ArrowDownRight, // Trade-off negative
   ArrowUpRight, // Trade-off positive
 } from 'lucide-react';
-import logo from './assets/images/lovelop_logo_v2.png';
+import logo from './assets/images/logo.png';
 import SimulationMap from './components/simulation/SimulationMap'; // Import SimulationMap
 import {
   AreaChart,
