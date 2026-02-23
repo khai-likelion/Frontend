@@ -2317,7 +2317,7 @@ const App = () => {
               <img
                 src={logo}
                 alt="Lovelop"
-                className="h-32 w-auto transform group-hover:scale-105 transition-all duration-300"
+                className="h-[152px] w-auto transform group-hover:scale-105 transition-all duration-300"
               />
             </div>
             <p className="text-[11px] text-gray-400 font-medium mt-3 tracking-wide text-center w-full">AI가 실험해주는 내 가게의 미래</p>
