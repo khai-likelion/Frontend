@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.18",
-    "axios": "^1.13.5",
+    "@tailwindcss/typography": "^0.5.19",
     "clsx": "^2.1.1",
     "lucide-react": "^0.564.0",
     "mapbox-gl": "^3.18.1",
@@ -20,6 +20,7 @@
     "react-map-gl": "^8.1.0",
     "react-markdown": "^10.1.0",
     "recharts": "^3.7.0",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.4.1"
   },
   "devDependencies": {
