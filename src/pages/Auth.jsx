@@ -18,7 +18,12 @@ export const LoginView = ({ onLogin, onSignup }) => {
         <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 animate-fade-in">
             <div className="p-8 pb-0 text-center">
                 <div className="inline-flex items-center justify-center mb-6">
-                    <img src={logo} alt="Lovelop" className="h-20 w-auto" />
+                    <img
+                        src={logo}
+                        alt="Lovelop"
+                        className="h-20 w-auto"
+                        style={{ filter: 'invert(21%) sepia(100%) saturate(3501%) hue-rotate(352deg) brightness(97%) contrast(92%)' }}
+                    />
                 </div>
                 <p className="text-gray-500">AI가 실험해주는 내 가게의 미래</p>
             </div>
@@ -91,7 +96,12 @@ export const SignupView = ({ onSignup, onLogin }) => {
         <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 animate-fade-in">
             <div className="p-8 pb-0 text-center">
                 <div className="inline-flex items-center justify-center mb-6">
-                    <img src={logo} alt="Lovelop" className="h-16 w-auto" />
+                    <img
+                        src={logo}
+                        alt="Lovelop"
+                        className="h-16 w-auto"
+                        style={{ filter: 'invert(21%) sepia(100%) saturate(3501%) hue-rotate(352deg) brightness(97%) contrast(92%)' }}
+                    />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 font-space mb-2">회원가입</h2>
                 <p className="text-gray-500">AI가 실험해주는 내 가게의 미래</p>
