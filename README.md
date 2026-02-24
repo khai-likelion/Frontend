@@ -25,3 +25,15 @@ lovelop(러블롭) 서비스의 프론트엔드 저장소입니다. 소상공인
 npm install
 npm run dev
 ```
+
+## 환경변수 설정 (로컬 개발)
+
+프로젝트 루트에 `.env.local` 파일을 만들고 아래 값을 설정하세요.
+
+```
+VITE_API_BASE_URL=http://localhost:8000
+VITE_MAPBOX_TOKEN=<your_mapbox_token>
+VITE_KAKAO_MAP_API_KEY=<your_kakao_key>
+```
+
+프론트 실행 후 브라우저 Network 탭에서 `GET http://localhost:8000/stores?limit=50&offset=0` 요청이 발생하면 백엔드 연동이 정상입니다.
