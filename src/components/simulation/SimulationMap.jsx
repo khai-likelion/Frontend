@@ -3,6 +3,7 @@ import Map, { Marker } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { AgentMarker } from './AgentMarker';
 import { ArrowRight, MapPin } from 'lucide-react';
+import { useJobPolling } from '../../hooks/useJobPolling';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
 
@@ -100,7 +101,7 @@ function lerp(current, target, t) {
 
 const AGENT_COUNT = 160;
 
-export default function SimulationMap({ storeData, onComplete }) {
+export default function SimulationMap({ storeData, onComplete, jobId, timeoutMs = 30 * 60 * 1000, maxRetries = 450 }) {
     const [viewState, setViewState] = useState({
         ...MANGWON_COORDS,
         latitude: storeData?.lat || MANGWON_COORDS.latitude,
@@ -123,26 +124,44 @@ export default function SimulationMap({ storeData, onComplete }) {
     const [agents, setAgents] = useState([]);
     const [simTime, setSimTime] = useState(new Date());
 
-    // ── 시뮬레이션 상태: 'running' → 'done' ──
+    // ── 시뮬레이션 상태: 'running' → 'done' | 'error' ──
     const [simStatus, setSimStatus] = useState('running');
     const [statusText, setStatusText] = useState('시뮬레이션 중입니다...');
+    const [pollError, setPollError] = useState(null);
 
-    // ── 5초 후 시뮬레이션 완료 타이머 ──
+    // ── 5초 후 상태 텍스트 업데이트 (항상) ──
     useEffect(() => {
         const textTimer = setTimeout(() => {
             setStatusText('완료되면 알려드릴게요!');
         }, 5000);
+        return () => clearTimeout(textTimer);
+    }, []);
 
+    // ── 데모 폴백 타이머 (jobId가 없을 때만) ──
+    useEffect(() => {
+        if (jobId) return;
         const doneTimer = setTimeout(() => {
             setSimStatus('done');
             setStatusText('최종 보고서가 준비되었습니다!');
         }, 10000);
+        return () => clearTimeout(doneTimer);
+    }, [jobId]);
 
-        return () => {
-            clearTimeout(textTimer);
-            clearTimeout(doneTimer);
-        };
-    }, []);
+    // ── 실제 잡 폴링 (jobId가 있을 때) ──
+    useJobPolling(jobId, {
+        enabled: !!jobId,
+        timeoutMs,
+        maxRetries,
+        onCompleted: () => {
+            setSimStatus('done');
+            setStatusText('최종 보고서가 준비되었습니다!');
+        },
+        onFailed: (message) => {
+            setPollError(message);
+            setSimStatus('error');
+            setStatusText('시뮬레이션 오류가 발생했습니다.');
+        },
+    });
 
     // ── 메인 시뮬레이션 루프 (simStatus === 'running'일 때만 이동) ──
     useEffect(() => {
@@ -305,6 +324,15 @@ export default function SimulationMap({ storeData, onComplete }) {
                                         <span className="text-sm font-bold text-green-400 animate-pulse">{statusText}</span>
                                     </div>
                                     <p className="text-[10px] text-gray-500">Y-Report 생성을 위해 데이터를 수집하고 있습니다</p>
+                                </div>
+                            ) : simStatus === 'error' ? (
+                                <div className="space-y-2 animate-fade-in">
+                                    <div className="text-center">
+                                        <div className="text-sm font-bold text-red-400 mb-1">❌ {statusText}</div>
+                                    </div>
+                                    {pollError && (
+                                        <p className="text-[10px] text-red-300 text-center">{pollError}</p>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="space-y-3 animate-fade-in">

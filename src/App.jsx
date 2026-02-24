@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Force rebuild for Vercel
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'; // Force rebuild for Vercel
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
@@ -61,11 +61,18 @@ import {
   Line
 } from 'recharts';
 
-import realData from './data/real_data.json';
+import { fetchStores, normalizeStoresResponse } from './api/stores';
+import { createSimulation, fetchSimulation } from './api/simulation';
+import { createYReport, fetchYReportView, normalizeYReportView } from './api/yReport';
+import { useJobPolling } from './hooks/useJobPolling';
+import { createXReport, fetchXReportView, normalizeXReportView } from './api/xReport';
+import { getErrorMessage } from './i18n/errors';
+import { ToastProvider } from './components/ToastProvider';
+import { fetchJob, normalizeJob } from './api/jobs';
+import { formatNumber, formatPercent, clamp } from './utils/format';
 
-// --- Mock Data ---
-
-// --- Mock Data ---
+// Alias keeps existing call-sites unchanged
+const getJobErrorMessage = getErrorMessage;
 
 // simulationData moved to SimulationView (or can be dynamic later)
 const simulationData = [
@@ -79,25 +86,31 @@ const simulationData = [
 ];
 
 const MyPageView = ({ data, onBack, onManageMembership }) => {
-  // Initialize Kakao Map with retry logic (similar to VerificationView)
+  const [mapReady, setMapReady] = useState(false);
+
+  // Initialize Kakao Map with retry logic
   useEffect(() => {
     const loadMap = () => {
       if (window.kakao && window.kakao.maps) {
         window.kakao.maps.load(() => {
-          const container = document.getElementById('mypage-map'); // Unique ID for MyPage map
+          const container = document.getElementById('mypage-map');
           if (container) {
+            const mapLat = data?.lat || MANGWON_CENTER.lat;
+            const mapLng = data?.lng || MANGWON_CENTER.lng;
+            const zoomLevel = data?.lat ? 3 : 5;
             const options = {
-              center: new window.kakao.maps.LatLng(data.lat, data.lng),
-              level: 3
+              center: new window.kakao.maps.LatLng(mapLat, mapLng),
+              level: zoomLevel,
             };
             const map = new window.kakao.maps.Map(container, options);
 
-            // Marker
-            const markerPosition = new window.kakao.maps.LatLng(data.lat, data.lng);
-            const marker = new window.kakao.maps.Marker({
-              position: markerPosition
-            });
-            marker.setMap(map);
+            if (data?.lat && data?.lng) {
+              const marker = new window.kakao.maps.Marker({
+                position: new window.kakao.maps.LatLng(data.lat, data.lng),
+              });
+              marker.setMap(map);
+            }
+            setMapReady(true);
           }
         });
         return true;
@@ -143,10 +156,10 @@ const MyPageView = ({ data, onBack, onManageMembership }) => {
             {/* Map Area */}
             <div className="h-48 bg-gray-100 relative">
               <div id="mypage-map" className="w-full h-full"></div>
-              {/* Fallback for no API key */}
-              {!window.kakao && (
+              {/* 지도 초기화 전 오버레이 */}
+              {!mapReady && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-200/50">
-                  <span className="text-xs text-gray-500 font-medium">지도 로딩 중... (API 키 확인 필요)</span>
+                  <span className="text-xs text-gray-500 font-medium">지도 로딩 중...</span>
                 </div>
               )}
             </div>
@@ -536,9 +549,21 @@ const SignupView = ({ onSignup, onLogin }) => {
   );
 };
 
-const DashboardView = ({ stats, stores, onAnalyze, selectedStoreId, onSelectStore }) => {
+const DashboardView = ({
+  stats,
+  stores,
+  storeTotal,
+  onAnalyze,
+  selectedStoreId,
+  onSelectStore,
+  isLoadingStores,
+  storeError,
+  onSearchQueryChange,
+  onLoadMore,
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showResults, setShowResults] = useState(false);
+  const dropdownRef = useRef(null);
 
   // Initialize searchTerm with selected store name
   useEffect(() => {
@@ -549,8 +574,10 @@ const DashboardView = ({ stats, stores, onAnalyze, selectedStoreId, onSelectStor
   }, [selectedStoreId, stores]);
 
   const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
+    const val = e.target.value;
+    setSearchTerm(val);
     setShowResults(true);
+    onSearchQueryChange?.(val);
   };
 
   const handleSelectResult = (store) => {
@@ -559,13 +586,18 @@ const DashboardView = ({ stats, stores, onAnalyze, selectedStoreId, onSelectStor
     setShowResults(false);
   };
 
-  // Filter stores: show results only if 2+ characters typed
-  const filteredStores = searchTerm.length >= 2
-    ? stores.filter(store =>
-      store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (store.address && store.address.includes(searchTerm))
-    ).slice(0, 10)
-    : [];
+  // API already filters by query; show all loaded results (더 보기로 추가된 항목 포함)
+  const filteredStores = searchTerm.length >= 2 ? stores : [];
+  const canLoadMore = typeof storeTotal === 'number' && storeTotal > stores.length;
+
+  // Map API error codes to user-friendly messages
+  const ERROR_CODE_MAP = {
+    STORE_NOT_FOUND: '매장을 찾을 수 없습니다.',
+    INVALID_QUERY: '검색어가 올바르지 않습니다.',
+  };
+  const displayError = storeError
+    ? (storeError.code && ERROR_CODE_MAP[storeError.code]) || storeError.message || '매장 데이터를 불러오지 못했습니다.'
+    : null;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -582,7 +614,9 @@ const DashboardView = ({ stats, stores, onAnalyze, selectedStoreId, onSelectStor
 
         <div className="relative z-10 flex flex-col md:flex-row gap-6 items-end">
           <div className="flex-1 space-y-2 w-full relative">
-            <label className="text-gray-300 text-sm font-medium">분석할 매장 검색 ({stores.length}개 매장 데이터 보유)</label>
+            <label className="text-gray-300 text-sm font-medium">
+              분석할 매장 검색 ({storeTotal ?? stores.length}개 매장 데이터 보유)
+            </label>
             <div className="relative group">
               <input
                 type="text"
@@ -590,29 +624,48 @@ const DashboardView = ({ stats, stores, onAnalyze, selectedStoreId, onSelectStor
                 onChange={handleSearchChange}
                 onFocus={() => setShowResults(true)}
                 placeholder="매장명 검색 (2글자 이상 입력)"
-                className="w-full bg-white/10 border border-white/20 text-white rounded-xl px-4 py-4 pl-12 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all backdrop-blur-sm placeholder-gray-400"
+                className="w-full bg-white/10 border border-white/20 text-white rounded-xl px-4 py-4 pl-12 pr-12 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all backdrop-blur-sm placeholder-gray-400"
               />
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-white transition-colors" size={20} />
 
+              {/* Loading spinner inside input */}
+              {isLoadingStores && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                </div>
+              )}
+
               {/* Autocomplete Dropdown */}
               {showResults && searchTerm.length >= 2 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 max-h-64 overflow-y-auto">
+                <div ref={dropdownRef} className={`absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 max-h-64 overflow-y-auto transition-opacity ${isLoadingStores ? 'opacity-50' : 'opacity-100'}`}>
                   {filteredStores.length > 0 ? (
-                    filteredStores.map(store => (
-                      <div
-                        key={store.id}
-                        onClick={() => handleSelectResult(store)}
-                        className="p-3 hover:bg-red-50 cursor-pointer border-b border-gray-50 last:border-none flex flex-col gap-0.5 transition-colors"
-                      >
-                        <div className="font-bold text-gray-900 text-sm flex items-center gap-2">
-                          {store.name}
-                          {store.id === selectedStoreId && <CheckCircle size={14} className="text-red-500" />}
+                    <>
+                      {filteredStores.map(store => (
+                        <div
+                          key={store.id}
+                          onClick={() => handleSelectResult(store)}
+                          className="p-3 hover:bg-red-50 cursor-pointer border-b border-gray-50 last:border-none flex flex-col gap-0.5 transition-colors"
+                        >
+                          <div className="font-bold text-gray-900 text-sm flex items-center gap-2">
+                            {store.name}
+                            {store.id === selectedStoreId && <CheckCircle size={14} className="text-red-500" />}
+                          </div>
+                          <div className="text-xs text-gray-500 flex items-center gap-1">
+                            <MapPin size={10} /> {store.address || '주소 정보 없음'}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500 flex items-center gap-1">
-                          <MapPin size={10} /> {store.address || '주소 정보 없음'}
-                        </div>
-                      </div>
-                    ))
+                      ))}
+                      {canLoadMore && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onLoadMore?.(); }}
+                          className="w-full p-3 text-center text-red-500 text-xs font-medium hover:bg-red-50 transition-colors border-t border-gray-50"
+                        >
+                          더 보기 ({stores.length} / {storeTotal})
+                        </button>
+                      )}
+                    </>
+                  ) : isLoadingStores ? (
+                    <div className="p-4 text-center text-gray-400 text-sm">불러오는 중...</div>
                   ) : (
                     <div className="p-4 text-center text-gray-400 text-sm">
                       검색 결과가 없습니다.
@@ -621,7 +674,19 @@ const DashboardView = ({ stats, stores, onAnalyze, selectedStoreId, onSelectStor
                 </div>
               )}
             </div>
-            {/* Close dropdown when clicking outside could be handled by a backdrop or ref, omitting for simplicity/MVP as per request */}
+
+            {/* Error message */}
+            {displayError && (
+              <div className="flex items-center gap-1.5 text-red-300 text-xs mt-1">
+                <AlertCircle size={12} />
+                {displayError}
+              </div>
+            )}
+
+            {/* Empty state when backend is unreachable */}
+            {!isLoadingStores && !displayError && stores.length === 0 && (
+              <p className="text-gray-400 text-xs mt-1">데이터를 불러오는 중입니다...</p>
+            )}
           </div>
           <button
             onClick={onAnalyze}
@@ -644,9 +709,13 @@ const DashboardView = ({ stats, stores, onAnalyze, selectedStoreId, onSelectStor
 };
 
 
+// 망원동 중심 좌표 (stores 테이블에 lat/lng 컬럼 없음 → 항상 폴백 사용)
+const MANGWON_CENTER = { lat: 37.5556, lng: 126.9068 };
+
 const VerificationView = ({ data, onVerified, onBack }) => {
   const [bizNum, setBizNum] = useState('');
   const [error, setError] = useState('');
+  const [mapReady, setMapReady] = useState(false);
 
   // Initialize Kakao Map with retry logic
   useEffect(() => {
@@ -655,18 +724,24 @@ const VerificationView = ({ data, onVerified, onBack }) => {
         window.kakao.maps.load(() => {
           const container = document.getElementById('kakao-map');
           if (container) {
+            // lat/lng 없으면 망원동 중심으로 폴백
+            const mapLat = data?.lat || MANGWON_CENTER.lat;
+            const mapLng = data?.lng || MANGWON_CENTER.lng;
+            const zoomLevel = data?.lat ? 3 : 5; // 정확한 좌표 없으면 넓게
             const options = {
-              center: new window.kakao.maps.LatLng(data.lat, data.lng),
-              level: 3
+              center: new window.kakao.maps.LatLng(mapLat, mapLng),
+              level: zoomLevel,
             };
             const map = new window.kakao.maps.Map(container, options);
 
-            // Marker
-            const markerPosition = new window.kakao.maps.LatLng(data.lat, data.lng);
-            const marker = new window.kakao.maps.Marker({
-              position: markerPosition
-            });
-            marker.setMap(map);
+            // 실제 좌표가 있을 때만 마커 표시
+            if (data?.lat && data?.lng) {
+              const marker = new window.kakao.maps.Marker({
+                position: new window.kakao.maps.LatLng(data.lat, data.lng),
+              });
+              marker.setMap(map);
+            }
+            setMapReady(true);
           }
         });
         return true;
@@ -724,18 +799,18 @@ const VerificationView = ({ data, onVerified, onBack }) => {
         <div className="h-64 w-full bg-gray-100 relative">
           <div id="kakao-map" className="w-full h-full"></div>
 
-          {/* Overlay info - only show if map might not load (e.g. no API key) */}
-          {!window.kakao && (
+          {/* Overlay: SDK 로드 실패 또는 지도 초기화 전 */}
+          {!mapReady && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-200/50 pointer-events-none">
               <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm font-bold text-gray-700">
                 <MapPin className="text-red-500" size={18} />
-                <span>{data.address || '주소 정보 없음'} (API 키 확인 필요)</span>
+                <span>{data.address || '주소 정보 없음'}</span>
               </div>
             </div>
           )}
 
-          {/* Always visible address badge */}
-          {window.kakao && (
+          {/* 지도 로드 후 주소 뱃지 */}
+          {mapReady && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none z-10">
               <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm font-bold text-gray-700 border border-gray-100">
                 <MapPin className="text-red-500" size={16} />
@@ -808,14 +883,84 @@ const VerificationView = ({ data, onVerified, onBack }) => {
   );
 };
 
-const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution }) => {
-  const [selectedMetric, setSelectedMetric] = useState(data.radarData[0]);
+const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSolution }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMetric, setSelectedMetric] = useState(null);
 
-  // Update selectedMetric when data changes (e.g. store switching)
+  // ── API / Job state ───────────────────────────────────────────────────
+  const [isCreating, setIsCreating] = useState(false);
+  const [isFetchingResult, setIsFetchingResult] = useState(false);
+  const [jobId, setJobId] = useState(null);
+  const [xReportData, setXReportData] = useState(null);
+  const [createError, setCreateError] = useState(null); // { message, code }
+
+  // Update selectedMetric when xReportData changes
   useEffect(() => {
-    setSelectedMetric(data.radarData[0]);
-  }, [data]);
+    setSelectedMetric(xReportData?.radarData?.[0] ?? null);
+  }, [xReportData]);
+
+  // ── Job polling ───────────────────────────────────────────────────────
+  const { status: pollStatus, progress, isPolling } = useJobPolling(jobId, {
+    enabled: !!jobId,
+    onCompleted: async (resultId) => {
+      setIsFetchingResult(true);
+      try {
+        const raw = await fetchXReportView(resultId);
+        const norm = normalizeXReportView(raw);
+        setXReportData(norm);
+      } catch (err) {
+        setCreateError({ message: getJobErrorMessage(err.code, err.message), code: err.code ?? null });
+      } finally {
+        setIsFetchingResult(false);
+      }
+    },
+    onFailed: (message, code) => {
+      setCreateError({ message: getJobErrorMessage(code, message), code });
+      setJobId(null);
+    },
+  });
+
+  const isBusy = isCreating || isPolling || isFetchingResult;
+
+  const handleCreate = async () => {
+    if (isBusy) return;
+    setCreateError(null);
+    setXReportData(null);
+    setIsCreating(true);
+    const controller = new AbortController();
+    try {
+      const result = await createXReport(
+        {
+          store_source_id: storeData?.id || undefined,
+          snapshot_version: 'v1',
+          prompt_id: 'default',
+        },
+        { signal: controller.signal },
+      );
+      // Backend is synchronous — no job queue. Fetch the view directly.
+      setIsCreating(false);
+      setIsFetchingResult(true);
+      const raw = await fetchXReportView(result.xReportId, { signal: controller.signal });
+      const norm = normalizeXReportView(raw);
+      setXReportData(norm);
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        setCreateError({ message: getJobErrorMessage(err.code, err.message), code: err.code ?? null });
+      }
+    } finally {
+      setIsCreating(false);
+      setIsFetchingResult(false);
+    }
+  };
+
+  const handleRetry = () => {
+    setCreateError(null);
+    setJobId(null);
+    setXReportData(null);
+  };
+
+  // ── Derived data ──────────────────────────────────────────────────────
+  const d = xReportData;
 
   const toggleSolution = (solution) => {
     if (selectedSolutions.find(s => s.title === solution.title)) {
@@ -831,7 +976,7 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
         <div className="flex justify-between items-end border-b border-gray-100 pb-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">X-Report: {data.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">X-Report: {d?.name ?? storeData?.name ?? '—'}</h1>
               <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold border border-red-200">진단 완료</span>
             </div>
             <p className="text-gray-500 text-sm">GPT-5.2 기반 AI 분석 리포트 — 매장 전략 처방전</p>
@@ -858,24 +1003,92 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
 
             <div className="text-right group relative cursor-help">
               <div className="text-sm text-gray-400 mb-1">종합 등급</div>
-              <div className="text-4xl font-bold font-space text-gray-900">{data.grade}<span className="text-lg text-gray-400 font-normal ml-1">/ S</span></div>
+              <div className="text-4xl font-bold font-space text-gray-900">{d?.grade ?? '—'}</div>
               {/* Tooltip */}
-              <div className="absolute top-full right-0 mt-2 w-48 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
-                <div className="flex justify-between mb-1"><span>S</span> <span className="text-gray-400">최상</span></div>
-                <div className="flex justify-between mb-1"><span>A</span> <span className="text-gray-400">상</span></div>
-                <div className="flex justify-between mb-1"><span>B</span> <span className="text-gray-400">중</span></div>
-                <div className="flex justify-between mb-1"><span>C</span> <span className="text-gray-400">하</span></div>
-                <div className="flex justify-between"><span>D</span> <span className="text-gray-400">최하</span></div>
+              <div className="absolute top-full right-0 mt-2 w-52 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                {[
+                  { g: 'S', pct: '상위 3%',  desc: '최상위' },
+                  { g: 'A', pct: '상위 10%', desc: '' },
+                  { g: 'B', pct: '상위 30%', desc: '' },
+                  { g: 'C', pct: '상위 70%', desc: '중간층' },
+                  { g: 'D', pct: '상위 90%', desc: '' },
+                  { g: 'E', pct: '상위 97%', desc: '' },
+                  { g: 'F', pct: '하위 3%',  desc: '최하위' },
+                ].map(({ g, pct, desc }) => (
+                  <div key={g} className={`flex justify-between mb-1 ${d?.grade === g ? 'text-red-400 font-bold' : ''}`}>
+                    <span>{g}</span>
+                    <span className="text-gray-400">{pct}{desc ? ` · ${desc}` : ''}</span>
+                  </div>
+                ))}
               </div>
             </div>
             <div className="w-px h-12 bg-gray-200"></div>
             <div className="text-right">
               <div className="text-sm text-gray-400 mb-1">상위</div>
-              <div className="text-4xl font-bold font-space text-red-600">{data.rankPercent}%</div>
+              <div className="text-4xl font-bold font-space text-red-600">
+                {d?.rankPercent != null ? `${d.rankPercent}%` : '—'}
+              </div>
             </div>
           </div>
         </div>
 
+      {/* ══════════════════ X-Report 생성 UI ══════════════════ */}
+      {!d && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 flex flex-col items-center gap-6 text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+            <Sparkles size={28} className="text-red-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">X-Report 생성 준비 완료</h2>
+            <p className="text-gray-500 text-sm">AI가 매장을 진단하고 맞춤형 전략 처방전을 생성합니다.</p>
+          </div>
+
+          {/* Progress while polling */}
+          {(isPolling || isFetchingResult) && (
+            <div className="w-full max-w-md">
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span>처리 중... ({pollStatus})</span>
+                {progress !== null && <span>{progress}%</span>}
+              </div>
+              <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-red-500 rounded-full transition-all duration-500"
+                  style={{ width: progress !== null ? `${progress}%` : '60%' }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Error */}
+          {createError && (
+            <div className="w-full max-w-md flex items-start gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 text-left">
+              <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                {createError.message}
+                <button onClick={handleRetry} className="ml-2 underline text-red-500 hover:text-red-700">다시 시도</button>
+              </div>
+            </div>
+          )}
+
+          {!isBusy && !createError && (
+            <button
+              onClick={handleCreate}
+              className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg"
+            >
+              <Sparkles size={18} /> X-Report 생성 시작
+            </button>
+          )}
+
+          {isBusy && !createError && (
+            <button disabled className="bg-gray-400 cursor-not-allowed text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              {isCreating ? '생성 요청 중...' : '분석 중...'}
+            </button>
+          )}
+        </div>
+      )}
+
+      {d && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Interactive Radar Chart */}
           <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
@@ -883,7 +1096,7 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
             <p className="text-sm text-gray-400 mb-6">항목을 클릭하여 상세 분석을 확인하세요.</p>
             <div className="flex-1 min-h-[300px] relative">
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data.radarData}>
+                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={d?.radarData ?? []}>
                   <PolarGrid stroke="#f3f4f6" />
                   <PolarAngleAxis
                     dataKey="subject"
@@ -896,7 +1109,7 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
                         fontWeight={selectedMetric?.subject === payload.value ? 'bold' : 'normal'}
                         fontSize={13}
                         className="cursor-pointer hover:fill-red-500 transition-colors"
-                        onClick={() => setSelectedMetric(data.radarData.find(d => d.subject === payload.value))}
+                        onClick={() => setSelectedMetric((d?.radarData ?? []).find(rd => rd.subject === payload.value) ?? null)}
                       >
                         {payload.value}
                       </text>
@@ -904,7 +1117,7 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
                   />
                   <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                   <Radar
-                    name={data.name}
+                    name={d?.name ?? ''}
                     dataKey="A"
                     stroke="#E42313"
                     strokeWidth={3}
@@ -924,7 +1137,7 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">FOCUS ON</span>
-                  <h3 className="text-2xl font-bold text-gray-900 mt-1">{selectedMetric?.subject} <span className="text-red-600">{selectedMetric?.A}점</span></h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mt-1">종합 <span className="text-red-600">{d?.radarData?.length ? Math.round(d.radarData.reduce((s, r) => s + r.A, 0) / d.radarData.length) : '—'}점</span></h3>
                 </div>
                 <div className="bg-white px-3 py-1 rounded-lg border border-gray-200 text-xs font-medium text-gray-500">
                   망원동 평균: 78점
@@ -937,7 +1150,7 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
                     <MessageSquare size={14} /> 주요 키워드
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {data.keywords.slice(0, 8).map(k => {
+                    {(d?.keywords ?? []).slice(0, 8).map(k => {
                       let colorClass = 'bg-gray-100 text-gray-600';
                       if (k.sentiment === 'positive') colorClass = 'bg-green-100 text-green-700 border border-green-200';
                       if (k.sentiment === 'negative') colorClass = 'bg-red-50 text-red-600 border border-red-100';
@@ -956,7 +1169,7 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
                 <Info size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
                 <p>
                   <strong>AI 분석:</strong> {selectedMetric?.reason}.
-                  {data.description}
+                  {d?.description}
                 </p>
               </div>
             </div>
@@ -971,7 +1184,7 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Group solutions by category */}
               {Object.entries(
-                data.solutions.reduce((acc, sol) => {
+                (d?.solutions ?? []).reduce((acc, sol) => {
                   if (!acc[sol.category]) acc[sol.category] = [];
                   acc[sol.category].push(sol);
                   return acc;
@@ -1048,6 +1261,8 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
             </div>
           </div>
         </div>
+      )}
+
       </div>
 
       {/* Full Report Modal */}
@@ -1065,7 +1280,7 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
                 </button>
               </div>
               <div className="p-8 overflow-y-auto prose prose-slate prose-headings:font-space prose-headings:text-gray-900 prose-p:text-gray-600 prose-strong:text-gray-900 max-w-none text-left bg-white">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.fullReport}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{d?.fullReport}</ReactMarkdown>
               </div>
               <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
                 <button
@@ -1092,9 +1307,25 @@ const XReportView = ({ data, onNext, selectedSolutions = [], onSelectSolution })
 
 // --- New Component: Interactive Simulation Lab ---
 // --- New Component: Interactive Simulation Lab ---
-const SimulationView = ({ data, onComplete, selectedSolutions = [] }) => {
+// 기간 → 일수 매핑 (SimulationView 전체에서 공유)
+const DURATION_DAYS = {
+  '1day': 1, '1week': 7, '2weeks': 14, '1month': 30,
+  '3months': 90, '6months': 180, '1year': 365,
+};
+
+// 시뮬레이션 일수 기반 폴링 타임아웃 계산
+// 모든 기간: Celery task_time_limit(2시간)에 맞춰 2시간 대기 (사실상 무제한)
+function calcSimTimeout(_days) {
+  return 2 * 60 * 60 * 1000; // 2시간
+}
+
+const SimulationView = ({ data, onJobCreated, selectedSolutions = [] }) => {
   const [simValues, setSimValues] = useState({});
   const [duration, setDuration] = useState('1week');
+
+  // ── API / Job state ───────────────────────────────────────────────────
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState(null); // { message, code }
 
   // Initialize simulation values from data
   useEffect(() => {
@@ -1107,13 +1338,48 @@ const SimulationView = ({ data, onComplete, selectedSolutions = [] }) => {
     }
   }, [data]);
 
+  const simDays = DURATION_DAYS[duration] ?? 7;
+  const simTimeoutMs = calcSimTimeout(simDays);
+
+  const isBusy = isCreating;
+
+  const handleStart = async () => {
+    if (isBusy) return;
+    const storeName = data?.name;
+    if (!storeName || storeName === '—' || storeName === '이름 정보 없음') {
+      setCreateError({ message: '매장을 먼저 선택해주세요.', code: null });
+      return;
+    }
+    setCreateError(null);
+    setIsCreating(true);
+    const controller = new AbortController();
+    try {
+      const payload = {
+        store_source_id: storeName,
+        selected_strategy_ids: selectedSolutions
+          .map(s => s.id ?? s.title)
+          .filter(Boolean),
+        days: simDays,
+      };
+      const result = await createSimulation(payload, { signal: controller.signal });
+      onJobCreated(result.jobId, simTimeoutMs, Math.ceil(simTimeoutMs / 4000));
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        setCreateError({ message: getJobErrorMessage(err.code, err.message), code: err.code ?? null });
+      }
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   const durationOptions = [
-    { id: '1week', label: '1주일', credits: 10 },
-    { id: '2weeks', label: '2주일', credits: 20 },
-    { id: '1month', label: '1개월', credits: 35 },
-    { id: '3months', label: '3개월', credits: 100 },
-    { id: '6months', label: '6개월', credits: 180 },
-    { id: '1year', label: '1년', credits: 330 },
+    { id: '1day',    label: '1일',   credits: 3,   estimatedTime: '약 20~30분' },
+    { id: '1week',   label: '1주일', credits: 10,  estimatedTime: '약 1시간' },
+    { id: '2weeks',  label: '2주일', credits: 20,  estimatedTime: '약 2시간' },
+    { id: '1month',  label: '1개월', credits: 35,  estimatedTime: '약 4시간' },
+    { id: '3months', label: '3개월', credits: 100, estimatedTime: '약 12시간' },
+    { id: '6months', label: '6개월', credits: 180, estimatedTime: '약 24시간' },
+    { id: '1year',   label: '1년',   credits: 330, estimatedTime: '약 2일' },
   ];
 
   const selectedCredits = durationOptions.find(d => d.id === duration)?.credits || 0;
@@ -1148,15 +1414,18 @@ const SimulationView = ({ data, onComplete, selectedSolutions = [] }) => {
                 onClick={() => setDuration(opt.id)}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${duration === opt.id ? 'border-blue-500' : 'border-gray-300'
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 ${duration === opt.id ? 'border-blue-500' : 'border-gray-300'
                     }`}>
                     {duration === opt.id && <div className="w-2 h-2 rounded-full bg-blue-500" />}
                   </div>
-                  <span className={`font-medium ${duration === opt.id ? 'text-gray-900' : 'text-gray-600'}`}>
-                    {opt.label}
-                  </span>
+                  <div>
+                    <span className={`font-medium ${duration === opt.id ? 'text-gray-900' : 'text-gray-600'}`}>
+                      {opt.label}
+                    </span>
+                    <p className="text-[11px] text-gray-400 leading-tight">{opt.estimatedTime}</p>
+                  </div>
                 </div>
-                <div className="bg-gray-900 text-white text-xs font-bold px-2 py-1 rounded">
+                <div className="bg-gray-900 text-white text-xs font-bold px-2 py-1 rounded flex-shrink-0">
                   {opt.credits} CREDITS
                 </div>
               </label>
@@ -1193,11 +1462,25 @@ const SimulationView = ({ data, onComplete, selectedSolutions = [] }) => {
               <span className="text-gray-500">지불할 크레딧</span>
               <span className="text-2xl font-bold text-gray-900">{selectedCredits} CREDITS</span>
             </div>
+
+            {/* Error message */}
+            {createError && (
+              <div className="mb-4 flex items-start gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3">
+                <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                <span>{createError.message}</span>
+              </div>
+            )}
+
             <button
-              onClick={onComplete}
-              className="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              onClick={handleStart}
+              disabled={isBusy}
+              className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg ${
+                isBusy
+                  ? 'bg-gray-400 cursor-not-allowed text-white'
+                  : 'bg-gray-900 hover:bg-black text-white hover:shadow-xl transform hover:-translate-y-0.5'
+              }`}
             >
-              시뮬레이션 시작하기 <ArrowRight size={18} />
+              {isCreating ? '생성 중...' : <>시뮬레이션 시작하기 <ArrowRight size={18} /></>}
             </button>
           </div>
         </div>
@@ -1359,16 +1642,18 @@ const yReportMockData = {
 };
 
 // 워드클라우드 시각화 컴포넌트
-const WordCloudVisual = ({ keywords, label, accentColor }) => {
-  const maxWeight = Math.max(...keywords.map(k => k.weight));
+const WordCloudVisual = ({ keywords = [], label, accentColor }) => {
+  const maxWeight = keywords.length ? Math.max(...keywords.map(k => k.weight || 1)) : 1;
   return (
     <div className="flex-1">
       <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 ${accentColor === 'gray' ? 'bg-gray-100 text-gray-600' : 'bg-emerald-100 text-emerald-700'}`}>
         {label}
       </div>
       <div className="flex flex-wrap gap-2 items-center justify-center min-h-[140px] p-4 rounded-xl bg-gray-50/50">
-        {keywords.map((kw, i) => {
-          const ratio = kw.weight / maxWeight;
+        {keywords.length === 0 ? (
+          <span className="text-xs text-gray-400">키워드 없음</span>
+        ) : keywords.map((kw, i) => {
+          const ratio = (kw.weight || 1) / maxWeight;
           const fontSize = 12 + ratio * 18;
           const opacity = 0.4 + ratio * 0.6;
           const colors = accentColor === 'gray'
@@ -1404,38 +1689,139 @@ const ChangeBadge = ({ value, suffix = '%', showPlus = true }) => {
   );
 };
 
-const YReportView = () => {
-  const d = yReportMockData;
+// ── Y-Report TTL reconnect constants ────────────────────────────────────────
+const Y_REPORT_JOB_KEY = 'pending_y_report_job';
+const Y_REPORT_JOB_TTL = 600_000; // 10 minutes
+
+const YReportView = ({ storeData, selectedSolutions = [] }) => {
   const [activeRatingTab, setActiveRatingTab] = useState('taste');
 
-  // KDE 차트 데이터 결합
-  const ratingLabels = { taste: '맛', value: '가성비', atmosphere: '분위기' };
-  const currentRating = d.ratingDistribution[activeRatingTab];
-  const kdeChartData = currentRating.sim1.map((s1, i) => ({
-    score: s1.score,
-    sim1: s1.density,
-    sim2: currentRating.sim2[i].density,
-  }));
+  // ── API / Job state ───────────────────────────────────────────────────
+  const [isCreating, setIsCreating] = useState(false);
+  const [isFetchingResult, setIsFetchingResult] = useState(false);
+  const [jobId, setJobId] = useState(null);
+  const [yReportData, setYReportData] = useState(null);
+  const [createError, setCreateError] = useState(null); // { message, code }
+  const [isReconnecting, setIsReconnecting] = useState(false); // TTL reconnect banner
 
-  // 만족도 바 차트 데이터
-  const satisfactionData = Object.keys(d.ratingDistribution).map(key => {
-    const s1Scores = d.ratingDistribution[key].sim1;
-    const s2Scores = d.ratingDistribution[key].sim2;
-    const s1Sat = s1Scores.filter(s => s.score >= 4).reduce((a, b) => a + b.density, 0);
-    const s2Sat = s2Scores.filter(s => s.score >= 4).reduce((a, b) => a + b.density, 0);
-    const s1Total = s1Scores.reduce((a, b) => a + b.density, 0);
-    const s2Total = s2Scores.reduce((a, b) => a + b.density, 0);
-    return {
-      name: ratingLabels[key],
-      sim1: Math.round((s1Sat / s1Total) * 100),
-      sim2: Math.round((s2Sat / s2Total) * 100),
-    };
+  // ── TTL reconnect on mount ─────────────────────────────────────────────
+  useEffect(() => {
+    const raw = localStorage.getItem(Y_REPORT_JOB_KEY);
+    if (!raw) return;
+    let saved;
+    try { saved = JSON.parse(raw); } catch { localStorage.removeItem(Y_REPORT_JOB_KEY); return; }
+    const { jobId: savedJobId, createdAt } = saved ?? {};
+    if (!savedJobId || !createdAt || Date.now() - createdAt > Y_REPORT_JOB_TTL) {
+      localStorage.removeItem(Y_REPORT_JOB_KEY);
+      return;
+    }
+    // Validate status once before restoring polling
+    fetchJob(savedJobId)
+      .then(resp => {
+        const job = normalizeJob(resp);
+        if (job.status === 'pending' || job.status === 'processing') {
+          setIsReconnecting(true);
+          setJobId(savedJobId);
+        } else {
+          localStorage.removeItem(Y_REPORT_JOB_KEY);
+        }
+      })
+      .catch(() => { localStorage.removeItem(Y_REPORT_JOB_KEY); });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Job polling ───────────────────────────────────────────────────────
+  const { status: pollStatus, progress, isPolling } = useJobPolling(jobId, {
+    enabled: !!jobId,
+    onCompleted: async (resultId) => {
+      setIsReconnecting(false);
+      localStorage.removeItem(Y_REPORT_JOB_KEY);
+      setIsFetchingResult(true);
+      try {
+        const raw = await fetchYReportView(resultId);
+        const norm = normalizeYReportView(raw);
+        setYReportData(norm);
+      } catch (err) {
+        setCreateError({ message: getJobErrorMessage(err.code, err.message), code: err.code ?? null });
+      } finally {
+        setIsFetchingResult(false);
+      }
+    },
+    onFailed: (message, code) => {
+      setIsReconnecting(false);
+      localStorage.removeItem(Y_REPORT_JOB_KEY);
+      setCreateError({ message: getJobErrorMessage(code, message), code });
+      setJobId(null);
+    },
   });
 
-  const visitChange = ((d.overview.sim2.totalVisits - d.overview.sim1.totalVisits) / d.overview.sim1.totalVisits * 100).toFixed(1);
-  const shareChange = (d.overview.sim2.marketShare - d.overview.sim1.marketShare).toFixed(2);
-  const avgChange = (d.ratingSummary.sim2.avg - d.ratingSummary.sim1.avg).toFixed(2);
-  const satChange = (d.ratingSummary.sim2.satisfaction - d.ratingSummary.sim1.satisfaction).toFixed(1);
+  const isBusy = isCreating || isPolling || isFetchingResult;
+
+  const handleCreate = async () => {
+    if (isBusy) return;
+    setCreateError(null);
+    setYReportData(null);
+    setIsCreating(true);
+    const controller = new AbortController();
+    try {
+      const payload = {
+        storeId: storeData?.id || undefined,
+        selectedStrategyIds: selectedSolutions
+          .map(s => s.id ?? s.title)
+          .filter(Boolean),
+      };
+      const result = await createYReport(payload, { signal: controller.signal });
+      // Persist for TTL reconnect
+      localStorage.setItem(Y_REPORT_JOB_KEY, JSON.stringify({
+        jobId: result.jobId,
+        createdAt: Date.now(),
+      }));
+      setJobId(result.jobId);
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        setCreateError({ message: getJobErrorMessage(err.code, err.message), code: err.code ?? null });
+      }
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleRetry = () => {
+    setCreateError(null);
+    setJobId(null);
+    setYReportData(null);
+    setIsReconnecting(false);
+    localStorage.removeItem(Y_REPORT_JOB_KEY);
+  };
+
+  // ── Derived data (only when yReportData is available) ─────────────────
+  const d = yReportData;
+  const ratingLabels = { taste: '맛', value: '가성비', atmosphere: '분위기' };
+  const currentRating = d?.ratingDistribution?.[activeRatingTab];
+  const kdeChartData = currentRating?.sim1?.length
+    ? currentRating.sim1.map((s1, i) => ({
+        score: s1.score,
+        sim1: s1.density,
+        sim2: currentRating.sim2[i]?.density ?? 0,
+      }))
+    : [];
+
+  const satisfactionData = d ? Object.keys(d.ratingDistribution).map(key => {
+    const s1Scores = d.ratingDistribution[key].sim1;
+    const s2Scores = d.ratingDistribution[key].sim2;
+    if (!s1Scores.length || !s2Scores.length) return { name: ratingLabels[key], sim1: 0, sim2: 0 };
+    const s1Sat = s1Scores.filter(s => s.score >= 4).reduce((a, b) => a + b.density, 0);
+    const s2Sat = s2Scores.filter(s => s.score >= 4).reduce((a, b) => a + b.density, 0);
+    const s1Total = s1Scores.reduce((a, b) => a + b.density, 0) || 1;
+    const s2Total = s2Scores.reduce((a, b) => a + b.density, 0) || 1;
+    return { name: ratingLabels[key], sim1: Math.round((s1Sat / s1Total) * 100), sim2: Math.round((s2Sat / s2Total) * 100) };
+  }) : [];
+
+  const visitChange = d && d.overview.sim1.totalVisits
+    ? ((d.overview.sim2.totalVisits - d.overview.sim1.totalVisits) / d.overview.sim1.totalVisits * 100).toFixed(1)
+    : '0';
+  const shareChange = d ? (d.overview.sim2.marketShare - d.overview.sim1.marketShare).toFixed(2) : '0';
+  const avgChange = d ? (d.ratingSummary.sim2.avg - d.ratingSummary.sim1.avg).toFixed(2) : '0';
+  const satChange = d ? (d.ratingSummary.sim2.satisfaction - d.ratingSummary.sim1.satisfaction).toFixed(1) : '0';
 
   return (
     <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-12">
@@ -1459,6 +1845,73 @@ const YReportView = () => {
         </div>
       </div>
 
+      {/* ══════════════════ Y-Report 생성 UI ══════════════════ */}
+      {!d && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 flex flex-col items-center gap-6 text-center">
+          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
+            <Sparkles size={28} className="text-emerald-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Y-Report 생성 준비 완료</h2>
+            <p className="text-gray-500 text-sm">시뮬레이션 결과를 바탕으로 AI 비교 분석 리포트를 생성합니다.</p>
+          </div>
+
+          {/* Reconnect banner */}
+          {isReconnecting && !createError && (
+            <div className="w-full max-w-md flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+              <RefreshCw size={14} className="flex-shrink-0 animate-spin" />
+              <span>진행 중인 작업이 있습니다 — 계속 확인 중…</span>
+            </div>
+          )}
+
+          {/* Progress while polling */}
+          {(isPolling || isFetchingResult) && (
+            <div className="w-full max-w-md">
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span>처리 중... ({pollStatus})</span>
+                {progress !== null && <span>{progress}%</span>}
+              </div>
+              <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                  style={{ width: progress !== null ? `${progress}%` : '60%' }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Error */}
+          {createError && (
+            <div className="w-full max-w-md flex items-start gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 text-left">
+              <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                {createError.message}
+                <button onClick={handleRetry} className="ml-2 underline text-red-500 hover:text-red-700">다시 시도</button>
+              </div>
+            </div>
+          )}
+
+          {!isBusy && !createError && (
+            <button
+              onClick={handleCreate}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg"
+            >
+              <Sparkles size={18} /> Y-Report 생성 시작
+            </button>
+          )}
+
+          {isBusy && !createError && (
+            <button disabled className="bg-gray-400 cursor-not-allowed text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              {isCreating ? '생성 요청 중...' : '분석 중...'}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ══════════════════ 리포트 본문 (API 데이터 수신 후) ══════════════════ */}
+      {d && <>
+
       {/* ══════════════════ 솔루션 안전성 진단 ══════════════════ */}
 
       {/* ── 리스크 스코어 ── */}
@@ -1475,9 +1928,9 @@ const YReportView = () => {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-white text-3xl font-bold font-space">{d.riskScore.score}<span className="text-lg text-gray-400">/100</span></p>
-              <p className={`text-xs font-bold ${d.riskScore.score <= 30 ? 'text-emerald-400' : d.riskScore.score <= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
-                {d.riskScore.level}
+              <p className="text-white text-3xl font-bold font-space">{formatNumber(clamp(d.riskScore.score, 0, 100))}<span className="text-lg text-gray-400">/100</span></p>
+              <p className={`text-xs font-bold ${clamp(d.riskScore.score, 0, 100) <= 33 ? 'text-emerald-400' : clamp(d.riskScore.score, 0, 100) <= 66 ? 'text-yellow-400' : 'text-red-400'}`}>
+                {d.riskScore.level || (clamp(d.riskScore.score, 0, 100) <= 33 ? '낮은 위험' : clamp(d.riskScore.score, 0, 100) <= 66 ? '보통 위험' : '높은 위험')}
               </p>
             </div>
           </div>
@@ -1487,8 +1940,8 @@ const YReportView = () => {
           <div className="mb-4">
             <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-1000 ${d.riskScore.score <= 30 ? 'bg-gradient-to-r from-emerald-400 to-emerald-500' : d.riskScore.score <= 60 ? 'bg-gradient-to-r from-yellow-400 to-orange-400' : 'bg-gradient-to-r from-red-400 to-red-600'}`}
-                style={{ width: `${d.riskScore.score}%` }}
+                className={`h-full rounded-full transition-all duration-1000 ${clamp(d.riskScore.score, 0, 100) <= 33 ? 'bg-gradient-to-r from-emerald-400 to-emerald-500' : clamp(d.riskScore.score, 0, 100) <= 66 ? 'bg-gradient-to-r from-yellow-400 to-orange-400' : 'bg-gradient-to-r from-red-400 to-red-600'}`}
+                style={{ width: `${clamp(d.riskScore.score, 0, 100)}%` }}
               ></div>
             </div>
             <div className="flex justify-between mt-1.5 text-[10px] text-gray-400 font-bold">
@@ -1502,17 +1955,17 @@ const YReportView = () => {
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-emerald-50 rounded-xl p-3 text-center border border-emerald-100">
               <CheckCircle size={18} className="text-emerald-500 mx-auto mb-1" />
-              <p className="text-xl font-bold text-emerald-600">{d.riskScore.positive}</p>
+              <p className="text-xl font-bold text-emerald-600">{formatNumber(d.riskScore.positive)}</p>
               <p className="text-[10px] text-emerald-600 font-bold">순기능</p>
             </div>
             <div className="bg-amber-50 rounded-xl p-3 text-center border border-amber-100">
               <AlertCircle size={18} className="text-amber-500 mx-auto mb-1" />
-              <p className="text-xl font-bold text-amber-600">{d.riskScore.watch}</p>
+              <p className="text-xl font-bold text-amber-600">{formatNumber(d.riskScore.watch)}</p>
               <p className="text-[10px] text-amber-600 font-bold">관찰 필요</p>
             </div>
             <div className="bg-red-50 rounded-xl p-3 text-center border border-red-100">
               <AlertTriangle size={18} className="text-red-500 mx-auto mb-1" />
-              <p className="text-xl font-bold text-red-600">{d.riskScore.negative}</p>
+              <p className="text-xl font-bold text-red-600">{formatNumber(d.riskScore.negative)}</p>
               <p className="text-[10px] text-red-600 font-bold">역효과 감지</p>
             </div>
           </div>
@@ -1526,6 +1979,11 @@ const YReportView = () => {
           <h3 className="text-sm font-bold text-gray-900">역효과 감지 알림</h3>
           <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-[10px] font-bold">{d.sideEffects.length}건</span>
         </div>
+        {d.sideEffects.length === 0 && (
+          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-sm text-emerald-700 text-center">
+            감지된 역효과 없음
+          </div>
+        )}
         {d.sideEffects.map((se, i) => (
           <div
             key={i}
@@ -1612,23 +2070,23 @@ const YReportView = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
             <p className="text-xs text-gray-400 font-medium mb-1">총 방문 수 (전)</p>
-            <p className="text-2xl font-bold text-gray-400">{d.overview.sim1.totalVisits}건</p>
+            <p className="text-2xl font-bold text-gray-400">{formatNumber(d.overview.sim1.totalVisits)}건</p>
           </div>
           <div className="bg-white p-5 rounded-xl border-2 border-emerald-200 shadow-sm shadow-emerald-50">
             <p className="text-xs text-emerald-600 font-medium mb-1">총 방문 수 (후)</p>
             <div className="flex items-center gap-2">
-              <p className="text-2xl font-bold text-emerald-600">{d.overview.sim2.totalVisits}건</p>
+              <p className="text-2xl font-bold text-emerald-600">{formatNumber(d.overview.sim2.totalVisits)}건</p>
               <ChangeBadge value={parseFloat(visitChange)} />
             </div>
           </div>
           <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
             <p className="text-xs text-gray-400 font-medium mb-1">시장 점유율 (전)</p>
-            <p className="text-2xl font-bold text-gray-400">{d.overview.sim1.marketShare}%</p>
+            <p className="text-2xl font-bold text-gray-400">{formatPercent(d.overview.sim1.marketShare, 1)}</p>
           </div>
           <div className="bg-white p-5 rounded-xl border-2 border-emerald-200 shadow-sm shadow-emerald-50">
             <p className="text-xs text-emerald-600 font-medium mb-1">시장 점유율 (후)</p>
             <div className="flex items-center gap-2">
-              <p className="text-2xl font-bold text-emerald-600">{d.overview.sim2.marketShare}%</p>
+              <p className="text-2xl font-bold text-emerald-600">{formatPercent(d.overview.sim2.marketShare, 1)}</p>
               <ChangeBadge value={parseFloat(shareChange)} suffix="%p" />
             </div>
           </div>
@@ -1651,7 +2109,7 @@ const YReportView = () => {
         <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs text-gray-400 mb-1">평균 종합 평점</p>
-            <p className="text-xl font-bold text-gray-600">{d.ratingSummary.sim1.avg}점 → <span className="text-emerald-600">{d.ratingSummary.sim2.avg}점</span></p>
+            <p className="text-xl font-bold text-gray-600">{formatNumber(d.ratingSummary.sim1.avg, { maximumFractionDigits: 2 })}점 → <span className="text-emerald-600">{formatNumber(d.ratingSummary.sim2.avg, { maximumFractionDigits: 2 })}점</span></p>
           </div>
           <ChangeBadge value={parseFloat(avgChange)} suffix="" showPlus={true} />
         </div>
@@ -1670,12 +2128,65 @@ const YReportView = () => {
             </div>
             <WordCloudVisual keywords={d.keywords.sim2} label="Sim 2 — 전략 후" accentColor="emerald" />
           </div>
-          <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-100">
-            <p className="text-xs text-purple-700">
-              <strong>💡 인사이트:</strong> 전략 전 <span className="font-bold">#웨이팅길다</span>(14회)가 상위 키워드였으나, 전략 후 <span className="font-bold">#원격줄서기</span>(19회), <span className="font-bold">#분위기맛집</span>(22회)으로 전환. 솔루션이 고객 인식에 직접 반영됨.
-            </p>
+        </div>
+      </div>
+
+      {/* ────────────────── 지표 2-B: 평점 분포 (RatingDistribution) ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+            <BarChart2 size={18} className="text-purple-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">지표 2-B — 평점 분포 (Rating Distribution)</h2>
+            <p className="text-xs text-gray-400">항목별 전략 전후 가중 평균 평점 비교</p>
           </div>
         </div>
+
+        {Object.keys(d.ratingDistribution).length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-100 p-6 text-center text-sm text-gray-400">
+            평점 분포 데이터 없음
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="text-left py-3 px-4 font-bold text-gray-600">지표</th>
+                  <th className="text-center py-3 px-4 font-bold text-gray-400">Sim 1 (가중 평균)</th>
+                  <th className="text-center py-3 px-4 font-bold text-emerald-600">Sim 2 (가중 평균)</th>
+                  <th className="text-center py-3 px-4 font-bold text-gray-500">변화</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(d.ratingDistribution).map(([key, dist]) => {
+                  const LABELS = { taste: '맛', value: '가성비', atmosphere: '분위기', service: '서비스', price: '가격' };
+                  const s1 = Array.isArray(dist?.sim1) ? dist.sim1 : [];
+                  const s2 = Array.isArray(dist?.sim2) ? dist.sim2 : [];
+                  const wavg = (arr) => {
+                    const nums = arr.filter(v => typeof v?.score === 'number' && typeof v?.density === 'number');
+                    if (!nums.length) return 0;
+                    const tot = nums.reduce((a, b) => a + b.density, 0) || 1;
+                    return nums.reduce((a, b) => a + b.score * b.density, 0) / tot;
+                  };
+                  const a1 = wavg(s1);
+                  const a2 = wavg(s2);
+                  const delta = a2 - a1;
+                  return (
+                    <tr key={key} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                      <td className="py-3 px-4 font-bold text-gray-900">{LABELS[key] ?? key}</td>
+                      <td className="text-center py-3 px-4 text-gray-500">{formatNumber(a1, { maximumFractionDigits: 1 })}</td>
+                      <td className="text-center py-3 px-4 font-bold text-emerald-600">{formatNumber(a2, { maximumFractionDigits: 1 })}</td>
+                      <td className="text-center py-3 px-4">
+                        <ChangeBadge value={parseFloat(delta.toFixed(1))} suffix="" showPlus={true} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* ────────────────── 지표 3: 시간대별 손님 변화 (Hourly Traffic) ────────────────── */}
@@ -1708,6 +2219,9 @@ const YReportView = () => {
         </div>
 
         {/* Bar Chart — 이산 시간대이므로 바 차트가 정확 */}
+        {d.hourlyTraffic.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-sm text-gray-400">시간대별 트래픽 데이터 없음</div>
+        ) : (
         <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
           <h3 className="font-bold text-gray-900 text-sm mb-4">시간대별 방문 트래픽</h3>
           <ResponsiveContainer width="100%" height={280}>
@@ -1733,6 +2247,7 @@ const YReportView = () => {
             </p>
           </div>
         </div>
+        )}
       </div>
 
       {/* ────────────────── 지표 4: 세대별 증감 분석 ────────────────── */}
@@ -1747,6 +2262,9 @@ const YReportView = () => {
           </div>
         </div>
 
+        {d.generation.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-sm text-gray-400">세대별 데이터 없음</div>
+        ) : (
         <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={d.generation} barGap={4} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -1765,6 +2283,7 @@ const YReportView = () => {
             </p>
           </div>
         </div>
+        )}
       </div>
 
       {/* ────────────────── 지표 5: 방문 목적별 분석 ────────────────── */}
@@ -1779,6 +2298,9 @@ const YReportView = () => {
           </div>
         </div>
 
+        {d.purpose.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-sm text-gray-400">방문 목적 데이터 없음</div>
+        ) : (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <table className="w-full text-sm">
             <thead>
@@ -1810,6 +2332,7 @@ const YReportView = () => {
             </p>
           </div>
         </div>
+        )}
       </div>
 
       {/* ────────────────── 지표 6: 재방문율 분석 ────────────────── */}
@@ -1827,22 +2350,22 @@ const YReportView = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm text-center">
             <p className="text-xs text-gray-400 mb-1">기존 고객 유지</p>
-            <p className="text-2xl font-bold text-cyan-600">{d.retention.retained}명</p>
-            <p className="text-xs text-cyan-500 font-bold mt-1">유지율 {d.retention.retentionRate}%</p>
+            <p className="text-2xl font-bold text-cyan-600">{formatNumber(d.retention.retained)}명</p>
+            <p className="text-xs text-cyan-500 font-bold mt-1">유지율 {formatPercent(d.retention.retentionRate, 1)}</p>
           </div>
           <div className="bg-white p-5 rounded-xl border-2 border-emerald-200 shadow-sm text-center">
             <p className="text-xs text-emerald-600 mb-1">신규 유입</p>
-            <p className="text-2xl font-bold text-emerald-600">{d.retention.newUsers}명</p>
-            <p className="text-xs text-emerald-500 font-bold mt-1">Sim2의 {d.retention.newRatio}%</p>
+            <p className="text-2xl font-bold text-emerald-600">{formatNumber(d.retention.newUsers)}명</p>
+            <p className="text-xs text-emerald-500 font-bold mt-1">Sim2의 {formatPercent(d.retention.newRatio, 1)}</p>
           </div>
           <div className="bg-white p-5 rounded-xl border border-red-200 shadow-sm text-center">
             <p className="text-xs text-red-500 mb-1">이탈 (Churn)</p>
-            <p className="text-2xl font-bold text-red-500">{d.retention.churned}명</p>
+            <p className="text-2xl font-bold text-red-500">{formatNumber(d.retention.churned)}명</p>
           </div>
           <div className="bg-gradient-to-br from-cyan-50 to-emerald-50 p-5 rounded-xl border border-cyan-200 shadow-sm text-center">
             <p className="text-xs text-gray-500 mb-1">순 증가</p>
-            <p className="text-2xl font-bold text-gray-900">+{d.retention.newUsers - d.retention.churned}명</p>
-            <p className="text-xs text-gray-400 mt-1">{d.retention.sim1Agents} → {d.retention.sim2Agents} 에이전트</p>
+            <p className="text-2xl font-bold text-gray-900">+{formatNumber(d.retention.newUsers - d.retention.churned)}명</p>
+            <p className="text-xs text-gray-400 mt-1">{formatNumber(d.retention.sim1Agents)} → {formatNumber(d.retention.sim2Agents)} 에이전트</p>
           </div>
         </div>
       </div>
@@ -2032,20 +2555,23 @@ const YReportView = () => {
               <p className="text-white/70 text-xs">GPT-5.2 기반 자동 생성 · 시뮬레이션 데이터 근거</p>
             </div>
           </div>
-          <div className="p-6">
-            <ReactMarkdown
-              components={{
-                p: ({ children }) => <p className="text-sm text-gray-700 leading-relaxed mb-4">{children}</p>,
-                strong: ({ children }) => <strong className="font-bold text-gray-900">{children}</strong>,
-                ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700 mb-4">{children}</ol>,
-                li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-              }}
-            >
-              {d.llmSummary}
-            </ReactMarkdown>
-          </div>
+          {d.llmSummary ? (
+            <article className="p-6 bg-amber-50/40 rounded-b-2xl">
+              <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-4">AI 분석 결과</p>
+              <p
+                className="text-sm text-gray-700"
+                style={{ whiteSpace: 'pre-wrap', lineHeight: 1.9 }}
+              >
+                {d.llmSummary}
+              </p>
+            </article>
+          ) : (
+            <div className="p-6 text-sm text-gray-400 text-center">요약 내용이 없습니다.</div>
+          )}
         </div>
       </div>
+
+      </> /* end {d && <>} */}
     </div>
   );
 };
@@ -2196,7 +2722,7 @@ const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authView, setAuthView] = useState('login'); // 'login' | 'signup'
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false); // kept for layout guard; no longer set
   const [completedSteps, setCompletedSteps] = useState([]);
 
   const changeTab = (tab) => {
@@ -2207,18 +2733,121 @@ const App = () => {
     setCompletedSteps(steps.slice(0, idx));
   };
 
-  /* --- Data Loading --- */
-  const { stats, stores } = realData;
-  const [selectedStoreId, setSelectedStoreId] = useState(stores[0].id);
-  const selectedStoreData = stores.find(s => s.id === selectedStoreId) || stores[0];
-  const [selectedSolutions, setSelectedSolutions] = useState([]); // Lifted state for selected solutions
+  /* --- Store Data (API) --- */
+  const [stores, setStores] = useState([]);
+  const [storeTotal, setStoreTotal] = useState(0);
+  const [storeOffset, setStoreOffset] = useState(0);
+  const [isLoadingStores, setIsLoadingStores] = useState(false);
+  const [storeError, setStoreError] = useState(null); // { code, message } | null
+  const [storeSearchQuery, setStoreSearchQuery] = useState('');
+
+  const [selectedStoreId, setSelectedStoreId] = useState(null);
+  const [selectedSolutions, setSelectedSolutions] = useState([]);
+
+  // Simulation job state — set in SimulationView, consumed in SimulationMap
+  const [simJobId, setSimJobId] = useState(null);
+  const [simTimeoutMs, setSimTimeoutMs] = useState(30 * 60 * 1000);
+  const [simMaxRetries, setSimMaxRetries] = useState(450);
+
+  // Initialise selectedStoreId to first store once data arrives
+  useEffect(() => {
+    if (stores.length > 0 && selectedStoreId === null) {
+      setSelectedStoreId(stores[0].id);
+    }
+  }, [stores, selectedStoreId]);
+
+  // Debounced fetch with AbortController cleanup
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const doFetch = async () => {
+      setIsLoadingStores(true);
+      setStoreError(null);
+      try {
+        const resp = await fetchStores({
+          q: storeSearchQuery || undefined,
+          limit: 50,
+          offset: 0,
+          signal: controller.signal,
+        });
+        const norm = normalizeStoresResponse(resp);
+        setStores(norm.items);
+        setStoreTotal(norm.total);
+        setStoreOffset(0);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          setStoreError({ code: err.code ?? null, message: err.message ?? '매장 데이터를 불러오지 못했습니다.' });
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingStores(false);
+        }
+      }
+    };
+
+    // No delay on initial empty query; 300 ms debounce on search input
+    const delay = storeSearchQuery ? 300 : 0;
+    const timer = setTimeout(doFetch, delay);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [storeSearchQuery]);
+
+  // Load next page of stores and append
+  const handleLoadMoreStores = useCallback(async () => {
+    const nextOffset = storeOffset + 50;
+    if (nextOffset >= storeTotal) return;
+
+    const controller = new AbortController();
+    setIsLoadingStores(true);
+    try {
+      const resp = await fetchStores({
+        q: storeSearchQuery || undefined,
+        limit: 50,
+        offset: nextOffset,
+        signal: controller.signal,
+      });
+      const norm = normalizeStoresResponse(resp);
+      setStores(prev => [...prev, ...norm.items]);
+      setStoreOffset(nextOffset);
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        setStoreError({ code: err.code ?? null, message: err.message ?? '더 보기 로드 실패' });
+      }
+    } finally {
+      setIsLoadingStores(false);
+    }
+  }, [storeSearchQuery, storeOffset, storeTotal]);
+
+  // Derive summary stats from loaded stores
+  const stats = useMemo(() => {
+    const sentimentList = stores.filter(s => typeof s.sentiment === 'number');
+    const avgSentiment = sentimentList.length > 0
+      ? (sentimentList.reduce((sum, s) => sum + s.sentiment, 0) / sentimentList.length).toFixed(2)
+      : '—';
+    const revenueList = stores.filter(s => typeof s.revenue === 'number');
+    const avgRevenue = revenueList.length > 0
+      ? `₩${Math.round(revenueList.reduce((sum, s) => sum + s.revenue, 0) / revenueList.length).toLocaleString()}`
+      : '—';
+    return {
+      storeCount: storeTotal || stores.length,
+      avgSentiment,
+      totalAgents: '160',
+      avgRevenue,
+    };
+  }, [stores, storeTotal]);
+
+  const selectedStoreData = (selectedStoreId && stores.find(s => s.id === selectedStoreId)) || stores[0] || null;
+  // Safe fallback so downstream views never receive null
+  const safeStoreData = selectedStoreData ?? {
+    id: '', name: '—', address: '', lat: null, lng: null,
+    sentiment: null, revenue: null, grade: null, rankPercent: null,
+  };
 
   const handleAnalyze = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      changeTab('verification');
-    }, 1500);
+    changeTab('verification');
   };
 
   const renderContent = () => {
@@ -2232,26 +2861,33 @@ const App = () => {
       );
     }
 
+    const dashboardView = (
+      <DashboardView
+        stats={stats}
+        stores={stores}
+        storeTotal={storeTotal}
+        onAnalyze={handleAnalyze}
+        selectedStoreId={selectedStoreId}
+        onSelectStore={setSelectedStoreId}
+        isLoadingStores={isLoadingStores}
+        storeError={storeError}
+        onSearchQueryChange={setStoreSearchQuery}
+        onLoadMore={handleLoadMoreStores}
+      />
+    );
+
     switch (activeTab) {
-      case 'dashboard': return (
-        <DashboardView
-          stats={stats}
-          stores={stores}
-          onAnalyze={handleAnalyze}
-          selectedStoreId={selectedStoreId}
-          onSelectStore={setSelectedStoreId}
-        />
-      );
+      case 'dashboard': return dashboardView;
       case 'verification': return (
         <VerificationView
-          data={selectedStoreData}
+          data={safeStoreData}
           onVerified={() => changeTab('x-report')}
           onBack={() => changeTab('dashboard')}
         />
       );
       case 'x-report': return (
         <XReportView
-          data={selectedStoreData}
+          storeData={safeStoreData}
           onNext={() => changeTab('simulation')}
           selectedSolutions={selectedSolutions}
           onSelectSolution={setSelectedSolutions}
@@ -2259,35 +2895,35 @@ const App = () => {
       );
       case 'simulation': return (
         <SimulationView
-          data={selectedStoreData}
-          onComplete={() => changeTab('simulation_map')}
+          data={safeStoreData}
+          onJobCreated={(jobId, timeoutMs, maxRetries) => {
+            setSimJobId(jobId);
+            setSimTimeoutMs(timeoutMs);
+            setSimMaxRetries(maxRetries);
+            changeTab('simulation_map');
+          }}
           selectedSolutions={selectedSolutions}
         />
       );
       case 'simulation_map': return (
         <SimulationMap
-          storeData={selectedStoreData}
+          storeData={safeStoreData}
           onComplete={() => changeTab('y-report')}
+          jobId={simJobId}
+          timeoutMs={simTimeoutMs}
+          maxRetries={simMaxRetries}
         />
       );
       case 'mypage': return (
         <MyPageView
-          data={selectedStoreData}
+          data={safeStoreData}
           onBack={() => changeTab('dashboard')}
           onManageMembership={() => setActiveTab('pricing')}
         />
       );
-      case 'y-report': return <YReportView />;
+      case 'y-report': return <YReportView storeData={safeStoreData} selectedSolutions={selectedSolutions} />;
       case 'pricing': return <PricingView />;
-      default: return (
-        <DashboardView
-          stats={stats}
-          stores={stores}
-          onAnalyze={handleAnalyze}
-          selectedStoreId={selectedStoreId}
-          onSelectStore={setSelectedStoreId}
-        />
-      );
+      default: return dashboardView;
     }
   };
 
