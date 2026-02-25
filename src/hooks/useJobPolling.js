@@ -167,15 +167,23 @@ export function useJobPolling(jobId, {
         timer = setTimeout(poll, nextInterval);
 
       } catch (err) {
-        if (err.name === 'AbortError' || stopped) return;
+        if (stopped) return;
 
-        // 5xx — stop immediately
-        if (err.status != null && err.status >= 500) {
-          fail(err.message ?? '서버 오류가 발생했습니다.', 'SERVER_5XX');
+        // AbortError: either our own cleanup (stopped=true, already guarded above)
+        // or client.js's internal 10-second request timeout (transient) — retry.
+        // 5xx: transient server error — retry with backoff.
+        if (err.name === 'AbortError' || (err.status != null && err.status >= 500)) {
+          attempt++;
+          setState(s => ({ ...s, attempt }));
+          if (attempt >= maxRetries) {
+            fail('최대 재시도 횟수를 초과하였습니다.', 'MAX_RETRIES_EXCEEDED');
+            return;
+          }
+          timer = setTimeout(poll, Math.min(maxIntervalMs * 2, 10_000));
           return;
         }
 
-        // Other network / client error
+        // Other network / client error (4xx etc.) — fatal
         fail(
           err.message ?? '알 수 없는 오류가 발생했습니다.',
           err.code ?? null,

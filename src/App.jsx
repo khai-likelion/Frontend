@@ -1373,13 +1373,13 @@ const SimulationView = ({ data, onJobCreated, selectedSolutions = [] }) => {
   };
 
   const durationOptions = [
-    { id: '1day',    label: '1일',   credits: 3,   estimatedTime: '약 20~30분' },
-    { id: '1week',   label: '1주일', credits: 10,  estimatedTime: '약 1시간' },
-    { id: '2weeks',  label: '2주일', credits: 20,  estimatedTime: '약 2시간' },
-    { id: '1month',  label: '1개월', credits: 35,  estimatedTime: '약 4시간' },
-    { id: '3months', label: '3개월', credits: 100, estimatedTime: '약 12시간' },
-    { id: '6months', label: '6개월', credits: 180, estimatedTime: '약 24시간' },
-    { id: '1year',   label: '1년',   credits: 330, estimatedTime: '약 2일' },
+    { id: '1day',    label: '1일',   credits: 3,   estimatedTime: '약 10~15분' },
+    { id: '1week',   label: '1주일', credits: 10,  estimatedTime: '약 1~2시간' },
+    { id: '2weeks',  label: '2주일', credits: 20,  estimatedTime: '약 2~4시간' },
+    { id: '1month',  label: '1개월', credits: 35,  estimatedTime: '약 8시간' },
+    { id: '3months', label: '3개월', credits: 100, estimatedTime: '약 24시간' },
+    { id: '6months', label: '6개월', credits: 180, estimatedTime: '약 2일' },
+    { id: '1year',   label: '1년',   credits: 330, estimatedTime: '약 4일' },
   ];
 
   const selectedCredits = durationOptions.find(d => d.id === duration)?.credits || 0;
@@ -1693,7 +1693,7 @@ const ChangeBadge = ({ value, suffix = '%', showPlus = true }) => {
 const Y_REPORT_JOB_KEY = 'pending_y_report_job';
 const Y_REPORT_JOB_TTL = 600_000; // 10 minutes
 
-const YReportView = ({ storeData, selectedSolutions = [] }) => {
+const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
   const [activeRatingTab, setActiveRatingTab] = useState('taste');
 
   // ── API / Job state ───────────────────────────────────────────────────
@@ -1764,10 +1764,7 @@ const YReportView = ({ storeData, selectedSolutions = [] }) => {
     const controller = new AbortController();
     try {
       const payload = {
-        storeId: storeData?.id || undefined,
-        selectedStrategyIds: selectedSolutions
-          .map(s => s.id ?? s.title)
-          .filter(Boolean),
+        simulation_id: simId,
       };
       const result = await createYReport(payload, { signal: controller.signal });
       // Persist for TTL reconnect
@@ -2748,6 +2745,7 @@ const App = () => {
   const [simJobId, setSimJobId] = useState(null);
   const [simTimeoutMs, setSimTimeoutMs] = useState(30 * 60 * 1000);
   const [simMaxRetries, setSimMaxRetries] = useState(450);
+  const [simId, setSimId] = useState(null); // resultId from completed simulation job → Y-Report의 simulation_id
 
   // Initialise selectedStoreId to first store once data arrives
   useEffect(() => {
@@ -2908,7 +2906,7 @@ const App = () => {
       case 'simulation_map': return (
         <SimulationMap
           storeData={safeStoreData}
-          onComplete={() => changeTab('y-report')}
+          onComplete={(resultId) => { setSimId(resultId); changeTab('y-report'); }}
           jobId={simJobId}
           timeoutMs={simTimeoutMs}
           maxRetries={simMaxRetries}
@@ -2921,7 +2919,7 @@ const App = () => {
           onManageMembership={() => setActiveTab('pricing')}
         />
       );
-      case 'y-report': return <YReportView storeData={safeStoreData} selectedSolutions={selectedSolutions} />;
+      case 'y-report': return <YReportView storeData={safeStoreData} selectedSolutions={selectedSolutions} simId={simId} />;
       case 'pricing': return <PricingView />;
       default: return dashboardView;
     }
