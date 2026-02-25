@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Map, { Marker } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { AgentMarker } from './AgentMarker';
@@ -101,7 +101,7 @@ function lerp(current, target, t) {
 
 const AGENT_COUNT = 160;
 
-export default function SimulationMap({ storeData, onComplete, jobId, timeoutMs = 30 * 60 * 1000, maxRetries = 450 }) {
+export default function SimulationMap({ storeData, onComplete, jobId, onRetry, timeoutMs = 2 * 60 * 60 * 1000, maxRetries = Infinity }) {
     const [viewState, setViewState] = useState({
         ...MANGWON_COORDS,
         latitude: storeData?.lat || MANGWON_COORDS.latitude,
@@ -128,6 +128,9 @@ export default function SimulationMap({ storeData, onComplete, jobId, timeoutMs 
     const [simStatus, setSimStatus] = useState('running');
     const [statusText, setStatusText] = useState('시뮬레이션 중입니다...');
     const [pollError, setPollError] = useState(null);
+    const [simResultId, setSimResultId] = useState(null);
+    const [pollingEnabled, setPollingEnabled] = useState(true);
+    const [lastPolledAt, setLastPolledAt] = useState(null);
 
     // ── 5초 후 상태 텍스트 업데이트 (항상) ──
     useEffect(() => {
@@ -148,20 +151,47 @@ export default function SimulationMap({ storeData, onComplete, jobId, timeoutMs 
     }, [jobId]);
 
     // ── 실제 잡 폴링 (jobId가 있을 때) ──
-    useJobPolling(jobId, {
-        enabled: !!jobId,
+    const { attempt } = useJobPolling(jobId, {
+        enabled: !!jobId && pollingEnabled,
         timeoutMs,
         maxRetries,
-        onCompleted: () => {
+        onCompleted: (resultId) => {
+            setSimResultId(resultId);
             setSimStatus('done');
             setStatusText('최종 보고서가 준비되었습니다!');
+            // Auto-advance after 1.5s so user doesn't miss the small overlay button
+            setTimeout(() => onComplete(resultId), 1500);
         },
-        onFailed: (message) => {
-            setPollError(message);
-            setSimStatus('error');
-            setStatusText('시뮬레이션 오류가 발생했습니다.');
+        onFailed: (message, code) => {
+            if (code === 'TIMEOUT' || code === 'MAX_RETRIES_EXCEEDED') {
+                setSimStatus('timeout');
+                setStatusText('예상보다 오래 걸리고 있습니다.');
+            } else {
+                setPollError(message);
+                setSimStatus('error');
+                setStatusText('시뮬레이션 오류가 발생했습니다.');
+            }
         },
     });
+
+    // ── lastPolledAt: 폴링 시도마다 갱신 ──
+    useEffect(() => {
+        if (attempt > 0) setLastPolledAt(new Date());
+    }, [attempt]);
+
+    // ── 계속 대기: pollingEnabled false → true 토글로 훅 재시작 ──
+    useEffect(() => {
+        if (!pollingEnabled) {
+            const t = setTimeout(() => setPollingEnabled(true), 100);
+            return () => clearTimeout(t);
+        }
+    }, [pollingEnabled]);
+
+    const handleContinueWaiting = useCallback(() => {
+        setSimStatus('running');
+        setStatusText('계속 대기 중입니다...');
+        setPollingEnabled(false);
+    }, []);
 
     // ── 메인 시뮬레이션 루프 (simStatus === 'running'일 때만 이동) ──
     useEffect(() => {
@@ -324,6 +354,45 @@ export default function SimulationMap({ storeData, onComplete, jobId, timeoutMs 
                                         <span className="text-sm font-bold text-green-400 animate-pulse">{statusText}</span>
                                     </div>
                                     <p className="text-[10px] text-gray-500">Y-Report 생성을 위해 데이터를 수집하고 있습니다</p>
+                                    {jobId && (
+                                        <p className="text-[9px] text-gray-600">
+                                            Job #{jobId} · 폴링 {attempt}회
+                                        </p>
+                                    )}
+                                    {lastPolledAt && (
+                                        <p className="text-[9px] text-gray-600">
+                                            마지막 확인: {lastPolledAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                        </p>
+                                    )}
+                                </div>
+                            ) : simStatus === 'timeout' ? (
+                                <div className="space-y-2 animate-fade-in">
+                                    <div className="text-center">
+                                        <div className="text-sm font-bold text-yellow-400 mb-1">⏱ {statusText}</div>
+                                        <p className="text-[10px] text-gray-400">시뮬레이션이 아직 진행 중일 수 있습니다.</p>
+                                    </div>
+                                    <div className="flex flex-col gap-1.5">
+                                        <button
+                                            onClick={handleContinueWaiting}
+                                            className="w-full bg-yellow-600 hover:bg-yellow-500 text-white py-2 rounded-xl text-xs font-bold transition-all"
+                                        >
+                                            계속 대기
+                                        </button>
+                                        <div className="flex gap-1.5">
+                                            <button
+                                                onClick={() => window.location.reload()}
+                                                className="flex-1 bg-white/10 hover:bg-white/20 text-white py-2 rounded-xl text-xs font-bold transition-all"
+                                            >
+                                                새로고침
+                                            </button>
+                                            <button
+                                                onClick={onRetry || handleContinueWaiting}
+                                                className="flex-1 bg-white/10 hover:bg-white/20 text-white py-2 rounded-xl text-xs font-bold transition-all"
+                                            >
+                                                다시 시도
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             ) : simStatus === 'error' ? (
                                 <div className="space-y-2 animate-fade-in">
@@ -340,7 +409,7 @@ export default function SimulationMap({ storeData, onComplete, jobId, timeoutMs 
                                         <div className="text-sm font-bold text-green-400 mb-1">✅ {statusText}</div>
                                     </div>
                                     <button
-                                        onClick={onComplete}
+                                        onClick={() => onComplete(simResultId)}
                                         className="w-full bg-green-600 hover:bg-green-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-green-500/20"
                                     >
                                         최종 보고서 보러 가기 <ArrowRight size={18} />
