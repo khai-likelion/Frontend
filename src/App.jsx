@@ -883,7 +883,7 @@ const VerificationView = ({ data, onVerified, onBack }) => {
   );
 };
 
-const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSolution }) => {
+const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSolution, xReportData, onXReportDataChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState(null);
 
@@ -891,7 +891,7 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
   const [isCreating, setIsCreating] = useState(false);
   const [isFetchingResult, setIsFetchingResult] = useState(false);
   const [jobId, setJobId] = useState(null);
-  const [xReportData, setXReportData] = useState(null);
+  const setXReportData = onXReportDataChange;
   const [createError, setCreateError] = useState(null); // { message, code }
 
   // Update selectedMetric when xReportData changes
@@ -981,6 +981,7 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
             </div>
             <p className="text-gray-500 text-sm">GPT-5.2 기반 AI 분석 리포트 — 매장 전략 처방전</p>
           </div>
+          {d && (
           <div className="flex items-center gap-6">
             {/* Action Buttons in Header */}
             <div className="flex gap-2">
@@ -1030,6 +1031,7 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
               </div>
             </div>
           </div>
+          )}
         </div>
 
       {/* ══════════════════ X-Report 생성 UI ══════════════════ */}
@@ -1206,51 +1208,52 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
                         <div
                           key={idx}
                           onClick={() => toggleSolution(sol)}
-                          className={`relative bg-white p-4 rounded-xl border hover:shadow-lg cursor-pointer transition-all duration-300 group flex flex-col h-full hover:z-50 
+                          style={{ isolation: 'isolate' }}
+                          className={`relative bg-white p-4 rounded-xl border cursor-pointer transition-all duration-200 group flex flex-col min-h-[100px] hover:z-50
                           ${isSelected
                               ? 'border-red-500 ring-2 ring-red-100 bg-red-50/10'
                               : 'border-gray-200'}
-                          ${catIdx === 0 && !isSelected ? 'hover:border-red-400' : ''}
-                          ${catIdx === 1 && !isSelected ? 'hover:border-blue-400' : ''}
-                          ${catIdx === 2 && !isSelected ? 'hover:border-green-400' : ''}
                         `}
                         >
                           {isSelected && (
-                            <div className="absolute top-2 right-2 text-red-600 bg-white rounded-full p-1 shadow-sm z-30">
-                              <CheckCircle2 size={16} fill="currentColor" className="text-white" />
+                            <div className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-sm z-30">
+                              <CheckCircle2 size={16} className="text-red-500" fill="currentColor" />
                             </div>
                           )}
-                          <div className="font-bold text-gray-900 mb-2 text-sm leading-snug relative z-10">{sol.title}</div>
-                          <div className="text-xs text-gray-500 pt-2 border-t border-gray-50 mt-auto relative z-10 group-hover:opacity-0 transition-opacity">{sol.desc}</div>
+                          {/* Default: title (clamped) + category tag */}
+                          <div className="flex flex-col gap-2">
+                            <div className="font-bold text-gray-900 text-sm leading-snug line-clamp-3">"{sol.title}"</div>
+                            <span className={`self-start text-xs font-medium px-2 py-0.5 rounded-full mt-1 ${catIdx === 0 ? 'text-red-600 bg-red-50' : catIdx === 1 ? 'text-blue-600 bg-blue-50' : 'text-green-600 bg-green-50'}`}>
+                              {sol.category}
+                            </span>
+                          </div>
 
                           {/* Hover Overlay */}
-                          <div className={`absolute left-[-1px] top-[-1px] w-[calc(100%+2px)] min-h-[calc(100%+2px)] h-auto bg-white p-4 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 rounded-xl border shadow-xl ${catIdx === 0 ? 'border-red-400 shadow-red-100' : catIdx === 1 ? 'border-blue-400 shadow-blue-100' : 'border-green-400 shadow-green-100'}`}>
-                            <div className="space-y-3">
-                              {sol.execution && (
-                                <div>
-                                  <div className={`text-[10px] font-bold uppercase mb-1 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
-                                    <span className="text-lg">💡</span> 이렇게 실행해보세요
-                                  </div>
-                                  <div className="text-xs text-gray-800 leading-relaxed font-medium">
-                                    <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
-                                      {sol.execution}
-                                    </ReactMarkdown>
-                                  </div>
+                          <div className={`absolute left-[-1px] top-[-1px] w-[calc(100%+2px)] bg-white p-4 flex flex-col gap-3 pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-50 rounded-xl border shadow-xl ${catIdx === 0 ? 'border-red-400 shadow-red-100' : catIdx === 1 ? 'border-blue-400 shadow-blue-100' : 'border-green-400 shadow-green-100'}`}>
+                            {sol.execution && (
+                              <div>
+                                <div className={`text-xs font-bold mb-2 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
+                                  <span className="text-base">💡</span> 이렇게 실행해보세요
                                 </div>
-                              )}
-                              {sol.effect && (
-                                <div>
-                                  <div className={`text-[10px] font-bold uppercase mb-1 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
-                                    <span className="text-lg">📈</span> 기대되는 변화
-                                  </div>
-                                  <div className="text-xs text-gray-600 leading-relaxed">
-                                    <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
-                                      {sol.effect}
-                                    </ReactMarkdown>
-                                  </div>
+                                <div className="text-xs text-gray-700 leading-relaxed">
+                                  <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
+                                    {sol.execution}
+                                  </ReactMarkdown>
                                 </div>
-                              )}
-                            </div>
+                              </div>
+                            )}
+                            {sol.effect && (
+                              <div>
+                                <div className={`text-[10px] font-bold mb-2 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
+                                  <span className="text-base">📈</span> 기대되는 변화
+                                </div>
+                                <div className="text-xs text-gray-500 leading-relaxed">
+                                  <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
+                                    {sol.effect}
+                                  </ReactMarkdown>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
@@ -2740,6 +2743,7 @@ const App = () => {
 
   const [selectedStoreId, setSelectedStoreId] = useState(null);
   const [selectedSolutions, setSelectedSolutions] = useState([]);
+  const [xReportData, setXReportData] = useState(null);
 
   // Simulation job state — set in SimulationView, consumed in SimulationMap
   const [simJobId, setSimJobId] = useState(null);
@@ -2889,6 +2893,8 @@ const App = () => {
           onNext={() => changeTab('simulation')}
           selectedSolutions={selectedSolutions}
           onSelectSolution={setSelectedSolutions}
+          xReportData={xReportData}
+          onXReportDataChange={setXReportData}
         />
       );
       case 'simulation': return (
