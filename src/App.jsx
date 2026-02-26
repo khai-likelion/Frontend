@@ -1,3 +1,4 @@
+const USE_MOCK_DATA = true;
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'; // Force rebuild for Vercel
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -89,43 +90,43 @@ const simulationData = [
 const MyPageView = ({ data, onBack, onManageMembership }) => {
   const [mapReady, setMapReady] = useState(false);
 
+  const mapContainerRef = useRef(null);
+
   // Initialize Kakao Map with retry logic
   useEffect(() => {
-    const loadMap = () => {
-      if (window.kakao && window.kakao.maps) {
-        window.kakao.maps.load(() => {
-          const container = document.getElementById('mypage-map');
-          if (container) {
-            const mapLat = data?.lat || MANGWON_CENTER.lat;
-            const mapLng = data?.lng || MANGWON_CENTER.lng;
-            const zoomLevel = data?.lat ? 3 : 5;
-            const options = {
-              center: new window.kakao.maps.LatLng(mapLat, mapLng),
-              level: zoomLevel,
-            };
-            const map = new window.kakao.maps.Map(container, options);
+    const initMap = () => {
+      const container = mapContainerRef.current;
+      if (!container || !window.kakao || !window.kakao.maps) return;
 
-            if (data?.lat && data?.lng) {
-              const marker = new window.kakao.maps.Marker({
-                position: new window.kakao.maps.LatLng(data.lat, data.lng),
-              });
-              marker.setMap(map);
-            }
-            setMapReady(true);
-          }
-        });
-        return true;
-      }
-      return false;
+      window.kakao.maps.load(() => {
+        const mapLat = data?.lat || MANGWON_CENTER.lat;
+        const mapLng = data?.lng || MANGWON_CENTER.lng;
+        const zoomLevel = data?.lat ? 3 : 5;
+        const options = {
+          center: new window.kakao.maps.LatLng(mapLat, mapLng),
+          level: zoomLevel,
+        };
+        const map = new window.kakao.maps.Map(container, options);
+
+        if (data?.lat && data?.lng) {
+          const marker = new window.kakao.maps.Marker({
+            position: new window.kakao.maps.LatLng(data.lat, data.lng),
+          });
+          marker.setMap(map);
+        }
+        setMapReady(true);
+      });
     };
 
-    // Try loading immediately
-    if (!loadMap()) {
+    if (window.kakao && window.kakao.maps) {
+      initMap();
+    } else {
       let attempts = 0;
       const intervalId = setInterval(() => {
         attempts++;
-        if (loadMap() || attempts >= 10) {
+        if ((window.kakao && window.kakao.maps) || attempts >= 20) {
           clearInterval(intervalId);
+          if (window.kakao && window.kakao.maps) initMap();
         }
       }, 500);
       return () => clearInterval(intervalId);
@@ -156,7 +157,7 @@ const MyPageView = ({ data, onBack, onManageMembership }) => {
 
             {/* Map Area */}
             <div className="h-48 bg-gray-100 relative">
-              <div id="mypage-map" className="w-full h-full"></div>
+              <div ref={mapContainerRef} className="w-full h-full"></div>
               {/* 지도 초기화 전 오버레이 */}
               {!mapReady && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-200/50">
@@ -718,46 +719,46 @@ const VerificationView = ({ data, onVerified, onBack }) => {
   const [error, setError] = useState('');
   const [mapReady, setMapReady] = useState(false);
 
+  const mapContainerRef = useRef(null);
+
   // Initialize Kakao Map with retry logic
   useEffect(() => {
-    const loadMap = () => {
-      if (window.kakao && window.kakao.maps) {
-        window.kakao.maps.load(() => {
-          const container = document.getElementById('kakao-map');
-          if (container) {
-            // lat/lng 없으면 망원동 중심으로 폴백
-            const mapLat = data?.lat || MANGWON_CENTER.lat;
-            const mapLng = data?.lng || MANGWON_CENTER.lng;
-            const zoomLevel = data?.lat ? 3 : 5; // 정확한 좌표 없으면 넓게
-            const options = {
-              center: new window.kakao.maps.LatLng(mapLat, mapLng),
-              level: zoomLevel,
-            };
-            const map = new window.kakao.maps.Map(container, options);
+    const initMap = () => {
+      const container = mapContainerRef.current;
+      if (!container || !window.kakao || !window.kakao.maps) return;
 
-            // 실제 좌표가 있을 때만 마커 표시
-            if (data?.lat && data?.lng) {
-              const marker = new window.kakao.maps.Marker({
-                position: new window.kakao.maps.LatLng(data.lat, data.lng),
-              });
-              marker.setMap(map);
-            }
-            setMapReady(true);
-          }
-        });
-        return true;
-      }
-      return false;
+      window.kakao.maps.load(() => {
+        // lat/lng 없으면 망원동 중심으로 폴백
+        const mapLat = data?.lat || MANGWON_CENTER.lat;
+        const mapLng = data?.lng || MANGWON_CENTER.lng;
+        const zoomLevel = data?.lat ? 3 : 5; // 정확한 좌표 없으면 넓게
+        const options = {
+          center: new window.kakao.maps.LatLng(mapLat, mapLng),
+          level: zoomLevel,
+        };
+        const map = new window.kakao.maps.Map(container, options);
+
+        // 실제 좌표가 있을 때만 마커 표시
+        if (data?.lat && data?.lng) {
+          const marker = new window.kakao.maps.Marker({
+            position: new window.kakao.maps.LatLng(data.lat, data.lng),
+          });
+          marker.setMap(map);
+        }
+        setMapReady(true);
+      });
     };
 
-    // Try loading immediately
-    if (!loadMap()) {
-      // If not loaded, retry every 500ms for 5 seconds
+    if (window.kakao && window.kakao.maps) {
+      initMap();
+    } else {
+      // If not loaded, retry every 500ms for 10 seconds
       let attempts = 0;
       const intervalId = setInterval(() => {
         attempts++;
-        if (loadMap() || attempts >= 10) {
+        if ((window.kakao && window.kakao.maps) || attempts >= 20) {
           clearInterval(intervalId);
+          if (window.kakao && window.kakao.maps) initMap();
         }
       }, 500);
       return () => clearInterval(intervalId);
@@ -798,7 +799,7 @@ const VerificationView = ({ data, onVerified, onBack }) => {
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
         {/* Map Section */}
         <div className="h-64 w-full bg-gray-100 relative">
-          <div id="kakao-map" className="w-full h-full"></div>
+          <div ref={mapContainerRef} className="w-full h-full"></div>
 
           {/* Overlay: SDK 로드 실패 또는 지도 초기화 전 */}
           {!mapReady && (
@@ -1593,7 +1594,7 @@ const xReportMockData = {
   ]
 };
 
-const USE_MOCK_DATA = true;
+
 
 const yReportMockData = {
   // 지표 1: 기본 방문 지표 (돼지야 기준: 방문수 142->189, 점유율 10.4%->13.8% 가정)
