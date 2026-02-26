@@ -193,12 +193,18 @@ export default function SimulationMap({ storeData, onComplete, jobId, onRetry, t
         setPollingEnabled(false);
     }, []);
 
+    // ── 실제 현재 시간 업데이트 (1초마다) ──
+    useEffect(() => {
+        const clockInterval = setInterval(() => {
+            setSimTime(new Date());
+        }, 1000);
+        return () => clearInterval(clockInterval);
+    }, []);
+
     // ── 메인 시뮬레이션 루프 (simStatus === 'running'일 때만 이동) ──
     useEffect(() => {
         const interval = setInterval(() => {
             if (simStatus === 'done') return; // 완료되면 이동 중지
-
-            setSimTime(prevTime => new Date(prevTime.getTime() + 1000));
 
             setAgents(prevAgents => {
                 const centerLat = storeData?.lat || 37.556;
