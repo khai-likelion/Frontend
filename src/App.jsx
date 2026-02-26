@@ -70,6 +70,7 @@ import { getErrorMessage } from './i18n/errors';
 import { ToastProvider } from './components/ToastProvider';
 import { fetchJob, normalizeJob } from './api/jobs';
 import { formatNumber, formatPercent, clamp } from './utils/format';
+import realData from './data/real_data.json';
 
 // Alias keeps existing call-sites unchanged
 const getJobErrorMessage = getErrorMessage;
@@ -615,7 +616,7 @@ const DashboardView = ({
         <div className="relative z-10 flex flex-col md:flex-row gap-6 items-end">
           <div className="flex-1 space-y-2 w-full relative">
             <label className="text-gray-300 text-sm font-medium">
-              분석할 매장 검색 ({storeTotal ?? stores.length}개 매장 데이터 보유)
+              분석할 매장 검색 (720개 매장 데이터 보유)
             </label>
             <div className="relative group">
               <input
@@ -930,7 +931,22 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
 
     if (USE_MOCK_DATA) {
       setTimeout(() => {
-        setXReportData(xReportMockData);
+        // Find current store in realData.stores to get its specific mock data
+        const currentStoreId = storeData?.id || selectedStoreId;
+        const mockStore = realData.stores.find(s => s.id === currentStoreId) || realData.stores[0];
+
+        const mockDataForStore = {
+          name: mockStore.name,
+          grade: mockStore.grade || 'A',
+          rankPercent: mockStore.rankPercent || 8,
+          description: mockStore.description,
+          fullReport: mockStore.fullReport,
+          radarData: mockStore.radarData,
+          keywords: mockStore.keywords,
+          solutions: mockStore.solutions,
+        };
+
+        setXReportData(mockDataForStore);
         setIsCreating(false);
       }, 1500);
       return;
@@ -1364,6 +1380,15 @@ const SimulationView = ({ data, onJobCreated, selectedSolutions = [] }) => {
     }
     setCreateError(null);
     setIsCreating(true);
+
+    if (USE_MOCK_DATA) {
+      setTimeout(() => {
+        onJobCreated(null, 5000, 2);
+        setIsCreating(false);
+      }, 500);
+      return;
+    }
+
     const controller = new AbortController();
     try {
       const payload = {
@@ -1571,134 +1596,123 @@ const xReportMockData = {
 const USE_MOCK_DATA = true;
 
 const yReportMockData = {
-  // 지표 1: 기본 방문 지표
+  // 지표 1: 기본 방문 지표 (돼지야 기준: 방문수 142->189, 점유율 10.4%->13.8% 가정)
   overview: {
-    sim1: { totalVisits: 142, marketShare: 8.2 },
-    sim2: { totalVisits: 189, marketShare: 10.45 },
+    sim1: { totalVisits: 142, marketShare: 10.4 },
+    sim2: { totalVisits: 189, marketShare: 13.8 },
   },
-  // 워드클라우드 키워드
+  // 워드클라우드 키워드 (돼지야_result.json 기반)
   keywords: {
     sim1: [
-      { text: '가성비', weight: 18 }, { text: '맛있다', weight: 15 },
-      { text: '점심특선', weight: 12 }, { text: '직장인', weight: 11 },
-      { text: '혼밥', weight: 10 }, { text: '가까워서', weight: 9 },
-      { text: '빠른식사', weight: 8 }, { text: '편의성', weight: 7 },
-      { text: '웨이팅길다', weight: 14 }, { text: '메뉴다양', weight: 6 },
+      { text: '고기', weight: 25 }, { text: '청국장', weight: 22 },
+      { text: '비빔국수', weight: 18 }, { text: '친절', weight: 15 },
+      { text: '밑반찬', weight: 12 }, { text: '가성비', weight: 10 },
+      { text: '고사리', weight: 14 }, { text: '위생', weight: 12 },
     ],
     sim2: [
-      { text: '분위기맛집', weight: 22 }, { text: '원격줄서기', weight: 19 },
-      { text: '2인세트', weight: 17 }, { text: '데이트코스', weight: 15 },
-      { text: '맛커스텀', weight: 13 }, { text: '깔끔한매장', weight: 11 },
-      { text: '가성비', weight: 10 }, { text: '직장인', weight: 9 },
-      { text: '인스타감성', weight: 8 }, { text: '재방문의사', weight: 7 },
+      { text: '청결표준', weight: 28 }, { text: '환기강화', weight: 24 },
+      { text: '맛있다', weight: 22 }, { text: '친절사장님', weight: 20 },
+      { text: '2인세트', weight: 18 }, { text: '위생관리', weight: 16 },
+      { text: '고사리일관성', weight: 14 }, { text: '단골혜택', weight: 12 },
     ],
   },
-  // 지표 2: 평점 분포 (KDE-like data points)
+  // 지표 2: 평점 분포 (돼지야 기준: 맛 0.9, 서비스 0.8, 가성비 0.7, 청결 0.6)
   ratingDistribution: {
     taste: {
       sim1: [
-        { score: 1, density: 0.05 }, { score: 1.5, density: 0.08 }, { score: 2, density: 0.15 },
-        { score: 2.5, density: 0.22 }, { score: 3, density: 0.35 }, { score: 3.5, density: 0.42 },
-        { score: 4, density: 0.30 }, { score: 4.5, density: 0.15 }, { score: 5, density: 0.06 },
+        { score: 1, density: 0.02 }, { score: 2, density: 0.05 }, { score: 3, density: 0.15 },
+        { score: 4, density: 0.45 }, { score: 5, density: 0.33 },
       ],
       sim2: [
-        { score: 1, density: 0.02 }, { score: 1.5, density: 0.04 }, { score: 2, density: 0.08 },
-        { score: 2.5, density: 0.14 }, { score: 3, density: 0.25 }, { score: 3.5, density: 0.38 },
-        { score: 4, density: 0.48 }, { score: 4.5, density: 0.32 }, { score: 5, density: 0.12 },
+        { score: 1, density: 0.01 }, { score: 2, density: 0.03 }, { score: 3, density: 0.10 },
+        { score: 4, density: 0.40 }, { score: 5, density: 0.46 },
       ],
     },
-    value: {
+    cleanliness: {
       sim1: [
-        { score: 1, density: 0.08 }, { score: 1.5, density: 0.12 }, { score: 2, density: 0.22 },
-        { score: 2.5, density: 0.30 }, { score: 3, density: 0.38 }, { score: 3.5, density: 0.28 },
-        { score: 4, density: 0.18 }, { score: 4.5, density: 0.10 }, { score: 5, density: 0.04 },
+        { score: 1, density: 0.15 }, { score: 2, density: 0.25 }, { score: 3, density: 0.40 },
+        { score: 4, density: 0.15 }, { score: 5, density: 0.05 },
       ],
       sim2: [
-        { score: 1, density: 0.03 }, { score: 1.5, density: 0.05 }, { score: 2, density: 0.10 },
-        { score: 2.5, density: 0.16 }, { score: 3, density: 0.28 }, { score: 3.5, density: 0.40 },
-        { score: 4, density: 0.45 }, { score: 4.5, density: 0.28 }, { score: 5, density: 0.10 },
+        { score: 1, density: 0.02 }, { score: 2, density: 0.08 }, { score: 3, density: 0.25 },
+        { score: 4, density: 0.45 }, { score: 5, density: 0.20 },
       ],
     },
-    atmosphere: {
+    service: {
       sim1: [
-        { score: 1, density: 0.06 }, { score: 1.5, density: 0.10 }, { score: 2, density: 0.18 },
-        { score: 2.5, density: 0.28 }, { score: 3, density: 0.36 }, { score: 3.5, density: 0.32 },
-        { score: 4, density: 0.22 }, { score: 4.5, density: 0.12 }, { score: 5, density: 0.05 },
+        { score: 1, density: 0.05 }, { score: 2, density: 0.10 }, { score: 3, density: 0.25 },
+        { score: 4, density: 0.50 }, { score: 5, density: 0.10 },
       ],
       sim2: [
-        { score: 1, density: 0.04 }, { score: 1.5, density: 0.06 }, { score: 2, density: 0.12 },
-        { score: 2.5, density: 0.18 }, { score: 3, density: 0.30 }, { score: 3.5, density: 0.38 },
-        { score: 4, density: 0.42 }, { score: 4.5, density: 0.25 }, { score: 5, density: 0.10 },
+        { score: 1, density: 0.02 }, { score: 2, density: 0.05 }, { score: 3, density: 0.20 },
+        { score: 4, density: 0.45 }, { score: 5, density: 0.28 },
       ],
     },
   },
   ratingSummary: {
-    sim1: { avg: 3.42, satisfaction: 31.0 },
-    sim2: { avg: 3.81, satisfaction: 54.5 },
+    sim1: { avg: 3.61, satisfaction: 32.7 },
+    sim2: { avg: 4.15, satisfaction: 58.2 },
   },
-  // 지표 3: 시간대별 트래픽
+  // 지표 3: 시간대별 트래픽 (돼지야 기준: 저녁 17-21시 피크 46.5%)
   hourlyTraffic: [
-    { slot: '아침(07)', sim1: 8, sim2: 12 },
-    { slot: '점심(12)', sim1: 52, sim2: 68 },
-    { slot: '저녁(18)', sim1: 48, sim2: 72 },
-    { slot: '야식(22)', sim1: 34, sim2: 37 },
+    { slot: '아침(07)', sim1: 5, sim2: 6 },
+    { slot: '점심(12)', sim1: 32, sim2: 35 },
+    { slot: '저녁(18)', sim1: 66, sim2: 98 },
+    { slot: '야식(22)', sim1: 39, sim2: 50 },
   ],
-  peakSlot: { sim1: '점심(12)', sim2: '저녁(18)' },
-  // 지표 4: 세대별 증감
+  peakSlot: { sim1: '저녁(18)', sim2: '저녁(18)' },
+  // 지표 4: 세대별 증감 (돼지야 기준: 30대 25.9%, 50대 24.1%)
   generation: [
-    { gen: 'Z1', sim1: 12.5, sim2: 18.2 },
-    { gen: 'Z2', sim1: 28.3, sim2: 31.5 },
-    { gen: 'Y', sim1: 35.2, sim2: 30.1 },
-    { gen: 'X', sim1: 18.0, sim2: 14.8 },
-    { gen: 'S', sim1: 6.0, sim2: 5.4 },
+    { gen: '20대', sim1: 15.0, sim2: 22.5 },
+    { gen: '30대', sim1: 25.9, sim2: 32.4 },
+    { gen: '40대', sim1: 19.7, sim2: 21.0 },
+    { gen: '50대', sim1: 24.1, sim2: 18.2 },
+    { gen: '60대+', sim1: 19.0, sim2: 15.6 },
   ],
-  // 지표 5: 방문 목적
   purpose: [
-    { type: '생활베이스형', sim1Pct: 42.3, sim2Pct: 35.8, sim1Sat: 3.2, sim2Sat: 3.9 },
-    { type: '사적모임형', sim1Pct: 25.1, sim2Pct: 32.4, sim1Sat: 3.5, sim2Sat: 4.1 },
-    { type: '공적모임형', sim1Pct: 18.7, sim2Pct: 19.0, sim1Sat: 3.4, sim2Sat: 3.7 },
-    { type: '가족모임형', sim1Pct: 13.9, sim2Pct: 12.8, sim1Sat: 3.6, sim2Sat: 3.8 },
+    { type: '사적모임', sim1Pct: 35, sim2Pct: 48, sim1Sat: 3.5, sim2Sat: 4.2 },
+    { type: '가족외식', sim1Pct: 25, sim2Pct: 30, sim1Sat: 3.2, sim2Sat: 4.0 },
+    { type: '직장회식', sim1Pct: 30, sim2Pct: 15, sim1Sat: 3.8, sim2Sat: 3.9 },
+    { type: '기타', sim1Pct: 10, sim2Pct: 7, sim1Sat: 3.0, sim2Sat: 3.5 },
   ],
-  // 지표 6: 재방문율
   retention: {
-    sim1Agents: 68, sim2Agents: 89,
-    retained: 42, newUsers: 47, churned: 26,
-    retentionRate: 61.8, newRatio: 52.8,
+    retained: 85,
+    retentionRate: 59.8,
+    newUsers: 104,
+    newRatio: 55.0,
+    churned: 57,
+    sim1Agents: 142,
+    sim2Agents: 189,
   },
-  // 지표 9: 에이전트 유형
   agentType: [
-    { type: '유동', sim1: 58.2, sim2: 52.3 },
-    { type: '상주', sim1: 41.8, sim2: 47.7 },
+    { type: '유동 인구', sim1: 65, sim2: 78 },
+    { type: '상주 고객', sim1: 35, sim2: 22 },
   ],
-  // 지표 10: 성별 구성
   gender: [
-    { label: '남', sim1: 45.2, sim2: 42.8 },
-    { label: '여', sim1: 38.5, sim2: 41.6 },
-    { label: '혼성', sim1: 16.3, sim2: 15.6 },
+    { label: '남성', sim1: 62.6, sim2: 58.0 },
+    { label: '여성', sim1: 37.4, sim2: 42.0 },
   ],
-  // 지표 7: 경쟁 매장 비교 — 항목별 원본 단위 막대그래프용
-  radar: [
-    { metric: '방문수', unit: '명', target_before: 142, target_after: 189, comp1: 210, comp2: 165, comp3: 130 },
-    { metric: '평점', unit: '점', target_before: 3.42, target_after: 3.81, comp1: 3.65, comp2: 3.90, comp3: 3.30 },
-    { metric: '재방문율', unit: '%', target_before: 31, target_after: 44, comp1: 38, comp2: 42, comp3: 28 },
-    { metric: '만족도', unit: '%', target_before: 31, target_after: 55, comp1: 45, comp2: 52, comp3: 35 },
-    { metric: 'Z세대비율', unit: '%', target_before: 41, target_after: 50, comp1: 55, comp2: 48, comp3: 32 },
-  ],
-  radarStores: { comp1: '오시 망원본점', comp2: '마마무식당', comp3: '홍익돈까스' },
-  // 지표 11: 크로스탭 (세대 × 방문목적) — 비율
   crosstab: {
-    generations: ['Z1', 'Z2', 'Y', 'X', 'S'],
-    purposes: ['생활베이스형', '사적모임형', '공적모임형', '가족모임형'],
+    generations: ['20대', '30대', '40대', '50대', '60대+'],
+    purposes: ['사적모임', '가족외식', '직장회식', '기타'],
     sim2: [
+      [45, 20, 10, 25],
+      [50, 25, 15, 10],
       [30, 40, 20, 10],
-      [25, 35, 25, 15],
-      [40, 20, 25, 15],
-      [45, 15, 20, 20],
-      [50, 10, 15, 25],
-    ],
+      [20, 30, 40, 10],
+      [15, 25, 50, 10],
+    ]
   },
-  // 지표 8: LLM 요약
-  // ═══ 역효과 감지 데이터 ═══
+  radarStores: {
+    comp1: '오시 망원본점',
+    comp2: '마마무식당',
+    comp3: '홍익돈까스',
+  },
+  radar: [
+    { metric: '맛', unit: '점', target_before: 90, target_after: 95, comp1: 85, comp2: 80, comp3: 82 },
+    { metric: '위생', unit: '점', target_before: 60, target_after: 85, comp1: 80, comp2: 75, comp3: 88 },
+    { metric: '재방문율', unit: '%', target_before: 45, target_after: 62, comp1: 55, comp2: 48, comp3: 50 },
+  ],
   sideEffects: [
     { type: 'warning', metric: 'Y세대 방문 비중', change: -5.1, unit: '%p', detail: '2인 세트 메뉴 도입이 1인 직장인(Y세대) 방문을 감소시킬 수 있음' },
     { type: 'warning', metric: '점심 시간대 트래픽', change: -12, unit: '%', detail: '피크타임이 저녁으로 전환되며 점심 매출 공백 발생 위험' },
@@ -1706,7 +1720,7 @@ const yReportMockData = {
   ],
   tradeoffs: [
     { gain: 'Z세대(Z1+Z2) 유입', gainVal: '+8.9%p', loss: 'Y세대 이탈', lossVal: '-5.1%p' },
-    { gain: '사적모임형 방문', gainVal: '+7.3%p', loss: '생활베이스형 감소', lossVal: '-6.5%p' },
+    { gain: '사적모임형 방문', gainVal: '+7.3%p', loss: '가족모임형 감소', lossVal: '-6.5%p' },
     { gain: '저녁 트래픽 급증', gainVal: '+50%', loss: '점심 트래픽 하락', lossVal: '-12%' },
     { gain: '분위기 만족도', gainVal: '+0.5점', loss: '가성비 인식', lossVal: '-0.3점' },
   ],
@@ -1718,7 +1732,7 @@ const yReportMockData = {
     negative: 2,
     totalMetrics: 11,
   },
-  llmSummary: `**전략의 효과 분석**\n\n전략 적용 후 '류진'의 방문 수는 +33.1%로 유의미한 증가를 보였습니다. 평균 평점은 3.42점에서 3.81점으로 0.39점 상승하였으며, 만족도(4점 이상)는 31.0%에서 54.5%로 23.5%p 급증하였습니다.\n\n**바뀐 주 고객층의 특성**\n\nZ세대(Z1+Z2) 비율이 40.8%에서 49.7%로 확대되며 젊은 고객층 유입이 두드러졌습니다. 사적모임형 방문이 25.1%→32.4%로 증가하며, 데이트·모임 수요를 성공적으로 흡수했습니다.\n\n**재방문율 및 고객 충성도**\n\n기존 고객 유지율 61.8%로 양호하며, 신규 유입 47명이 이탈 26명을 크게 상회합니다. 장기 충성도 강화를 위해 포인트/쿠폰 제도 도입을 권장합니다.\n\n**향후 권장 사항**\n\n1. 저녁 시간대 집중 프로모션으로 신규 피크타임 매출을 극대화하세요.\n2. Z세대 타겟 SNS 마케팅(인스타감성, 분위기맛집)을 지속 강화하세요.\n3. 점심 시간대 방문 유지를 위해 직장인 대상 신속 서비스 유지가 필요합니다.`,
+  llmSummary: `**돼지야 전략 시뮬레이션 결과 요약**\n\n전략 적용 후 '돼지야'의 방문 수는 +33% 증가하였으며, 특히 저녁 시간대(17-21시) 유입이 두드러졌습니다. \n\n**핵심 성과**\n1. **위생 및 청결 리스크 해결**: '청결 표준화' 솔루션 도입으로 위생 만족도가 60점에서 85점으로 크게 개선되었습니다.\n2. **Z/M세대 유입 확대**: 2인 세트 메뉴와 분위기 개선으로 2030 고객 비중이 40.9%에서 54.9%로 확대되었습니다.\n3. **맛의 우위 고착**: 고사리 품질 표준화를 통해 맛에 대한 일관성을 확보, '맛' 점수가 95점으로 상권 최상위권을 유지했습니다.\n\n**주의 사항**\n- 주말 피크 타임의 높은 혼잡도로 인한 서비스 지연 가능성이 있으니, 서빙 프로세스 최적화를 권장합니다.`
 };
 
 // 워드클라우드 시각화 컴포넌트
@@ -2854,13 +2868,8 @@ const App = () => {
 
       if (USE_MOCK_DATA) {
         setTimeout(() => {
-          setStores([
-            { id: '1', name: '류진 (망원본점)', address: '서울 마포구 망원로 123', lat: 37.5556, lng: 126.9068, sentiment: 88, revenue: 45000000 },
-            { id: '2', name: '오시 망원본점', address: '서울 마포구 망원로 45', lat: 37.5560, lng: 126.9070, sentiment: 82, revenue: 52000000 },
-            { id: '3', name: '마마무식당', address: '서울 마포구 포은로 78', lat: 37.5550, lng: 126.9060, sentiment: 75, revenue: 38000000 },
-            { id: '4', name: '홍익돈까스', address: '서울 마포구 망원동 56-1', lat: 37.5540, lng: 126.9080, sentiment: 79, revenue: 42000000 },
-          ]);
-          setStoreTotal(4);
+          setStores(realData.stores);
+          setStoreTotal(721);
           setIsLoadingStores(false);
         }, 500);
         return;
@@ -2926,21 +2935,14 @@ const App = () => {
 
   // Derive summary stats from loaded stores
   const stats = useMemo(() => {
-    const sentimentList = stores.filter(s => typeof s.sentiment === 'number');
-    const avgSentiment = sentimentList.length > 0
-      ? (sentimentList.reduce((sum, s) => sum + s.sentiment, 0) / sentimentList.length).toFixed(2)
-      : '—';
-    const revenueList = stores.filter(s => typeof s.revenue === 'number');
-    const avgRevenue = revenueList.length > 0
-      ? `₩${Math.round(revenueList.reduce((sum, s) => sum + s.revenue, 0) / revenueList.length).toLocaleString()}`
-      : '—';
+    // Hardcoded stats as per user request
     return {
-      storeCount: storeTotal || stores.length,
-      avgSentiment,
-      totalAgents: '160',
-      avgRevenue,
+      storeCount: '721', // '분석 매장 수' 721
+      avgSentiment: '4.2',
+      totalAgents: '720', // '(720개 매장 데이터 보유)'에 대응
+      avgRevenue: '31,520', // '평균 객단가' 31,520
     };
-  }, [stores, storeTotal]);
+  }, []);
 
   const selectedStoreData = (selectedStoreId && stores.find(s => s.id === selectedStoreId)) || stores[0] || null;
   // Safe fallback so downstream views never receive null

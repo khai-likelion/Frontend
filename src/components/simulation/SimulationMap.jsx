@@ -146,7 +146,7 @@ export default function SimulationMap({ storeData, onComplete, jobId, onRetry, t
         const doneTimer = setTimeout(() => {
             setSimStatus('done');
             setStatusText('최종 보고서가 준비되었습니다!');
-        }, 10000);
+        }, 3000);
         return () => clearTimeout(doneTimer);
     }, [jobId]);
 
