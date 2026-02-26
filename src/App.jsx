@@ -927,6 +927,15 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
     setCreateError(null);
     setXReportData(null);
     setIsCreating(true);
+
+    if (USE_MOCK_DATA) {
+      setTimeout(() => {
+        setXReportData(xReportMockData);
+        setIsCreating(false);
+      }, 1500);
+      return;
+    }
+
     const controller = new AbortController();
     try {
       const result = await createXReport(
@@ -982,289 +991,289 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
             <p className="text-gray-500 text-sm">GPT-5.2 기반 AI 분석 리포트 — 매장 전략 처방전</p>
           </div>
           {d && (
-          <div className="flex items-center gap-6">
-            {/* Action Buttons in Header */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 text-sm transition-colors"
-              >
-                <FileText size={16} className="text-red-500" />
-                전문 보기
-              </button>
-              <button
-                onClick={() => window.print()}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl font-bold hover:bg-black text-sm transition-colors"
-              >
-                <Printer size={16} />
-                PDF 저장
-              </button>
-            </div>
-            <div className="w-px h-8 bg-gray-200"></div>
+            <div className="flex items-center gap-6">
+              {/* Action Buttons in Header */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 text-sm transition-colors"
+                >
+                  <FileText size={16} className="text-red-500" />
+                  전문 보기
+                </button>
+                <button
+                  onClick={() => window.print()}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl font-bold hover:bg-black text-sm transition-colors"
+                >
+                  <Printer size={16} />
+                  PDF 저장
+                </button>
+              </div>
+              <div className="w-px h-8 bg-gray-200"></div>
 
-            <div className="text-right group relative cursor-help">
-              <div className="text-sm text-gray-400 mb-1">종합 등급</div>
-              <div className="text-4xl font-bold font-space text-gray-900">{d?.grade ?? '—'}</div>
-              {/* Tooltip */}
-              <div className="absolute top-full right-0 mt-2 w-52 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
-                {[
-                  { g: 'S', pct: '상위 3%',  desc: '최상위' },
-                  { g: 'A', pct: '상위 10%', desc: '' },
-                  { g: 'B', pct: '상위 30%', desc: '' },
-                  { g: 'C', pct: '상위 70%', desc: '중간층' },
-                  { g: 'D', pct: '상위 90%', desc: '' },
-                  { g: 'E', pct: '상위 97%', desc: '' },
-                  { g: 'F', pct: '하위 3%',  desc: '최하위' },
-                ].map(({ g, pct, desc }) => (
-                  <div key={g} className={`flex justify-between mb-1 ${d?.grade === g ? 'text-red-400 font-bold' : ''}`}>
-                    <span>{g}</span>
-                    <span className="text-gray-400">{pct}{desc ? ` · ${desc}` : ''}</span>
+              <div className="text-right group relative cursor-help">
+                <div className="text-sm text-gray-400 mb-1">종합 등급</div>
+                <div className="text-4xl font-bold font-space text-gray-900">{d?.grade ?? '—'}</div>
+                {/* Tooltip */}
+                <div className="absolute top-full right-0 mt-2 w-52 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                  {[
+                    { g: 'S', pct: '상위 3%', desc: '최상위' },
+                    { g: 'A', pct: '상위 10%', desc: '' },
+                    { g: 'B', pct: '상위 30%', desc: '' },
+                    { g: 'C', pct: '상위 70%', desc: '중간층' },
+                    { g: 'D', pct: '상위 90%', desc: '' },
+                    { g: 'E', pct: '상위 97%', desc: '' },
+                    { g: 'F', pct: '하위 3%', desc: '최하위' },
+                  ].map(({ g, pct, desc }) => (
+                    <div key={g} className={`flex justify-between mb-1 ${d?.grade === g ? 'text-red-400 font-bold' : ''}`}>
+                      <span>{g}</span>
+                      <span className="text-gray-400">{pct}{desc ? ` · ${desc}` : ''}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="w-px h-12 bg-gray-200"></div>
+              <div className="text-right">
+                <div className="text-sm text-gray-400 mb-1">상위</div>
+                <div className="text-4xl font-bold font-space text-red-600">
+                  {d?.rankPercent != null ? `${d.rankPercent}%` : '—'}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ══════════════════ X-Report 생성 UI ══════════════════ */}
+        {!d && (
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 flex flex-col items-center gap-6 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+              <Sparkles size={28} className="text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">X-Report 생성 준비 완료</h2>
+              <p className="text-gray-500 text-sm">AI가 매장을 진단하고 맞춤형 전략 처방전을 생성합니다.</p>
+            </div>
+
+            {/* Progress while polling */}
+            {(isPolling || isFetchingResult) && (
+              <div className="w-full max-w-md">
+                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>처리 중... ({pollStatus})</span>
+                  {progress !== null && <span>{progress}%</span>}
+                </div>
+                <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-red-500 rounded-full transition-all duration-500"
+                    style={{ width: progress !== null ? `${progress}%` : '60%' }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Error */}
+            {createError && (
+              <div className="w-full max-w-md flex items-start gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 text-left">
+                <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  {createError.message}
+                  <button onClick={handleRetry} className="ml-2 underline text-red-500 hover:text-red-700">다시 시도</button>
+                </div>
+              </div>
+            )}
+
+            {!isBusy && !createError && (
+              <button
+                onClick={handleCreate}
+                className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg"
+              >
+                <Sparkles size={18} /> X-Report 생성 시작
+              </button>
+            )}
+
+            {isBusy && !createError && (
+              <button disabled className="bg-gray-400 cursor-not-allowed text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                {isCreating ? '생성 요청 중...' : '분석 중...'}
+              </button>
+            )}
+          </div>
+        )}
+
+        {d && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Interactive Radar Chart */}
+            <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">역량 분석 (Deep-Dive)</h3>
+              <p className="text-sm text-gray-400 mb-6">항목을 클릭하여 상세 분석을 확인하세요.</p>
+              <div className="flex-1 min-h-[300px] relative">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={d?.radarData ?? []}>
+                    <PolarGrid stroke="#f3f4f6" />
+                    <PolarAngleAxis
+                      dataKey="subject"
+                      tick={({ x, y, payload }) => (
+                        <text
+                          x={x} y={y}
+                          dy={4}
+                          textAnchor="middle"
+                          fill={selectedMetric?.subject === payload.value ? '#E42313' : '#6b7280'}
+                          fontWeight={selectedMetric?.subject === payload.value ? 'bold' : 'normal'}
+                          fontSize={13}
+                          className="cursor-pointer hover:fill-red-500 transition-colors"
+                          onClick={() => setSelectedMetric((d?.radarData ?? []).find(rd => rd.subject === payload.value) ?? null)}
+                        >
+                          {payload.value}
+                        </text>
+                      )}
+                    />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                    <Radar
+                      name={d?.name ?? ''}
+                      dataKey="A"
+                      stroke="#E42313"
+                      strokeWidth={3}
+                      fill="#E42313"
+                      fillOpacity={0.15}
+                    />
+                    <Tooltip />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Dynamic Insight Panel */}
+            <div className="lg:col-span-7 space-y-6">
+              {/* Selected Metric Detail */}
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 transition-all">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">FOCUS ON</span>
+                    <h3 className="text-2xl font-bold text-gray-900 mt-1">종합 <span className="text-red-600">{d?.radarData?.length ? Math.round(d.radarData.reduce((s, r) => s + r.A, 0) / d.radarData.length) : '—'}점</span></h3>
+                  </div>
+                  <div className="bg-white px-3 py-1 rounded-lg border border-gray-200 text-xs font-medium text-gray-500">
+                    망원동 평균: 78점
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 mb-4">
+                  <div className="bg-white p-4 rounded-xl border border-gray-100">
+                    <div className="flex items-center gap-2 mb-2 text-gray-900 font-bold text-sm">
+                      <MessageSquare size={14} /> 주요 키워드
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {(d?.keywords ?? []).slice(0, 8).map(k => {
+                        let colorClass = 'bg-gray-100 text-gray-600';
+                        if (k.sentiment === 'positive') colorClass = 'bg-green-100 text-green-700 border border-green-200';
+                        if (k.sentiment === 'negative') colorClass = 'bg-red-50 text-red-600 border border-red-100';
+
+                        return (
+                          <span key={k.text} className={`px-2 py-1 rounded text-xs font-medium ${colorClass}`}>
+                            #{k.text}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-sm text-gray-600 bg-white p-4 rounded-xl border border-gray-100 flex gap-3 items-start">
+                  <Info size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
+                  <p>
+                    <strong>AI 분석:</strong> {selectedMetric?.reason}.
+                    {d?.description}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 mb-4">
+                <h4 className="font-bold text-gray-900">추천 필살기 (Solutions)</h4>
+                <button onClick={onNext} className="flex items-center gap-2 text-red-600 font-medium hover:underline">
+                  전체 시뮬레이션으로 적용 <ArrowRight size={16} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Group solutions by category */}
+                {Object.entries(
+                  (d?.solutions ?? []).reduce((acc, sol) => {
+                    if (!acc[sol.category]) acc[sol.category] = [];
+                    acc[sol.category].push(sol);
+                    return acc;
+                  }, {})
+                ).map(([category, solutions], catIdx) => (
+                  <div key={category} className="flex flex-col gap-4">
+                    {/* Category Header */}
+                    <div className={`p-3 rounded-lg border-l-4 ${catIdx === 0 ? 'bg-red-50 border-red-500' : catIdx === 1 ? 'bg-blue-50 border-blue-500' : 'bg-green-50 border-green-500'}`}>
+                      <h5 className={`font-bold text-sm ${catIdx === 0 ? 'text-red-700' : catIdx === 1 ? 'text-blue-700' : 'text-green-700'}`}>
+                        {category}
+                      </h5>
+                    </div>
+
+                    {/* Solutions in this category */}
+                    <div className="flex flex-col gap-3">
+                      {solutions.map((sol, idx) => {
+                        const isSelected = selectedSolutions.some(s => s.title === sol.title);
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => toggleSolution(sol)}
+                            style={{ isolation: 'isolate' }}
+                            className={`relative bg-white p-4 rounded-xl border cursor-pointer transition-all duration-200 group flex flex-col min-h-[100px] hover:z-50
+                          ${isSelected
+                                ? 'border-red-500 ring-2 ring-red-100 bg-red-50/10'
+                                : 'border-gray-200'}
+                        `}
+                          >
+                            {isSelected && (
+                              <div className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-sm z-30">
+                                <CheckCircle2 size={16} className="text-red-500" fill="currentColor" />
+                              </div>
+                            )}
+                            {/* Default: title (clamped) + category tag */}
+                            <div className="flex flex-col gap-2">
+                              <div className="font-bold text-gray-900 text-sm leading-snug line-clamp-3">"{sol.title}"</div>
+                              <span className={`self-start text-xs font-medium px-2 py-0.5 rounded-full mt-1 ${catIdx === 0 ? 'text-red-600 bg-red-50' : catIdx === 1 ? 'text-blue-600 bg-blue-50' : 'text-green-600 bg-green-50'}`}>
+                                {sol.category}
+                              </span>
+                            </div>
+
+                            {/* Hover Overlay */}
+                            <div className={`absolute left-[-1px] top-[-1px] w-[calc(100%+2px)] bg-white p-4 flex flex-col gap-3 pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-50 rounded-xl border shadow-xl ${catIdx === 0 ? 'border-red-400 shadow-red-100' : catIdx === 1 ? 'border-blue-400 shadow-blue-100' : 'border-green-400 shadow-green-100'}`}>
+                              {sol.execution && (
+                                <div>
+                                  <div className={`text-xs font-bold mb-2 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
+                                    <span className="text-base">💡</span> 이렇게 실행해보세요
+                                  </div>
+                                  <div className="text-xs text-gray-700 leading-relaxed">
+                                    <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
+                                      {sol.execution}
+                                    </ReactMarkdown>
+                                  </div>
+                                </div>
+                              )}
+                              {sol.effect && (
+                                <div>
+                                  <div className={`text-[10px] font-bold mb-2 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
+                                    <span className="text-base">📈</span> 기대되는 변화
+                                  </div>
+                                  <div className="text-xs text-gray-500 leading-relaxed">
+                                    <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
+                                      {sol.effect}
+                                    </ReactMarkdown>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="w-px h-12 bg-gray-200"></div>
-            <div className="text-right">
-              <div className="text-sm text-gray-400 mb-1">상위</div>
-              <div className="text-4xl font-bold font-space text-red-600">
-                {d?.rankPercent != null ? `${d.rankPercent}%` : '—'}
-              </div>
-            </div>
           </div>
-          )}
-        </div>
-
-      {/* ══════════════════ X-Report 생성 UI ══════════════════ */}
-      {!d && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 flex flex-col items-center gap-6 text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-            <Sparkles size={28} className="text-red-600" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">X-Report 생성 준비 완료</h2>
-            <p className="text-gray-500 text-sm">AI가 매장을 진단하고 맞춤형 전략 처방전을 생성합니다.</p>
-          </div>
-
-          {/* Progress while polling */}
-          {(isPolling || isFetchingResult) && (
-            <div className="w-full max-w-md">
-              <div className="flex justify-between text-xs text-gray-500 mb-1">
-                <span>처리 중... ({pollStatus})</span>
-                {progress !== null && <span>{progress}%</span>}
-              </div>
-              <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-red-500 rounded-full transition-all duration-500"
-                  style={{ width: progress !== null ? `${progress}%` : '60%' }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Error */}
-          {createError && (
-            <div className="w-full max-w-md flex items-start gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 text-left">
-              <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                {createError.message}
-                <button onClick={handleRetry} className="ml-2 underline text-red-500 hover:text-red-700">다시 시도</button>
-              </div>
-            </div>
-          )}
-
-          {!isBusy && !createError && (
-            <button
-              onClick={handleCreate}
-              className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg"
-            >
-              <Sparkles size={18} /> X-Report 생성 시작
-            </button>
-          )}
-
-          {isBusy && !createError && (
-            <button disabled className="bg-gray-400 cursor-not-allowed text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              {isCreating ? '생성 요청 중...' : '분석 중...'}
-            </button>
-          )}
-        </div>
-      )}
-
-      {d && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Interactive Radar Chart */}
-          <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">역량 분석 (Deep-Dive)</h3>
-            <p className="text-sm text-gray-400 mb-6">항목을 클릭하여 상세 분석을 확인하세요.</p>
-            <div className="flex-1 min-h-[300px] relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={d?.radarData ?? []}>
-                  <PolarGrid stroke="#f3f4f6" />
-                  <PolarAngleAxis
-                    dataKey="subject"
-                    tick={({ x, y, payload }) => (
-                      <text
-                        x={x} y={y}
-                        dy={4}
-                        textAnchor="middle"
-                        fill={selectedMetric?.subject === payload.value ? '#E42313' : '#6b7280'}
-                        fontWeight={selectedMetric?.subject === payload.value ? 'bold' : 'normal'}
-                        fontSize={13}
-                        className="cursor-pointer hover:fill-red-500 transition-colors"
-                        onClick={() => setSelectedMetric((d?.radarData ?? []).find(rd => rd.subject === payload.value) ?? null)}
-                      >
-                        {payload.value}
-                      </text>
-                    )}
-                  />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar
-                    name={d?.name ?? ''}
-                    dataKey="A"
-                    stroke="#E42313"
-                    strokeWidth={3}
-                    fill="#E42313"
-                    fillOpacity={0.15}
-                  />
-                  <Tooltip />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Dynamic Insight Panel */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Selected Metric Detail */}
-            <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 transition-all">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">FOCUS ON</span>
-                  <h3 className="text-2xl font-bold text-gray-900 mt-1">종합 <span className="text-red-600">{d?.radarData?.length ? Math.round(d.radarData.reduce((s, r) => s + r.A, 0) / d.radarData.length) : '—'}점</span></h3>
-                </div>
-                <div className="bg-white px-3 py-1 rounded-lg border border-gray-200 text-xs font-medium text-gray-500">
-                  망원동 평균: 78점
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 mb-4">
-                <div className="bg-white p-4 rounded-xl border border-gray-100">
-                  <div className="flex items-center gap-2 mb-2 text-gray-900 font-bold text-sm">
-                    <MessageSquare size={14} /> 주요 키워드
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {(d?.keywords ?? []).slice(0, 8).map(k => {
-                      let colorClass = 'bg-gray-100 text-gray-600';
-                      if (k.sentiment === 'positive') colorClass = 'bg-green-100 text-green-700 border border-green-200';
-                      if (k.sentiment === 'negative') colorClass = 'bg-red-50 text-red-600 border border-red-100';
-
-                      return (
-                        <span key={k.text} className={`px-2 py-1 rounded text-xs font-medium ${colorClass}`}>
-                          #{k.text}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-sm text-gray-600 bg-white p-4 rounded-xl border border-gray-100 flex gap-3 items-start">
-                <Info size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
-                <p>
-                  <strong>AI 분석:</strong> {selectedMetric?.reason}.
-                  {d?.description}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-4 mb-4">
-              <h4 className="font-bold text-gray-900">추천 필살기 (Solutions)</h4>
-              <button onClick={onNext} className="flex items-center gap-2 text-red-600 font-medium hover:underline">
-                전체 시뮬레이션으로 적용 <ArrowRight size={16} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Group solutions by category */}
-              {Object.entries(
-                (d?.solutions ?? []).reduce((acc, sol) => {
-                  if (!acc[sol.category]) acc[sol.category] = [];
-                  acc[sol.category].push(sol);
-                  return acc;
-                }, {})
-              ).map(([category, solutions], catIdx) => (
-                <div key={category} className="flex flex-col gap-4">
-                  {/* Category Header */}
-                  <div className={`p-3 rounded-lg border-l-4 ${catIdx === 0 ? 'bg-red-50 border-red-500' : catIdx === 1 ? 'bg-blue-50 border-blue-500' : 'bg-green-50 border-green-500'}`}>
-                    <h5 className={`font-bold text-sm ${catIdx === 0 ? 'text-red-700' : catIdx === 1 ? 'text-blue-700' : 'text-green-700'}`}>
-                      {category}
-                    </h5>
-                  </div>
-
-                  {/* Solutions in this category */}
-                  <div className="flex flex-col gap-3">
-                    {solutions.map((sol, idx) => {
-                      const isSelected = selectedSolutions.some(s => s.title === sol.title);
-                      return (
-                        <div
-                          key={idx}
-                          onClick={() => toggleSolution(sol)}
-                          style={{ isolation: 'isolate' }}
-                          className={`relative bg-white p-4 rounded-xl border cursor-pointer transition-all duration-200 group flex flex-col min-h-[100px] hover:z-50
-                          ${isSelected
-                              ? 'border-red-500 ring-2 ring-red-100 bg-red-50/10'
-                              : 'border-gray-200'}
-                        `}
-                        >
-                          {isSelected && (
-                            <div className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-sm z-30">
-                              <CheckCircle2 size={16} className="text-red-500" fill="currentColor" />
-                            </div>
-                          )}
-                          {/* Default: title (clamped) + category tag */}
-                          <div className="flex flex-col gap-2">
-                            <div className="font-bold text-gray-900 text-sm leading-snug line-clamp-3">"{sol.title}"</div>
-                            <span className={`self-start text-xs font-medium px-2 py-0.5 rounded-full mt-1 ${catIdx === 0 ? 'text-red-600 bg-red-50' : catIdx === 1 ? 'text-blue-600 bg-blue-50' : 'text-green-600 bg-green-50'}`}>
-                              {sol.category}
-                            </span>
-                          </div>
-
-                          {/* Hover Overlay */}
-                          <div className={`absolute left-[-1px] top-[-1px] w-[calc(100%+2px)] bg-white p-4 flex flex-col gap-3 pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-50 rounded-xl border shadow-xl ${catIdx === 0 ? 'border-red-400 shadow-red-100' : catIdx === 1 ? 'border-blue-400 shadow-blue-100' : 'border-green-400 shadow-green-100'}`}>
-                            {sol.execution && (
-                              <div>
-                                <div className={`text-xs font-bold mb-2 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
-                                  <span className="text-base">💡</span> 이렇게 실행해보세요
-                                </div>
-                                <div className="text-xs text-gray-700 leading-relaxed">
-                                  <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
-                                    {sol.execution}
-                                  </ReactMarkdown>
-                                </div>
-                              </div>
-                            )}
-                            {sol.effect && (
-                              <div>
-                                <div className={`text-[10px] font-bold mb-2 flex items-center gap-1 ${catIdx === 0 ? 'text-red-600' : catIdx === 1 ? 'text-blue-600' : 'text-green-600'}`}>
-                                  <span className="text-base">📈</span> 기대되는 변화
-                                </div>
-                                <div className="text-xs text-gray-500 leading-relaxed">
-                                  <ReactMarkdown components={{ p: ({ children }) => <span>{children}</span> }}>
-                                    {sol.effect}
-                                  </ReactMarkdown>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+        )}
 
       </div>
 
@@ -1376,13 +1385,13 @@ const SimulationView = ({ data, onJobCreated, selectedSolutions = [] }) => {
   };
 
   const durationOptions = [
-    { id: '1day',    label: '1일',   credits: 3,   estimatedTime: '약 10~15분' },
-    { id: '1week',   label: '1주일', credits: 10,  estimatedTime: '약 1~2시간' },
-    { id: '2weeks',  label: '2주일', credits: 20,  estimatedTime: '약 2~4시간' },
-    { id: '1month',  label: '1개월', credits: 35,  estimatedTime: '약 8시간' },
+    { id: '1day', label: '1일', credits: 3, estimatedTime: '약 10~15분' },
+    { id: '1week', label: '1주일', credits: 10, estimatedTime: '약 1~2시간' },
+    { id: '2weeks', label: '2주일', credits: 20, estimatedTime: '약 2~4시간' },
+    { id: '1month', label: '1개월', credits: 35, estimatedTime: '약 8시간' },
     { id: '3months', label: '3개월', credits: 100, estimatedTime: '약 24시간' },
     { id: '6months', label: '6개월', credits: 180, estimatedTime: '약 2일' },
-    { id: '1year',   label: '1년',   credits: 330, estimatedTime: '약 4일' },
+    { id: '1year', label: '1년', credits: 330, estimatedTime: '약 4일' },
   ];
 
   const selectedCredits = durationOptions.find(d => d.id === duration)?.credits || 0;
@@ -1477,11 +1486,10 @@ const SimulationView = ({ data, onJobCreated, selectedSolutions = [] }) => {
             <button
               onClick={handleStart}
               disabled={isBusy}
-              className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg ${
-                isBusy
-                  ? 'bg-gray-400 cursor-not-allowed text-white'
-                  : 'bg-gray-900 hover:bg-black text-white hover:shadow-xl transform hover:-translate-y-0.5'
-              }`}
+              className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg ${isBusy
+                ? 'bg-gray-400 cursor-not-allowed text-white'
+                : 'bg-gray-900 hover:bg-black text-white hover:shadow-xl transform hover:-translate-y-0.5'
+                }`}
             >
               {isCreating ? '생성 중...' : <>시뮬레이션 시작하기 <ArrowRight size={18} /></>}
             </button>
@@ -1493,6 +1501,75 @@ const SimulationView = ({ data, onJobCreated, selectedSolutions = [] }) => {
 };
 
 // ── Y-Report: 비교 분석 리포트 (지표 1~3) ──────────────────────────────
+const xReportMockData = {
+  name: "류진 (망원본점)",
+  grade: "S",
+  rankPercent: 8,
+  description: "망원동 상권 내 경쟁사 대비 상위 8%의 경쟁력을 보유하고 있습니다. 특히 맛과 위생 측면에서 고객 만족도가 매우 높게 나타나고 있습니다.",
+  fullReport: `# AI 분석 리포트: 류진 (망원본점) 상세 지표 분석
+
+## 1. 종합 진단
+류진은 망원동 상권 내에서 **'맛'과 '위생'** 면에서 독보적인 강점을 보이고 있습니다. 현재 종합 등급은 **S등급**으로, 상위 8%의 우수한 성과를 내고 있습니다.
+
+## 2. 세부 분석
+- **맛 (92점):** 시그니처 메뉴의 아이덴티티가 확실하며, 맛의 일관성이 높습니다.
+- **서비스 (85점):** 직원들의 친절도에 대한 긍정적 피드백이 주를 이뤄지고 있습니다.
+- **분위기 (78점):** 모던한 인테리어가 젊은 층에 어필하고 있으나, 공간 효율성은 다소 떨어집니다.
+- **가격 (70점):** 주변 경쟁사 대비 가격대가 소폭 높게 형성되어 있어, 가성비에 대한 인식이 개선 과제로 남아있습니다.
+
+## 3. 핵심 키워드
+- **긍정:** #맛의달인 #친절한사장님 #인생맛집 #인스타감성
+- **부정:** #웨이팅지옥 #가격부담 #양이적음
+
+## 4. AI 처방전 (Solutions)
+현재의 높은 품질을 유지하면서 **'가성비'** 문제를 해결하기 위한 **2인 커스텀 세트 메뉴** 도입을 제안합니다. 이를 통해 객단가 상승과 고객 만족도 개선을 동시에 노릴 수 있습니다.`,
+  radarData: [
+    { subject: '맛', A: 92, score: 92, reason: '메뉴의 완성도와 식재료의 신선함이 탁월함' },
+    { subject: '서비스', A: 85, score: 85, reason: '빠른 응대와 친절한 서비스 태도가 장점' },
+    { subject: '분위기', A: 78, score: 78, reason: '전반적인 무드는 좋으나 좌석 간격이 다소 좁음' },
+    { subject: '가격', A: 70, score: 70, reason: '상권 평균 대비 가격 저항선에 근접한 상태' },
+    { subject: '위생', A: 95, score: 95, reason: '오픈 주방의 청결도가 고객 신뢰를 형성함' },
+  ],
+  keywords: [
+    { text: '맛있다', sentiment: 'positive' },
+    { text: '친절함', sentiment: 'positive' },
+    { text: '위생적', sentiment: 'positive' },
+    { text: '웨이팅', sentiment: 'negative' },
+    { text: '가성비', sentiment: 'negative' },
+    { text: '분위기굿', sentiment: 'positive' },
+    { text: '재방문', sentiment: 'positive' },
+    { text: '양이부족', sentiment: 'negative' },
+  ],
+  solutions: [
+    {
+      id: "SOL_001",
+      category: '메뉴 전략',
+      title: '2인 가성비 세트 메뉴 도입',
+      desc: '인기 메뉴 2가지와 사이드를 묶어 15% 할인된 가격으로 제공',
+      execution: '기존 단품 위주의 구성에서 2인 방문객을 겨냥한 세트 구성을 메뉴판 전면에 배치하세요.',
+      effect: '가성비 인식 12% 개선 및 2인 테이블 회전율 15% 향상 기대',
+    },
+    {
+      id: "SOL_002",
+      category: '마케팅',
+      title: '원격 줄서기 시스템 도입',
+      desc: '웨이팅에 대한 부정적 인식을 줄이기 위한 디지털 대기 시스템',
+      execution: '테이블링이나 캐치테이블과 같은 원격 줄서기 솔루션을 연동하여 고객 대기 시간을 관리하세요.',
+      effect: '웨이팅 포기 고객 20% 감소 및 방문 전환율 10% 상승',
+    },
+    {
+      id: "SOL_003",
+      category: '공간',
+      title: '조명 및 가구 조정을 통한 분위기 개선',
+      desc: '인스타 감성을 강화하기 위한 핵심 스팟 조명 교체',
+      execution: '메인 테이블 상단에 핀 조명을 설치하여 음식 사진이 더 잘 나오도록 유도하세요.',
+      effect: 'SNS 언급량 30% 증가 및 젊은 층 유입 가속화',
+    }
+  ]
+};
+
+const USE_MOCK_DATA = true;
+
 const yReportMockData = {
   // 지표 1: 기본 방문 지표
   overview: {
@@ -1764,6 +1841,15 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
     setCreateError(null);
     setYReportData(null);
     setIsCreating(true);
+
+    if (USE_MOCK_DATA) {
+      setTimeout(() => {
+        setYReportData(yReportMockData);
+        setIsCreating(false);
+      }, 2000);
+      return;
+    }
+
     const controller = new AbortController();
     try {
       const payload = {
@@ -1799,10 +1885,10 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
   const currentRating = d?.ratingDistribution?.[activeRatingTab];
   const kdeChartData = currentRating?.sim1?.length
     ? currentRating.sim1.map((s1, i) => ({
-        score: s1.score,
-        sim1: s1.density,
-        sim2: currentRating.sim2[i]?.density ?? 0,
-      }))
+      score: s1.score,
+      sim1: s1.density,
+      sim2: currentRating.sim2[i]?.density ?? 0,
+    }))
     : [];
 
   const satisfactionData = d ? Object.keys(d.ratingDistribution).map(key => {
@@ -1912,664 +1998,664 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
       {/* ══════════════════ 리포트 본문 (API 데이터 수신 후) ══════════════════ */}
       {d && <>
 
-      {/* ══════════════════ 솔루션 안전성 진단 ══════════════════ */}
+        {/* ══════════════════ 솔루션 안전성 진단 ══════════════════ */}
 
-      {/* ── 리스크 스코어 ── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
-              <Shield size={20} className="text-white" />
+        {/* ── 리스크 스코어 ── */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
+                <Shield size={20} className="text-white" />
+              </div>
+              <div>
+                <h2 className="text-white font-bold text-lg">솔루션 안전성 진단</h2>
+                <p className="text-gray-400 text-xs">시뮬레이션 11개 지표 기반 역효과 자동 탐지 결과</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-white font-bold text-lg">솔루션 안전성 진단</h2>
-              <p className="text-gray-400 text-xs">시뮬레이션 11개 지표 기반 역효과 자동 탐지 결과</p>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-white text-3xl font-bold font-space">{formatNumber(clamp(d.riskScore.score, 0, 100))}<span className="text-lg text-gray-400">/100</span></p>
+                <p className={`text-xs font-bold ${clamp(d.riskScore.score, 0, 100) <= 33 ? 'text-emerald-400' : clamp(d.riskScore.score, 0, 100) <= 66 ? 'text-yellow-400' : 'text-red-400'}`}>
+                  {d.riskScore.level || (clamp(d.riskScore.score, 0, 100) <= 33 ? '낮은 위험' : clamp(d.riskScore.score, 0, 100) <= 66 ? '보통 위험' : '높은 위험')}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-white text-3xl font-bold font-space">{formatNumber(clamp(d.riskScore.score, 0, 100))}<span className="text-lg text-gray-400">/100</span></p>
-              <p className={`text-xs font-bold ${clamp(d.riskScore.score, 0, 100) <= 33 ? 'text-emerald-400' : clamp(d.riskScore.score, 0, 100) <= 66 ? 'text-yellow-400' : 'text-red-400'}`}>
-                {d.riskScore.level || (clamp(d.riskScore.score, 0, 100) <= 33 ? '낮은 위험' : clamp(d.riskScore.score, 0, 100) <= 66 ? '보통 위험' : '높은 위험')}
+          <div className="p-5">
+            {/* 게이지 바 */}
+            <div className="mb-4">
+              <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-1000 ${clamp(d.riskScore.score, 0, 100) <= 33 ? 'bg-gradient-to-r from-emerald-400 to-emerald-500' : clamp(d.riskScore.score, 0, 100) <= 66 ? 'bg-gradient-to-r from-yellow-400 to-orange-400' : 'bg-gradient-to-r from-red-400 to-red-600'}`}
+                  style={{ width: `${clamp(d.riskScore.score, 0, 100)}%` }}
+                ></div>
+              </div>
+              <div className="flex justify-between mt-1.5 text-[10px] text-gray-400 font-bold">
+                <span>0 안전</span>
+                <span>30</span>
+                <span>60</span>
+                <span>100 위험</span>
+              </div>
+            </div>
+            {/* 지표 요약 */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-emerald-50 rounded-xl p-3 text-center border border-emerald-100">
+                <CheckCircle size={18} className="text-emerald-500 mx-auto mb-1" />
+                <p className="text-xl font-bold text-emerald-600">{formatNumber(d.riskScore.positive)}</p>
+                <p className="text-[10px] text-emerald-600 font-bold">순기능</p>
+              </div>
+              <div className="bg-amber-50 rounded-xl p-3 text-center border border-amber-100">
+                <AlertCircle size={18} className="text-amber-500 mx-auto mb-1" />
+                <p className="text-xl font-bold text-amber-600">{formatNumber(d.riskScore.watch)}</p>
+                <p className="text-[10px] text-amber-600 font-bold">관찰 필요</p>
+              </div>
+              <div className="bg-red-50 rounded-xl p-3 text-center border border-red-100">
+                <AlertTriangle size={18} className="text-red-500 mx-auto mb-1" />
+                <p className="text-xl font-bold text-red-600">{formatNumber(d.riskScore.negative)}</p>
+                <p className="text-[10px] text-red-600 font-bold">역효과 감지</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 역효과 감지 경고 ── */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={18} className="text-red-500" />
+            <h3 className="text-sm font-bold text-gray-900">역효과 감지 알림</h3>
+            <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-[10px] font-bold">{d.sideEffects.length}건</span>
+          </div>
+          {d.sideEffects.length === 0 && (
+            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-sm text-emerald-700 text-center">
+              감지된 역효과 없음
+            </div>
+          )}
+          {d.sideEffects.map((se, i) => (
+            <div
+              key={i}
+              className={`rounded-xl p-4 flex items-start gap-3 border ${se.type === 'warning' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}
+            >
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${se.type === 'warning' ? 'bg-red-100' : 'bg-amber-100'}`}>
+                {se.type === 'warning'
+                  ? <AlertTriangle size={16} className="text-red-500" />
+                  : <AlertCircle size={16} className="text-amber-500" />
+                }
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-bold text-sm text-gray-900">{se.metric}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${se.type === 'warning' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                    {se.change > 0 ? '+' : ''}{se.change}{se.unit}
+                  </span>
+                  <span className={`text-[10px] font-bold ${se.type === 'warning' ? 'text-red-500' : 'text-amber-500'}`}>
+                    {se.type === 'warning' ? '⚠️ 역효과' : '🔍 관찰 필요'}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-600 leading-relaxed">{se.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── 트레이드오프 시각화 (Gain vs Loss) ── */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-gray-100 flex items-center gap-2">
+            <TrendingUp size={16} className="text-gray-700" />
+            <h3 className="font-bold text-sm text-gray-900">전략 트레이드오프 — 얻은 것 vs 잃은 것</h3>
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200 text-xs">
+                <th className="text-left py-2.5 px-4 font-bold text-emerald-600 w-5/12">
+                  <span className="flex items-center gap-1"><ArrowUpRight size={14} /> 얻은 것 (Gain)</span>
+                </th>
+                <th className="text-center py-2.5 px-2 w-2/12"></th>
+                <th className="text-right py-2.5 px-4 font-bold text-red-500 w-5/12">
+                  <span className="flex items-center gap-1 justify-end">잃은 것 (Loss) <ArrowDownRight size={14} /></span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {d.tradeoffs.map((t, i) => (
+                <tr key={i} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                  <td className="py-3 px-4">
+                    <span className="font-bold text-gray-900">{t.gain}</span>
+                    <span className="ml-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{t.gainVal}</span>
+                  </td>
+                  <td className="text-center py-3 px-2">
+                    <span className="text-gray-300 text-lg">⇄</span>
+                  </td>
+                  <td className="py-3 px-4 text-right">
+                    <span className="font-bold text-gray-900">{t.loss}</span>
+                    <span className="ml-2 text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">{t.lossVal}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="p-3 bg-blue-50 border-t border-blue-100">
+            <p className="text-xs text-blue-700">
+              <strong>💡 판단 가이드:</strong> 좌측(순기능)이 우측(역효과)보다 크면 전략을 유지하되, 역효과 항목에 대한 <strong>보완 솔루션</strong>을 검토하세요. 역효과가 치명적이면 해당 솔루션만 제외 후 재시뮬레이션을 추천합니다.
+            </p>
+          </div>
+        </div>
+
+        {/* ────────────────── 지표 1: 기본 방문 지표 (Overview) ────────────────── */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <BarChart2 size={18} className="text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">지표 1 — 기본 방문 지표 (Overview)</h2>
+              <p className="text-xs text-gray-400">전략 후 손님이 실제로 늘었는가?</p>
+            </div>
+          </div>
+
+          {/* KPI Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+              <p className="text-xs text-gray-400 font-medium mb-1">총 방문 수 (전)</p>
+              <p className="text-2xl font-bold text-gray-400">{formatNumber(d.overview.sim1.totalVisits)}건</p>
+            </div>
+            <div className="bg-white p-5 rounded-xl border-2 border-emerald-200 shadow-sm shadow-emerald-50">
+              <p className="text-xs text-emerald-600 font-medium mb-1">총 방문 수 (후)</p>
+              <div className="flex items-center gap-2">
+                <p className="text-2xl font-bold text-emerald-600">{formatNumber(d.overview.sim2.totalVisits)}건</p>
+                <ChangeBadge value={parseFloat(visitChange)} />
+              </div>
+            </div>
+            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+              <p className="text-xs text-gray-400 font-medium mb-1">시장 점유율 (전)</p>
+              <p className="text-2xl font-bold text-gray-400">{formatPercent(d.overview.sim1.marketShare, 1)}</p>
+            </div>
+            <div className="bg-white p-5 rounded-xl border-2 border-emerald-200 shadow-sm shadow-emerald-50">
+              <p className="text-xs text-emerald-600 font-medium mb-1">시장 점유율 (후)</p>
+              <div className="flex items-center gap-2">
+                <p className="text-2xl font-bold text-emerald-600">{formatPercent(d.overview.sim2.marketShare, 1)}</p>
+                <ChangeBadge value={parseFloat(shareChange)} suffix="%p" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ────────────────── 지표 2: 방문 키워드 & 평균 평점 ────────────────── */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+              <MessageSquare size={18} className="text-purple-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">지표 2 — 방문 키워드 & 평균 평점</h2>
+              <p className="text-xs text-gray-400">방문자 리뷰 키워드가 달라졌는가? 평점이 올랐는가?</p>
+            </div>
+          </div>
+
+          {/* 평균 종합 평점 카드 */}
+          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-400 mb-1">평균 종합 평점</p>
+              <p className="text-xl font-bold text-gray-600">{formatNumber(d.ratingSummary.sim1.avg, { maximumFractionDigits: 2 })}점 → <span className="text-emerald-600">{formatNumber(d.ratingSummary.sim2.avg, { maximumFractionDigits: 2 })}점</span></p>
+            </div>
+            <ChangeBadge value={parseFloat(avgChange)} suffix="" showPlus={true} />
+          </div>
+
+          {/* Word Cloud */}
+          <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+            <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2 text-sm">
+              <MessageSquare size={16} className="text-purple-500" /> 방문 키워드 워드클라우드 비교
+            </h3>
+            <div className="flex flex-col md:flex-row gap-6">
+              <WordCloudVisual keywords={d.keywords.sim1} label="Sim 1 — 전략 전" accentColor="gray" />
+              <div className="hidden md:flex items-center">
+                <div className="w-px h-32 bg-gray-200"></div>
+                <ArrowRight size={20} className="text-gray-300 mx-2" />
+                <div className="w-px h-32 bg-gray-200"></div>
+              </div>
+              <WordCloudVisual keywords={d.keywords.sim2} label="Sim 2 — 전략 후" accentColor="emerald" />
+            </div>
+          </div>
+        </div>
+
+        {/* ────────────────── 지표 2-B: 평점 분포 (RatingDistribution) ────────────────── */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+              <BarChart2 size={18} className="text-purple-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">지표 2-B — 평점 분포 (Rating Distribution)</h2>
+              <p className="text-xs text-gray-400">항목별 전략 전후 가중 평균 평점 비교</p>
+            </div>
+          </div>
+
+          {Object.keys(d.ratingDistribution).length === 0 ? (
+            <div className="bg-white rounded-xl border border-gray-100 p-6 text-center text-sm text-gray-400">
+              평점 분포 데이터 없음
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="text-left py-3 px-4 font-bold text-gray-600">지표</th>
+                    <th className="text-center py-3 px-4 font-bold text-gray-400">Sim 1 (가중 평균)</th>
+                    <th className="text-center py-3 px-4 font-bold text-emerald-600">Sim 2 (가중 평균)</th>
+                    <th className="text-center py-3 px-4 font-bold text-gray-500">변화</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(d.ratingDistribution).map(([key, dist]) => {
+                    const LABELS = { taste: '맛', value: '가성비', atmosphere: '분위기', service: '서비스', price: '가격' };
+                    const s1 = Array.isArray(dist?.sim1) ? dist.sim1 : [];
+                    const s2 = Array.isArray(dist?.sim2) ? dist.sim2 : [];
+                    const wavg = (arr) => {
+                      const nums = arr.filter(v => typeof v?.score === 'number' && typeof v?.density === 'number');
+                      if (!nums.length) return 0;
+                      const tot = nums.reduce((a, b) => a + b.density, 0) || 1;
+                      return nums.reduce((a, b) => a + b.score * b.density, 0) / tot;
+                    };
+                    const a1 = wavg(s1);
+                    const a2 = wavg(s2);
+                    const delta = a2 - a1;
+                    return (
+                      <tr key={key} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                        <td className="py-3 px-4 font-bold text-gray-900">{LABELS[key] ?? key}</td>
+                        <td className="text-center py-3 px-4 text-gray-500">{formatNumber(a1, { maximumFractionDigits: 1 })}</td>
+                        <td className="text-center py-3 px-4 font-bold text-emerald-600">{formatNumber(a2, { maximumFractionDigits: 1 })}</td>
+                        <td className="text-center py-3 px-4">
+                          <ChangeBadge value={parseFloat(delta.toFixed(1))} suffix="" showPlus={true} />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* ────────────────── 지표 3: 시간대별 손님 변화 (Hourly Traffic) ────────────────── */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+              <Clock size={18} className="text-amber-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">지표 3 — 시간대별 손님 변화 (Hourly Traffic)</h2>
+              <p className="text-xs text-gray-400">전략이 특정 시간대에만 효과가 있는가? 피크타임이 바뀌었는가?</p>
+            </div>
+          </div>
+
+          {/* Peak Time Cards */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+              <p className="text-xs text-gray-400 mb-1">피크 타임슬롯 (전)</p>
+              <p className="text-xl font-bold text-gray-500">{d.peakSlot.sim1}</p>
+            </div>
+            <div className="bg-white p-5 rounded-xl border-2 border-amber-200 shadow-sm shadow-amber-50">
+              <p className="text-xs text-amber-600 mb-1">피크 타임슬롯 (후)</p>
+              <div className="flex items-center gap-2">
+                <p className="text-xl font-bold text-amber-600">{d.peakSlot.sim2}</p>
+                {d.peakSlot.sim1 !== d.peakSlot.sim2 && (
+                  <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">피크 전환</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Bar Chart — 이산 시간대이므로 바 차트가 정확 */}
+          {d.hourlyTraffic.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-sm text-gray-400">시간대별 트래픽 데이터 없음</div>
+          ) : (
+            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+              <h3 className="font-bold text-gray-900 text-sm mb-4">시간대별 방문 트래픽</h3>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={d.hourlyTraffic} barGap={2} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                  <XAxis dataKey="slot" tick={{ fontSize: 11, fontWeight: 600 }} />
+                  <YAxis tick={{ fontSize: 11 }} label={{ value: '방문 횟수', angle: -90, position: 'insideLeft', fontSize: 11 }} />
+                  <Tooltip
+                    formatter={(val, name) => [`${val}회`, name === '전략 전' ? '전략 전' : '전략 후']}
+                    contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+                  />
+                  <Bar dataKey="sim1" fill="#d1d5db" radius={[4, 4, 0, 0]} name="전략 전" barSize={18} />
+                  <Bar dataKey="sim2" fill="#f59e0b" radius={[4, 4, 0, 0]} name="전략 후" barSize={18} />
+                  <Legend
+                    formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
+                    wrapperStyle={{ fontSize: '12px' }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
+                <p className="text-xs text-amber-700">
+                  <strong>💡 인사이트:</strong> 피크 타임이 <strong>점심 → 저녁</strong>으로 전환됨. 2인 세트가 저녁 데이트 고객 유입에 기여하며, 저녁 방문이 <strong>+50%</strong> 증가.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ────────────────── 지표 4: 세대별 증감 분석 ────────────────── */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <Users size={18} className="text-indigo-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">지표 4 — 세대별 증감 분석 (Generation Impact)</h2>
+              <p className="text-xs text-gray-400">어떤 세대의 방문이 늘었고, 어떤 세대에서 감소했는가?</p>
+            </div>
+          </div>
+
+          {d.generation.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-sm text-gray-400">세대별 데이터 없음</div>
+          ) : (
+            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={d.generation} barGap={4} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                  <XAxis dataKey="gen" tick={{ fontSize: 12, fontWeight: 600 }} />
+                  <YAxis tick={{ fontSize: 11 }} unit="%" domain={[0, 'auto']} />
+                  <Tooltip formatter={(val, name) => [`${val}%`, name === '전략 전' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
+                  <Bar dataKey="sim1" fill="#c7d2fe" radius={[4, 4, 0, 0]} name="전략 전" barSize={28} />
+                  <Bar dataKey="sim2" fill="#6366f1" radius={[4, 4, 0, 0]} name="전략 후" barSize={28} />
+                  <Legend formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="mt-3 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                <p className="text-xs text-indigo-700">
+                  <strong>💡 인사이트:</strong> Z세대(Z1+Z2) 비율이 <strong>40.8% → 49.7%</strong>로 급증. 데이트코스·인스타감성 솔루션이 젊은 층 유입에 직접 기여.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ────────────────── 지표 5: 방문 목적별 분석 ────────────────── */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-rose-100 rounded-lg flex items-center justify-center">
+              <Target size={18} className="text-rose-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">지표 5 — 방문 목적별 상세 분석 (Purpose Analysis)</h2>
+              <p className="text-xs text-gray-400">어떤 목적의 손님이 늘었고, 만족도는 어떻게 달라졌는가?</p>
+            </div>
+          </div>
+
+          {d.purpose.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-sm text-gray-400">방문 목적 데이터 없음</div>
+          ) : (
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="text-left py-3 px-4 font-bold text-gray-600">방문 목적</th>
+                    <th className="text-center py-3 px-4 font-bold text-gray-400">비중(전)</th>
+                    <th className="text-center py-3 px-4 font-bold text-emerald-600">비중(후)</th>
+                    <th className="text-center py-3 px-4 font-bold text-gray-400">만족도(전)</th>
+                    <th className="text-center py-3 px-4 font-bold text-emerald-600">만족도(후)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {d.purpose.map((p, i) => (
+                    <tr key={i} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="py-3 px-4 font-bold text-gray-900">{p.type}</td>
+                      <td className="text-center py-3 px-4 text-gray-400">{p.sim1Pct}%</td>
+                      <td className="text-center py-3 px-4 font-bold text-gray-900">{p.sim2Pct}%
+                        <ChangeBadge value={parseFloat((p.sim2Pct - p.sim1Pct).toFixed(1))} suffix="%p" />
+                      </td>
+                      <td className="text-center py-3 px-4 text-gray-400">{p.sim1Sat}</td>
+                      <td className="text-center py-3 px-4 font-bold text-emerald-600">{p.sim2Sat}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="p-3 bg-rose-50 border-t border-rose-100">
+                <p className="text-xs text-rose-700">
+                  <strong>💡 인사이트:</strong> 사적모임형 비중이 <strong>+7.3%p</strong> 증가하며 가장 큰 변화. 2인 세트 메뉴가 데이트 수요 흡수에 효과적.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ────────────────── 지표 6: 재방문율 분석 ────────────────── */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
+              <RefreshCw size={18} className="text-cyan-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">지표 6 — 재방문율 분석 (Retention)</h2>
+              <p className="text-xs text-gray-400">기존 고객이 유지되었는가? 신규 유입 vs 이탈 비율은?</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm text-center">
+              <p className="text-xs text-gray-400 mb-1">기존 고객 유지</p>
+              <p className="text-2xl font-bold text-cyan-600">{formatNumber(d.retention.retained)}명</p>
+              <p className="text-xs text-cyan-500 font-bold mt-1">유지율 {formatPercent(d.retention.retentionRate, 1)}</p>
+            </div>
+            <div className="bg-white p-5 rounded-xl border-2 border-emerald-200 shadow-sm text-center">
+              <p className="text-xs text-emerald-600 mb-1">신규 유입</p>
+              <p className="text-2xl font-bold text-emerald-600">{formatNumber(d.retention.newUsers)}명</p>
+              <p className="text-xs text-emerald-500 font-bold mt-1">Sim2의 {formatPercent(d.retention.newRatio, 1)}</p>
+            </div>
+            <div className="bg-white p-5 rounded-xl border border-red-200 shadow-sm text-center">
+              <p className="text-xs text-red-500 mb-1">이탈 (Churn)</p>
+              <p className="text-2xl font-bold text-red-500">{formatNumber(d.retention.churned)}명</p>
+            </div>
+            <div className="bg-gradient-to-br from-cyan-50 to-emerald-50 p-5 rounded-xl border border-cyan-200 shadow-sm text-center">
+              <p className="text-xs text-gray-500 mb-1">순 증가</p>
+              <p className="text-2xl font-bold text-gray-900">+{formatNumber(d.retention.newUsers - d.retention.churned)}명</p>
+              <p className="text-xs text-gray-400 mt-1">{formatNumber(d.retention.sim1Agents)} → {formatNumber(d.retention.sim2Agents)} 에이전트</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ────────────────── 지표 7: 경쟁 매장 비교 (항목별 막대그래프) ────────────────── */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">
+              <Target size={18} className="text-teal-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">지표 7 — 경쟁 매장 비교 (Competitor Benchmark)</h2>
+              <p className="text-xs text-gray-400">전략 전후 타겟 매장이 경쟁 매장 대비 어떻게 달라졌는가?</p>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+            {/* 범례 — 매장명만 색상으로 구분 */}
+            <div className="flex flex-wrap gap-3 mb-6 text-xs font-bold">
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-gray-400 inline-block"></span> <span className="text-gray-500">류진 (전략 전)</span></span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> <span className="text-emerald-600">류진 (전략 후)</span></span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> <span className="text-blue-600">{d.radarStores.comp1}</span></span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-purple-500 inline-block"></span> <span className="text-purple-600">{d.radarStores.comp2}</span></span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-orange-500 inline-block"></span> <span className="text-orange-600">{d.radarStores.comp3}</span></span>
+            </div>
+
+            {/* 항목별 개별 막대그래프 — 바 색상 통일 */}
+            <div className="space-y-6">
+              {d.radar.map((item, idx) => (
+                <div key={idx}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-bold text-gray-700">{item.metric}</h4>
+                    <span className="text-xs text-gray-400">단위: {item.unit}</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {[
+                      { label: '류진 (전)', value: item.target_before, nameColor: 'text-gray-500' },
+                      { label: '류진 (후)', value: item.target_after, nameColor: 'text-emerald-600' },
+                      { label: d.radarStores.comp1, value: item.comp1, nameColor: 'text-blue-600' },
+                      { label: d.radarStores.comp2, value: item.comp2, nameColor: 'text-purple-600' },
+                      { label: d.radarStores.comp3, value: item.comp3, nameColor: 'text-orange-600' },
+                    ].map((bar, bi) => {
+                      const maxVal = Math.max(item.target_before, item.target_after, item.comp1, item.comp2, item.comp3);
+                      const pct = (bar.value / maxVal) * 100;
+                      return (
+                        <div key={bi} className="flex items-center gap-2">
+                          <span className={`text-[11px] font-semibold w-24 text-right truncate ${bar.nameColor}`}>{bar.label}</span>
+                          <div className="flex-1 bg-gray-100 rounded-full h-5 relative overflow-hidden">
+                            <div
+                              className="bg-teal-500 h-full rounded-full transition-all duration-500"
+                              style={{ width: `${pct}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs font-bold text-gray-600 w-14 text-right">{bar.value}{item.unit}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 p-3 bg-teal-50 rounded-lg border border-teal-100">
+              <p className="text-xs text-teal-700">
+                <strong>💡 인사이트:</strong> 전략 후 류진이 만족도·재방문율에서 경쟁 매장을 <strong>추월</strong>했습니다. 방문수는 아직 오시 망원본점에 다소 뒤처지나, 격차가 크게 축소됨.
               </p>
             </div>
           </div>
         </div>
-        <div className="p-5">
-          {/* 게이지 바 */}
-          <div className="mb-4">
-            <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-1000 ${clamp(d.riskScore.score, 0, 100) <= 33 ? 'bg-gradient-to-r from-emerald-400 to-emerald-500' : clamp(d.riskScore.score, 0, 100) <= 66 ? 'bg-gradient-to-r from-yellow-400 to-orange-400' : 'bg-gradient-to-r from-red-400 to-red-600'}`}
-                style={{ width: `${clamp(d.riskScore.score, 0, 100)}%` }}
-              ></div>
-            </div>
-            <div className="flex justify-between mt-1.5 text-[10px] text-gray-400 font-bold">
-              <span>0 안전</span>
-              <span>30</span>
-              <span>60</span>
-              <span>100 위험</span>
-            </div>
-          </div>
-          {/* 지표 요약 */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-emerald-50 rounded-xl p-3 text-center border border-emerald-100">
-              <CheckCircle size={18} className="text-emerald-500 mx-auto mb-1" />
-              <p className="text-xl font-bold text-emerald-600">{formatNumber(d.riskScore.positive)}</p>
-              <p className="text-[10px] text-emerald-600 font-bold">순기능</p>
-            </div>
-            <div className="bg-amber-50 rounded-xl p-3 text-center border border-amber-100">
-              <AlertCircle size={18} className="text-amber-500 mx-auto mb-1" />
-              <p className="text-xl font-bold text-amber-600">{formatNumber(d.riskScore.watch)}</p>
-              <p className="text-[10px] text-amber-600 font-bold">관찰 필요</p>
-            </div>
-            <div className="bg-red-50 rounded-xl p-3 text-center border border-red-100">
-              <AlertTriangle size={18} className="text-red-500 mx-auto mb-1" />
-              <p className="text-xl font-bold text-red-600">{formatNumber(d.riskScore.negative)}</p>
-              <p className="text-[10px] text-red-600 font-bold">역효과 감지</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* ── 역효과 감지 경고 ── */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <AlertTriangle size={18} className="text-red-500" />
-          <h3 className="text-sm font-bold text-gray-900">역효과 감지 알림</h3>
-          <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-[10px] font-bold">{d.sideEffects.length}건</span>
-        </div>
-        {d.sideEffects.length === 0 && (
-          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-sm text-emerald-700 text-center">
-            감지된 역효과 없음
-          </div>
-        )}
-        {d.sideEffects.map((se, i) => (
-          <div
-            key={i}
-            className={`rounded-xl p-4 flex items-start gap-3 border ${se.type === 'warning' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${se.type === 'warning' ? 'bg-red-100' : 'bg-amber-100'}`}>
-              {se.type === 'warning'
-                ? <AlertTriangle size={16} className="text-red-500" />
-                : <AlertCircle size={16} className="text-amber-500" />
-              }
+        {/* ────────────────── 지표 9: 에이전트 유형 (상주/유동) ────────────────── */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+              <MapPin size={18} className="text-orange-600" />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-bold text-sm text-gray-900">{se.metric}</span>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${se.type === 'warning' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                  {se.change > 0 ? '+' : ''}{se.change}{se.unit}
-                </span>
-                <span className={`text-[10px] font-bold ${se.type === 'warning' ? 'text-red-500' : 'text-amber-500'}`}>
-                  {se.type === 'warning' ? '⚠️ 역효과' : '🔍 관찰 필요'}
-                </span>
-              </div>
-              <p className="text-xs text-gray-600 leading-relaxed">{se.detail}</p>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">지표 9 — 에이전트 유형별 분석 (Agent Type)</h2>
+              <p className="text-xs text-gray-400">유동 인구 vs 상주 고객, 어느 쪽이 더 증가했는가?</p>
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* ── 트레이드오프 시각화 (Gain vs Loss) ── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-100 flex items-center gap-2">
-          <TrendingUp size={16} className="text-gray-700" />
-          <h3 className="font-bold text-sm text-gray-900">전략 트레이드오프 — 얻은 것 vs 잃은 것</h3>
-        </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-200 text-xs">
-              <th className="text-left py-2.5 px-4 font-bold text-emerald-600 w-5/12">
-                <span className="flex items-center gap-1"><ArrowUpRight size={14} /> 얻은 것 (Gain)</span>
-              </th>
-              <th className="text-center py-2.5 px-2 w-2/12"></th>
-              <th className="text-right py-2.5 px-4 font-bold text-red-500 w-5/12">
-                <span className="flex items-center gap-1 justify-end">잃은 것 (Loss) <ArrowDownRight size={14} /></span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {d.tradeoffs.map((t, i) => (
-              <tr key={i} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                <td className="py-3 px-4">
-                  <span className="font-bold text-gray-900">{t.gain}</span>
-                  <span className="ml-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{t.gainVal}</span>
-                </td>
-                <td className="text-center py-3 px-2">
-                  <span className="text-gray-300 text-lg">⇄</span>
-                </td>
-                <td className="py-3 px-4 text-right">
-                  <span className="font-bold text-gray-900">{t.loss}</span>
-                  <span className="ml-2 text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">{t.lossVal}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="p-3 bg-blue-50 border-t border-blue-100">
-          <p className="text-xs text-blue-700">
-            <strong>💡 판단 가이드:</strong> 좌측(순기능)이 우측(역효과)보다 크면 전략을 유지하되, 역효과 항목에 대한 <strong>보완 솔루션</strong>을 검토하세요. 역효과가 치명적이면 해당 솔루션만 제외 후 재시뮬레이션을 추천합니다.
-          </p>
-        </div>
-      </div>
-
-      {/* ────────────────── 지표 1: 기본 방문 지표 (Overview) ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-            <BarChart2 size={18} className="text-blue-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 1 — 기본 방문 지표 (Overview)</h2>
-            <p className="text-xs text-gray-400">전략 후 손님이 실제로 늘었는가?</p>
+          <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={d.agentType} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 11 }} unit="%" domain={[0, 70]} />
+                <YAxis dataKey="type" type="category" tick={{ fontSize: 13, fontWeight: 700 }} />
+                <Tooltip formatter={(val, name) => [`${val}%`, name === '전략 전' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
+                <Bar dataKey="sim1" fill="#fed7aa" radius={[0, 4, 4, 0]} name="전략 전" barSize={20} />
+                <Bar dataKey="sim2" fill="#f97316" radius={[0, 4, 4, 0]} name="전략 후" barSize={20} />
+                <Legend formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-            <p className="text-xs text-gray-400 font-medium mb-1">총 방문 수 (전)</p>
-            <p className="text-2xl font-bold text-gray-400">{formatNumber(d.overview.sim1.totalVisits)}건</p>
-          </div>
-          <div className="bg-white p-5 rounded-xl border-2 border-emerald-200 shadow-sm shadow-emerald-50">
-            <p className="text-xs text-emerald-600 font-medium mb-1">총 방문 수 (후)</p>
-            <div className="flex items-center gap-2">
-              <p className="text-2xl font-bold text-emerald-600">{formatNumber(d.overview.sim2.totalVisits)}건</p>
-              <ChangeBadge value={parseFloat(visitChange)} />
+        {/* ────────────────── 지표 10: 성별 구성 ────────────────── */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+              <Users size={18} className="text-pink-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">지표 10 — 성별 구성 분석 (Gender Composition)</h2>
+              <p className="text-xs text-gray-400">전략 전후 성별 비율이 달라졌는가?</p>
             </div>
           </div>
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-            <p className="text-xs text-gray-400 font-medium mb-1">시장 점유율 (전)</p>
-            <p className="text-2xl font-bold text-gray-400">{formatPercent(d.overview.sim1.marketShare, 1)}</p>
+          <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={d.gender} barGap={4} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 13, fontWeight: 700 }} />
+                <YAxis tick={{ fontSize: 11 }} unit="%" domain={[0, 'auto']} />
+                <Tooltip formatter={(val, name) => [`${val}%`, name === '전략 전' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
+                <Bar dataKey="sim1" fill="#fbb6ce" radius={[4, 4, 0, 0]} name="전략 전" barSize={32} />
+                <Bar dataKey="sim2" fill="#ec4899" radius={[4, 4, 0, 0]} name="전략 후" barSize={32} />
+                <Legend formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          <div className="bg-white p-5 rounded-xl border-2 border-emerald-200 shadow-sm shadow-emerald-50">
-            <p className="text-xs text-emerald-600 font-medium mb-1">시장 점유율 (후)</p>
-            <div className="flex items-center gap-2">
-              <p className="text-2xl font-bold text-emerald-600">{formatPercent(d.overview.sim2.marketShare, 1)}</p>
-              <ChangeBadge value={parseFloat(shareChange)} suffix="%p" />
+        </div>
+
+        {/* ────────────────── 지표 11: 세대×방문목적 크로스탭 히트맵 ────────────────── */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+              <Sparkles size={18} className="text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">지표 11 — 세대 × 방문목적 크로스탭 (Heatmap)</h2>
+              <p className="text-xs text-gray-400">어떤 세대가 어떤 목적으로 방문했는가? 전략 후 분포.</p>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* ────────────────── 지표 2: 방문 키워드 & 평균 평점 ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-            <MessageSquare size={18} className="text-purple-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 2 — 방문 키워드 & 평균 평점</h2>
-            <p className="text-xs text-gray-400">방문자 리뷰 키워드가 달라졌는가? 평점이 올랐는가?</p>
-          </div>
-        </div>
-
-        {/* 평균 종합 평점 카드 */}
-        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs text-gray-400 mb-1">평균 종합 평점</p>
-            <p className="text-xl font-bold text-gray-600">{formatNumber(d.ratingSummary.sim1.avg, { maximumFractionDigits: 2 })}점 → <span className="text-emerald-600">{formatNumber(d.ratingSummary.sim2.avg, { maximumFractionDigits: 2 })}점</span></p>
-          </div>
-          <ChangeBadge value={parseFloat(avgChange)} suffix="" showPlus={true} />
-        </div>
-
-        {/* Word Cloud */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2 text-sm">
-            <MessageSquare size={16} className="text-purple-500" /> 방문 키워드 워드클라우드 비교
-          </h3>
-          <div className="flex flex-col md:flex-row gap-6">
-            <WordCloudVisual keywords={d.keywords.sim1} label="Sim 1 — 전략 전" accentColor="gray" />
-            <div className="hidden md:flex items-center">
-              <div className="w-px h-32 bg-gray-200"></div>
-              <ArrowRight size={20} className="text-gray-300 mx-2" />
-              <div className="w-px h-32 bg-gray-200"></div>
-            </div>
-            <WordCloudVisual keywords={d.keywords.sim2} label="Sim 2 — 전략 후" accentColor="emerald" />
-          </div>
-        </div>
-      </div>
-
-      {/* ────────────────── 지표 2-B: 평점 분포 (RatingDistribution) ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-            <BarChart2 size={18} className="text-purple-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 2-B — 평점 분포 (Rating Distribution)</h2>
-            <p className="text-xs text-gray-400">항목별 전략 전후 가중 평균 평점 비교</p>
-          </div>
-        </div>
-
-        {Object.keys(d.ratingDistribution).length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-100 p-6 text-center text-sm text-gray-400">
-            평점 분포 데이터 없음
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-bold text-gray-600">지표</th>
-                  <th className="text-center py-3 px-4 font-bold text-gray-400">Sim 1 (가중 평균)</th>
-                  <th className="text-center py-3 px-4 font-bold text-emerald-600">Sim 2 (가중 평균)</th>
-                  <th className="text-center py-3 px-4 font-bold text-gray-500">변화</th>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-3 font-bold text-gray-600">세대 ↓ \ 목적 →</th>
+                  {d.crosstab.purposes.map(p => (
+                    <th key={p} className="text-center py-3 px-3 font-bold text-gray-600">{p}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {Object.entries(d.ratingDistribution).map(([key, dist]) => {
-                  const LABELS = { taste: '맛', value: '가성비', atmosphere: '분위기', service: '서비스', price: '가격' };
-                  const s1 = Array.isArray(dist?.sim1) ? dist.sim1 : [];
-                  const s2 = Array.isArray(dist?.sim2) ? dist.sim2 : [];
-                  const wavg = (arr) => {
-                    const nums = arr.filter(v => typeof v?.score === 'number' && typeof v?.density === 'number');
-                    if (!nums.length) return 0;
-                    const tot = nums.reduce((a, b) => a + b.density, 0) || 1;
-                    return nums.reduce((a, b) => a + b.score * b.density, 0) / tot;
-                  };
-                  const a1 = wavg(s1);
-                  const a2 = wavg(s2);
-                  const delta = a2 - a1;
-                  return (
-                    <tr key={key} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                      <td className="py-3 px-4 font-bold text-gray-900">{LABELS[key] ?? key}</td>
-                      <td className="text-center py-3 px-4 text-gray-500">{formatNumber(a1, { maximumFractionDigits: 1 })}</td>
-                      <td className="text-center py-3 px-4 font-bold text-emerald-600">{formatNumber(a2, { maximumFractionDigits: 1 })}</td>
-                      <td className="text-center py-3 px-4">
-                        <ChangeBadge value={parseFloat(delta.toFixed(1))} suffix="" showPlus={true} />
-                      </td>
-                    </tr>
-                  );
-                })}
+                {d.crosstab.generations.map((gen, gi) => (
+                  <tr key={gen} className="border-b border-gray-50">
+                    <td className="py-3 px-3 font-bold text-gray-900">{gen}</td>
+                    {d.crosstab.sim2[gi].map((val, pi) => {
+                      const intensity = val / 50;
+                      const bg = `rgba(239, 68, 68, ${Math.min(intensity, 1) * 0.6})`;
+                      return (
+                        <td key={pi} className="text-center py-3 px-3 font-bold text-sm" style={{ backgroundColor: bg, color: intensity > 0.5 ? '#fff' : '#374151' }}>
+                          {val}%
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
               </tbody>
             </table>
-          </div>
-        )}
-      </div>
-
-      {/* ────────────────── 지표 3: 시간대별 손님 변화 (Hourly Traffic) ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
-            <Clock size={18} className="text-amber-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 3 — 시간대별 손님 변화 (Hourly Traffic)</h2>
-            <p className="text-xs text-gray-400">전략이 특정 시간대에만 효과가 있는가? 피크타임이 바뀌었는가?</p>
-          </div>
-        </div>
-
-        {/* Peak Time Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-            <p className="text-xs text-gray-400 mb-1">피크 타임슬롯 (전)</p>
-            <p className="text-xl font-bold text-gray-500">{d.peakSlot.sim1}</p>
-          </div>
-          <div className="bg-white p-5 rounded-xl border-2 border-amber-200 shadow-sm shadow-amber-50">
-            <p className="text-xs text-amber-600 mb-1">피크 타임슬롯 (후)</p>
-            <div className="flex items-center gap-2">
-              <p className="text-xl font-bold text-amber-600">{d.peakSlot.sim2}</p>
-              {d.peakSlot.sim1 !== d.peakSlot.sim2 && (
-                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">피크 전환</span>
-              )}
+            <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-100">
+              <p className="text-xs text-red-700">
+                <strong>💡 인사이트:</strong> Z1세대는 사적모임(40%)이 압도적, S세대는 생활베이스(50%)가 지배적. 세대별 맞춤 마케팅이 필요합니다.
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Bar Chart — 이산 시간대이므로 바 차트가 정확 */}
-        {d.hourlyTraffic.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-sm text-gray-400">시간대별 트래픽 데이터 없음</div>
-        ) : (
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          <h3 className="font-bold text-gray-900 text-sm mb-4">시간대별 방문 트래픽</h3>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={d.hourlyTraffic} barGap={2} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="slot" tick={{ fontSize: 11, fontWeight: 600 }} />
-              <YAxis tick={{ fontSize: 11 }} label={{ value: '방문 횟수', angle: -90, position: 'insideLeft', fontSize: 11 }} />
-              <Tooltip
-                formatter={(val, name) => [`${val}회`, name === '전략 전' ? '전략 전' : '전략 후']}
-                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
-              />
-              <Bar dataKey="sim1" fill="#d1d5db" radius={[4, 4, 0, 0]} name="전략 전" barSize={18} />
-              <Bar dataKey="sim2" fill="#f59e0b" radius={[4, 4, 0, 0]} name="전략 후" barSize={18} />
-              <Legend
-                formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'}
-                wrapperStyle={{ fontSize: '12px' }}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
-            <p className="text-xs text-amber-700">
-              <strong>💡 인사이트:</strong> 피크 타임이 <strong>점심 → 저녁</strong>으로 전환됨. 2인 세트가 저녁 데이트 고객 유입에 기여하며, 저녁 방문이 <strong>+50%</strong> 증가.
-            </p>
-          </div>
-        </div>
-        )}
-      </div>
-
-      {/* ────────────────── 지표 4: 세대별 증감 분석 ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-            <Users size={18} className="text-indigo-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 4 — 세대별 증감 분석 (Generation Impact)</h2>
-            <p className="text-xs text-gray-400">어떤 세대의 방문이 늘었고, 어떤 세대에서 감소했는가?</p>
-          </div>
-        </div>
-
-        {d.generation.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-sm text-gray-400">세대별 데이터 없음</div>
-        ) : (
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={d.generation} barGap={4} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="gen" tick={{ fontSize: 12, fontWeight: 600 }} />
-              <YAxis tick={{ fontSize: 11 }} unit="%" domain={[0, 'auto']} />
-              <Tooltip formatter={(val, name) => [`${val}%`, name === '전략 전' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
-              <Bar dataKey="sim1" fill="#c7d2fe" radius={[4, 4, 0, 0]} name="전략 전" barSize={28} />
-              <Bar dataKey="sim2" fill="#6366f1" radius={[4, 4, 0, 0]} name="전략 후" barSize={28} />
-              <Legend formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="mt-3 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-            <p className="text-xs text-indigo-700">
-              <strong>💡 인사이트:</strong> Z세대(Z1+Z2) 비율이 <strong>40.8% → 49.7%</strong>로 급증. 데이트코스·인스타감성 솔루션이 젊은 층 유입에 직접 기여.
-            </p>
-          </div>
-        </div>
-        )}
-      </div>
-
-      {/* ────────────────── 지표 5: 방문 목적별 분석 ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-rose-100 rounded-lg flex items-center justify-center">
-            <Target size={18} className="text-rose-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 5 — 방문 목적별 상세 분석 (Purpose Analysis)</h2>
-            <p className="text-xs text-gray-400">어떤 목적의 손님이 늘었고, 만족도는 어떻게 달라졌는가?</p>
-          </div>
-        </div>
-
-        {d.purpose.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-sm text-gray-400">방문 목적 데이터 없음</div>
-        ) : (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-bold text-gray-600">방문 목적</th>
-                <th className="text-center py-3 px-4 font-bold text-gray-400">비중(전)</th>
-                <th className="text-center py-3 px-4 font-bold text-emerald-600">비중(후)</th>
-                <th className="text-center py-3 px-4 font-bold text-gray-400">만족도(전)</th>
-                <th className="text-center py-3 px-4 font-bold text-emerald-600">만족도(후)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {d.purpose.map((p, i) => (
-                <tr key={i} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-3 px-4 font-bold text-gray-900">{p.type}</td>
-                  <td className="text-center py-3 px-4 text-gray-400">{p.sim1Pct}%</td>
-                  <td className="text-center py-3 px-4 font-bold text-gray-900">{p.sim2Pct}%
-                    <ChangeBadge value={parseFloat((p.sim2Pct - p.sim1Pct).toFixed(1))} suffix="%p" />
-                  </td>
-                  <td className="text-center py-3 px-4 text-gray-400">{p.sim1Sat}</td>
-                  <td className="text-center py-3 px-4 font-bold text-emerald-600">{p.sim2Sat}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="p-3 bg-rose-50 border-t border-rose-100">
-            <p className="text-xs text-rose-700">
-              <strong>💡 인사이트:</strong> 사적모임형 비중이 <strong>+7.3%p</strong> 증가하며 가장 큰 변화. 2인 세트 메뉴가 데이트 수요 흡수에 효과적.
-            </p>
-          </div>
-        </div>
-        )}
-      </div>
-
-      {/* ────────────────── 지표 6: 재방문율 분석 ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
-            <RefreshCw size={18} className="text-cyan-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 6 — 재방문율 분석 (Retention)</h2>
-            <p className="text-xs text-gray-400">기존 고객이 유지되었는가? 신규 유입 vs 이탈 비율은?</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm text-center">
-            <p className="text-xs text-gray-400 mb-1">기존 고객 유지</p>
-            <p className="text-2xl font-bold text-cyan-600">{formatNumber(d.retention.retained)}명</p>
-            <p className="text-xs text-cyan-500 font-bold mt-1">유지율 {formatPercent(d.retention.retentionRate, 1)}</p>
-          </div>
-          <div className="bg-white p-5 rounded-xl border-2 border-emerald-200 shadow-sm text-center">
-            <p className="text-xs text-emerald-600 mb-1">신규 유입</p>
-            <p className="text-2xl font-bold text-emerald-600">{formatNumber(d.retention.newUsers)}명</p>
-            <p className="text-xs text-emerald-500 font-bold mt-1">Sim2의 {formatPercent(d.retention.newRatio, 1)}</p>
-          </div>
-          <div className="bg-white p-5 rounded-xl border border-red-200 shadow-sm text-center">
-            <p className="text-xs text-red-500 mb-1">이탈 (Churn)</p>
-            <p className="text-2xl font-bold text-red-500">{formatNumber(d.retention.churned)}명</p>
-          </div>
-          <div className="bg-gradient-to-br from-cyan-50 to-emerald-50 p-5 rounded-xl border border-cyan-200 shadow-sm text-center">
-            <p className="text-xs text-gray-500 mb-1">순 증가</p>
-            <p className="text-2xl font-bold text-gray-900">+{formatNumber(d.retention.newUsers - d.retention.churned)}명</p>
-            <p className="text-xs text-gray-400 mt-1">{formatNumber(d.retention.sim1Agents)} → {formatNumber(d.retention.sim2Agents)} 에이전트</p>
-          </div>
-        </div>
-      </div>
-
-      {/* ────────────────── 지표 7: 경쟁 매장 비교 (항목별 막대그래프) ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">
-            <Target size={18} className="text-teal-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 7 — 경쟁 매장 비교 (Competitor Benchmark)</h2>
-            <p className="text-xs text-gray-400">전략 전후 타겟 매장이 경쟁 매장 대비 어떻게 달라졌는가?</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          {/* 범례 — 매장명만 색상으로 구분 */}
-          <div className="flex flex-wrap gap-3 mb-6 text-xs font-bold">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-gray-400 inline-block"></span> <span className="text-gray-500">류진 (전략 전)</span></span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> <span className="text-emerald-600">류진 (전략 후)</span></span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> <span className="text-blue-600">{d.radarStores.comp1}</span></span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-purple-500 inline-block"></span> <span className="text-purple-600">{d.radarStores.comp2}</span></span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-orange-500 inline-block"></span> <span className="text-orange-600">{d.radarStores.comp3}</span></span>
-          </div>
-
-          {/* 항목별 개별 막대그래프 — 바 색상 통일 */}
-          <div className="space-y-6">
-            {d.radar.map((item, idx) => (
-              <div key={idx}>
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm font-bold text-gray-700">{item.metric}</h4>
-                  <span className="text-xs text-gray-400">단위: {item.unit}</span>
-                </div>
-                <div className="space-y-1.5">
-                  {[
-                    { label: '류진 (전)', value: item.target_before, nameColor: 'text-gray-500' },
-                    { label: '류진 (후)', value: item.target_after, nameColor: 'text-emerald-600' },
-                    { label: d.radarStores.comp1, value: item.comp1, nameColor: 'text-blue-600' },
-                    { label: d.radarStores.comp2, value: item.comp2, nameColor: 'text-purple-600' },
-                    { label: d.radarStores.comp3, value: item.comp3, nameColor: 'text-orange-600' },
-                  ].map((bar, bi) => {
-                    const maxVal = Math.max(item.target_before, item.target_after, item.comp1, item.comp2, item.comp3);
-                    const pct = (bar.value / maxVal) * 100;
-                    return (
-                      <div key={bi} className="flex items-center gap-2">
-                        <span className={`text-[11px] font-semibold w-24 text-right truncate ${bar.nameColor}`}>{bar.label}</span>
-                        <div className="flex-1 bg-gray-100 rounded-full h-5 relative overflow-hidden">
-                          <div
-                            className="bg-teal-500 h-full rounded-full transition-all duration-500"
-                            style={{ width: `${pct}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-xs font-bold text-gray-600 w-14 text-right">{bar.value}{item.unit}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-4 p-3 bg-teal-50 rounded-lg border border-teal-100">
-            <p className="text-xs text-teal-700">
-              <strong>💡 인사이트:</strong> 전략 후 류진이 만족도·재방문율에서 경쟁 매장을 <strong>추월</strong>했습니다. 방문수는 아직 오시 망원본점에 다소 뒤처지나, 격차가 크게 축소됨.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ────────────────── 지표 9: 에이전트 유형 (상주/유동) ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-            <MapPin size={18} className="text-orange-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 9 — 에이전트 유형별 분석 (Agent Type)</h2>
-            <p className="text-xs text-gray-400">유동 인구 vs 상주 고객, 어느 쪽이 더 증가했는가?</p>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={d.agentType} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 11 }} unit="%" domain={[0, 70]} />
-              <YAxis dataKey="type" type="category" tick={{ fontSize: 13, fontWeight: 700 }} />
-              <Tooltip formatter={(val, name) => [`${val}%`, name === '전략 전' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
-              <Bar dataKey="sim1" fill="#fed7aa" radius={[0, 4, 4, 0]} name="전략 전" barSize={20} />
-              <Bar dataKey="sim2" fill="#f97316" radius={[0, 4, 4, 0]} name="전략 후" barSize={20} />
-              <Legend formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* ────────────────── 지표 10: 성별 구성 ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
-            <Users size={18} className="text-pink-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 10 — 성별 구성 분석 (Gender Composition)</h2>
-            <p className="text-xs text-gray-400">전략 전후 성별 비율이 달라졌는가?</p>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={d.gender} barGap={4} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 13, fontWeight: 700 }} />
-              <YAxis tick={{ fontSize: 11 }} unit="%" domain={[0, 'auto']} />
-              <Tooltip formatter={(val, name) => [`${val}%`, name === '전략 전' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
-              <Bar dataKey="sim1" fill="#fbb6ce" radius={[4, 4, 0, 0]} name="전략 전" barSize={32} />
-              <Bar dataKey="sim2" fill="#ec4899" radius={[4, 4, 0, 0]} name="전략 후" barSize={32} />
-              <Legend formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* ────────────────── 지표 11: 세대×방문목적 크로스탭 히트맵 ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-            <Sparkles size={18} className="text-red-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 11 — 세대 × 방문목적 크로스탭 (Heatmap)</h2>
-            <p className="text-xs text-gray-400">어떤 세대가 어떤 목적으로 방문했는가? 전략 후 분포.</p>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-3 font-bold text-gray-600">세대 ↓ \ 목적 →</th>
-                {d.crosstab.purposes.map(p => (
-                  <th key={p} className="text-center py-3 px-3 font-bold text-gray-600">{p}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {d.crosstab.generations.map((gen, gi) => (
-                <tr key={gen} className="border-b border-gray-50">
-                  <td className="py-3 px-3 font-bold text-gray-900">{gen}</td>
-                  {d.crosstab.sim2[gi].map((val, pi) => {
-                    const intensity = val / 50;
-                    const bg = `rgba(239, 68, 68, ${Math.min(intensity, 1) * 0.6})`;
-                    return (
-                      <td key={pi} className="text-center py-3 px-3 font-bold text-sm" style={{ backgroundColor: bg, color: intensity > 0.5 ? '#fff' : '#374151' }}>
-                        {val}%
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-100">
-            <p className="text-xs text-red-700">
-              <strong>💡 인사이트:</strong> Z1세대는 사적모임(40%)이 압도적, S세대는 생활베이스(50%)가 지배적. 세대별 맞춤 마케팅이 필요합니다.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ────────────────── 지표 8: LLM 종합 평가 ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-            <Sparkles size={18} className="text-emerald-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">종합 평가 — AI Summary (GPT-5.2)</h2>
-            <p className="text-xs text-gray-400">모든 지표를 종합한 AI 전략 분석가의 총평</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 flex items-center gap-3">
-            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-              <Sparkles size={16} className="text-white" />
+        {/* ────────────────── 지표 8: LLM 종합 평가 ────────────────── */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+              <Sparkles size={18} className="text-emerald-600" />
             </div>
             <div>
-              <p className="text-white font-bold text-sm">AI 전략 분석 리포트</p>
-              <p className="text-white/70 text-xs">GPT-5.2 기반 자동 생성 · 시뮬레이션 데이터 근거</p>
+              <h2 className="text-lg font-bold text-gray-900">종합 평가 — AI Summary (GPT-5.2)</h2>
+              <p className="text-xs text-gray-400">모든 지표를 종합한 AI 전략 분석가의 총평</p>
             </div>
           </div>
-          {d.llmSummary ? (
-            <article className="p-6 bg-amber-50/40 rounded-b-2xl">
-              <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-4">AI 분석 결과</p>
-              <p
-                className="text-sm text-gray-700"
-                style={{ whiteSpace: 'pre-wrap', lineHeight: 1.9 }}
-              >
-                {d.llmSummary}
-              </p>
-            </article>
-          ) : (
-            <div className="p-6 text-sm text-gray-400 text-center">요약 내용이 없습니다.</div>
-          )}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 flex items-center gap-3">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <Sparkles size={16} className="text-white" />
+              </div>
+              <div>
+                <p className="text-white font-bold text-sm">AI 전략 분석 리포트</p>
+                <p className="text-white/70 text-xs">GPT-5.2 기반 자동 생성 · 시뮬레이션 데이터 근거</p>
+              </div>
+            </div>
+            {d.llmSummary ? (
+              <article className="p-6 bg-amber-50/40 rounded-b-2xl">
+                <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-4">AI 분석 결과</p>
+                <p
+                  className="text-sm text-gray-700"
+                  style={{ whiteSpace: 'pre-wrap', lineHeight: 1.9 }}
+                >
+                  {d.llmSummary}
+                </p>
+              </article>
+            ) : (
+              <div className="p-6 text-sm text-gray-400 text-center">요약 내용이 없습니다.</div>
+            )}
+          </div>
         </div>
-      </div>
 
       </> /* end {d && <>} */}
     </div>
@@ -2765,6 +2851,21 @@ const App = () => {
     const doFetch = async () => {
       setIsLoadingStores(true);
       setStoreError(null);
+
+      if (USE_MOCK_DATA) {
+        setTimeout(() => {
+          setStores([
+            { id: '1', name: '류진 (망원본점)', address: '서울 마포구 망원로 123', lat: 37.5556, lng: 126.9068, sentiment: 88, revenue: 45000000 },
+            { id: '2', name: '오시 망원본점', address: '서울 마포구 망원로 45', lat: 37.5560, lng: 126.9070, sentiment: 82, revenue: 52000000 },
+            { id: '3', name: '마마무식당', address: '서울 마포구 포은로 78', lat: 37.5550, lng: 126.9060, sentiment: 75, revenue: 38000000 },
+            { id: '4', name: '홍익돈까스', address: '서울 마포구 망원동 56-1', lat: 37.5540, lng: 126.9080, sentiment: 79, revenue: 42000000 },
+          ]);
+          setStoreTotal(4);
+          setIsLoadingStores(false);
+        }, 500);
+        return;
+      }
+
       try {
         const resp = await fetchStores({
           q: storeSearchQuery || undefined,
