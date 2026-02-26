@@ -208,11 +208,11 @@ const MyPageView = ({ data, onBack, onManageMembership }) => {
 
         {/* Right Column: Report Archives (8 cols) */}
         <div className="lg:col-span-8 space-y-8">
-          {/* X-Report Archive */}
+          {/* lop분석 Archive */}
           <section>
             <div className="flex justify-between items-end mb-4">
               <h3 className="font-bold text-xl text-gray-900 flex items-center gap-2">
-                <FileText size={24} className="text-blue-500" /> X-Report 보관함
+                <FileText size={24} className="text-blue-500" /> lop분석 보관함
               </h3>
               <button className="text-sm text-gray-500 hover:text-gray-900 underline">전체보기</button>
             </div>
@@ -250,11 +250,11 @@ const MyPageView = ({ data, onBack, onManageMembership }) => {
             </div>
           </section>
 
-          {/* Y-Report Archive */}
+          {/* lop검증 Archive */}
           <section>
             <div className="flex justify-between items-end mb-4">
               <h3 className="font-bold text-xl text-gray-900 flex items-center gap-2">
-                <BarChart2 size={24} className="text-purple-500" /> Y-Report 보관함
+                <BarChart2 size={24} className="text-purple-500" /> lop검증 보관함
               </h3>
               <button className="text-sm text-gray-500 hover:text-gray-900 underline">전체보기</button>
             </div>
@@ -264,7 +264,7 @@ const MyPageView = ({ data, onBack, onManageMembership }) => {
                 <Sparkles size={32} className="text-purple-400" />
               </div>
               <h4 className="font-bold text-gray-900 mb-2">아직 완료된 시뮬레이션 결과가 없습니다</h4>
-              <p className="text-gray-500 text-sm mb-6">X-Report 진단 후 가상 시뮬레이션을 돌려보세요.<br />미래의 매출 변화를 미리 예측해드립니다.</p>
+              <p className="text-gray-500 text-sm mb-6">lop분석 진단 후 가상 시뮬레이션을 돌려보세요.<br />미래의 매출 변화를 미리 예측해드립니다.</p>
               <button className="bg-gray-900 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-black transition-colors">
                 새 시뮬레이션 시작하기
               </button>
@@ -346,7 +346,7 @@ const AIChatButton = () => {
             <div className="flex gap-2">
               <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-xs">AI</div>
               <div className="bg-white p-3 rounded-2xl rounded-tl-none text-sm text-gray-600 shadow-sm border border-gray-100">
-                사장님, X-Report 분석 결과 <strong>'가성비'</strong> 항목 보완이 시급합니다. 관련 리뷰를 보여드릴까요?
+                사장님, lop분석 결과 <strong>'가성비'</strong> 항목 보완이 시급합니다. 관련 리뷰를 보여드릴까요?
               </div>
             </div>
           </div>
@@ -622,7 +622,7 @@ const DashboardView = ({
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                onFocus={() => setShowResults(true)}
+                onFocus={(e) => { setShowResults(true); e.target.select(); }}
                 placeholder="매장명 검색 (2글자 이상 입력)"
                 className="w-full bg-white/10 border border-white/20 text-white rounded-xl px-4 py-4 pl-12 pr-12 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all backdrop-blur-sm placeholder-gray-400"
               />
@@ -976,7 +976,7 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
         <div className="flex justify-between items-end border-b border-gray-100 pb-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">X-Report: {d?.name ?? storeData?.name ?? '—'}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">lop분석: {d?.name ?? storeData?.name ?? '—'}</h1>
               <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold border border-red-200">진단 완료</span>
             </div>
             <p className="text-gray-500 text-sm">GPT-5.2 기반 AI 분석 리포트 — 매장 전략 처방전</p>
@@ -1034,14 +1034,14 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
           )}
         </div>
 
-      {/* ══════════════════ X-Report 생성 UI ══════════════════ */}
+      {/* ══════════════════ lop분석 생성 UI ══════════════════ */}
       {!d && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 flex flex-col items-center gap-6 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
             <Sparkles size={28} className="text-red-600" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">X-Report 생성 준비 완료</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">lop분석 생성 준비 완료</h2>
             <p className="text-gray-500 text-sm">AI가 매장을 진단하고 맞춤형 전략 처방전을 생성합니다.</p>
           </div>
 
@@ -1077,7 +1077,7 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
               onClick={handleCreate}
               className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg"
             >
-              <Sparkles size={18} /> X-Report 생성 시작
+              <Sparkles size={18} /> lop분석 생성 시작
             </button>
           )}
 
@@ -1276,7 +1276,7 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
               <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                 <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                   <FileText size={20} className="text-red-600" />
-                  X-Report 전문 보기
+                  lop분석 전문 보기
                 </h3>
                 <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-900 p-2 hover:bg-gray-200 rounded-full transition-colors">
                   <X size={24} />
@@ -1365,7 +1365,7 @@ const SimulationView = ({ data, onJobCreated, selectedSolutions = [] }) => {
         days: simDays,
       };
       const result = await createSimulation(payload, { signal: controller.signal });
-      onJobCreated(result.jobId, simTimeoutMs, Math.ceil(simTimeoutMs / 4000));
+      onJobCreated(result.jobId, simTimeoutMs, Math.ceil(simTimeoutMs / 4000), simDays);
     } catch (err) {
       if (err.name !== 'AbortError') {
         setCreateError({ message: getJobErrorMessage(err.code, err.message), code: err.code ?? null });
@@ -1492,7 +1492,7 @@ const SimulationView = ({ data, onJobCreated, selectedSolutions = [] }) => {
   );
 };
 
-// ── Y-Report: 비교 분석 리포트 (지표 1~3) ──────────────────────────────
+// ── lop검증: 비교 분석 리포트 (지표 1~3) ──────────────────────────────
 const yReportMockData = {
   // 지표 1: 기본 방문 지표
   overview: {
@@ -1588,12 +1588,12 @@ const yReportMockData = {
     retained: 42, newUsers: 47, churned: 26,
     retentionRate: 61.8, newRatio: 52.8,
   },
-  // 지표 9: 에이전트 유형
+  // 지표 8: 에이전트 유형
   agentType: [
     { type: '유동', sim1: 58.2, sim2: 52.3 },
     { type: '상주', sim1: 41.8, sim2: 47.7 },
   ],
-  // 지표 10: 성별 구성
+  // 지표 9: 성별 구성
   gender: [
     { label: '남', sim1: 45.2, sim2: 42.8 },
     { label: '여', sim1: 38.5, sim2: 41.6 },
@@ -1608,7 +1608,7 @@ const yReportMockData = {
     { metric: 'Z세대비율', unit: '%', target_before: 41, target_after: 50, comp1: 55, comp2: 48, comp3: 32 },
   ],
   radarStores: { comp1: '오시 망원본점', comp2: '마마무식당', comp3: '홍익돈까스' },
-  // 지표 11: 크로스탭 (세대 × 방문목적) — 비율
+  // 지표 10: 크로스탭 (세대 × 방문목적) — 비율
   crosstab: {
     generations: ['Z1', 'Z2', 'Y', 'X', 'S'],
     purposes: ['생활베이스형', '사적모임형', '공적모임형', '가족모임형'],
@@ -1692,11 +1692,11 @@ const ChangeBadge = ({ value, suffix = '%', showPlus = true }) => {
   );
 };
 
-// ── Y-Report TTL reconnect constants ────────────────────────────────────────
+// ── lop검증 TTL reconnect constants ────────────────────────────────────────
 const Y_REPORT_JOB_KEY = 'pending_y_report_job';
 const Y_REPORT_JOB_TTL = 600_000; // 10 minutes
 
-const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
+const YReportView = ({ storeData, selectedSolutions = [], simId = null, simDays = 7 }) => {
   const [activeRatingTab, setActiveRatingTab] = useState('taste');
 
   // ── API / Job state ───────────────────────────────────────────────────
@@ -1706,6 +1706,7 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
   const [yReportData, setYReportData] = useState(null);
   const [createError, setCreateError] = useState(null); // { message, code }
   const [isReconnecting, setIsReconnecting] = useState(false); // TTL reconnect banner
+  const [isYModalOpen, setIsYModalOpen] = useState(false);
 
   // ── TTL reconnect on mount ─────────────────────────────────────────────
   useEffect(() => {
@@ -1823,36 +1824,109 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
   const avgChange = d ? (d.ratingSummary.sim2.avg - d.ratingSummary.sim1.avg).toFixed(2) : '0';
   const satChange = d ? (d.ratingSummary.sim2.satisfaction - d.ratingSummary.sim1.satisfaction).toFixed(1) : '0';
 
+  // ── 동적 인사이트 계산 ─────────────────────────────────────────
+  // 지표 3: 피크타임 변화
+  const peakInsight = d ? (() => {
+    const s1 = d.peakSlot.sim1 !== '—' ? d.peakSlot.sim1 : null;
+    const s2 = d.peakSlot.sim2 !== '—' ? d.peakSlot.sim2 : null;
+    if (!s1 || !s2) return '피크타임 데이터 없음';
+    if (s1 === s2) return `피크 타임 ${s1} 유지됨. 전략 전후 방문 패턴 변화 없음.`;
+    return `피크 타임이 <b>${s1} → ${s2}</b>으로 전환됨. 전략 후 방문 집중 시간대가 변화했습니다.`;
+  })() : '';
+
+  // 지표 4: 세대 증감
+  const genInsight = d ? (() => {
+    const nonMixed = d.generation.filter(g => !g.gen.startsWith('혼합'));
+    if (!nonMixed.length) return '세대 데이터 없음';
+    const z1 = d.generation.find(g => g.gen === 'Z1');
+    const z2 = d.generation.find(g => g.gen === 'Z2');
+    const zBefore = (z1?.sim1 || 0) + (z2?.sim1 || 0);
+    const zAfter  = (z1?.sim2 || 0) + (z2?.sim2 || 0);
+    const sorted = [...nonMixed].sort((a, b) => (b.sim2 - b.sim1) - (a.sim2 - a.sim1));
+    const topGain = sorted[0];
+    const topLoss = sorted[sorted.length - 1];
+    const gainDelta = topGain.sim2 - topGain.sim1;
+    const lossDelta = topLoss.sim2 - topLoss.sim1;
+    const parts = [];
+    if (zBefore !== zAfter) parts.push(`Z세대(Z1+Z2) 비율 <b>${zBefore}% → ${zAfter}%</b>`);
+    if (gainDelta > 0) parts.push(`${topGain.gen}세대 <b>+${gainDelta}%p</b> 증가`);
+    if (lossDelta < 0) parts.push(`${topLoss.gen}세대 <b>${lossDelta}%p</b> 감소`);
+    return parts.length ? parts.join(', ') + '.' : '세대 분포 변화 없음.';
+  })() : '';
+
+  // 지표 5: 방문 목적 최대 변화
+  const purposeInsight = d ? (() => {
+    if (!d.purpose.length) return '방문 목적 데이터 없음';
+    const withDelta = d.purpose.map(p => ({ ...p, delta: p.sim2Pct - p.sim1Pct }));
+    const topGain = withDelta.reduce((a, b) => b.delta > a.delta ? b : a, withDelta[0]);
+    const topLoss = withDelta.reduce((a, b) => b.delta < a.delta ? b : a, withDelta[0]);
+    const sign = v => v >= 0 ? '+' : '';
+    if (topGain.delta === 0 && topLoss.delta === 0) return '방문 목적 분포 변화 없음.';
+    let txt = '';
+    if (topGain.delta > 0) txt += `${topGain.type} 비중이 <b>${sign(topGain.delta)}${topGain.delta.toFixed(1)}%p</b> 증가`;
+    if (topLoss.delta < 0) txt += (txt ? ', ' : '') + `${topLoss.type} 비중이 <b>${topLoss.delta.toFixed(1)}%p</b> 감소`;
+    return txt + '.';
+  })() : '';
+
+  // 지표 7: 경쟁 매장 비교
+  const radarInsight = d ? (() => {
+    if (!d.radar.length) return '경쟁 매장 데이터 없음';
+    const ahead = d.radar.filter(r => r.targetAfter > Math.max(r.comp1, r.comp2, r.comp3)).map(r => r.metric);
+    const behind = d.radar.filter(r => r.targetAfter < Math.min(r.comp1, r.comp2, r.comp3)).map(r => r.metric);
+    const store = d.storeName;
+    if (!ahead.length && !behind.length) return `${store}은 대부분 지표에서 경쟁사와 유사한 수준입니다.`;
+    const parts = [];
+    if (ahead.length) parts.push(`${store}이 <b>${ahead.join('·')}</b>에서 경쟁사 전체를 앞섭니다`);
+    if (behind.length) parts.push(`<b>${behind.join('·')}</b>에서는 경쟁사 대비 개선 여지 있음`);
+    return parts.join('. ') + '.';
+  })() : '';
+
+  // 지표 10: 히트맵 세대별 주요 방문 목적
+  const heatmapInsight = d ? (() => {
+    const { generations, purposes, sim2 } = d.crosstab;
+    if (!generations.length || !purposes.length || !sim2.length) return '크로스탭 데이터 없음';
+    const highlights = generations.map((gen, gi) => {
+      const row = sim2[gi] || [];
+      const maxPct = Math.max(...row);
+      if (maxPct === 0) return null;
+      const maxPurpose = purposes[row.indexOf(maxPct)];
+      return `${gen}세대: ${maxPurpose}(${maxPct.toFixed(1)}%)`;
+    }).filter(Boolean);
+    return highlights.join(', ') + '. 세대별 맞춤 전략이 필요합니다.';
+  })() : '';
+
   return (
     <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-12">
       {/* Header */}
       <div className="flex justify-between items-end border-b border-gray-100 pb-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">Y-Report</h1>
+            <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">lop검증</h1>
             <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">비교 분석</span>
           </div>
-          <p className="text-gray-500 text-sm">전략 적용 전(Sim 1) vs 후(Sim 2) 시뮬레이션 비교 보고서  ·  96명 에이전트 × 7일</p>
+          <p className="text-gray-500 text-sm">전략 적용 전(Sim 1) vs 후(Sim 2) 시뮬레이션 비교 보고서  ·  160명 에이전트 × {simDays}일</p>
         </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
-            <FileText size={16} className="text-red-500" />
-            전문 보기
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-black transition-colors">
-            <Printer size={16} /> PDF 저장
-          </button>
-        </div>
+        {d && (
+          <div className="flex gap-3">
+            <button onClick={() => setIsYModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 text-sm transition-colors">
+              <FileText size={16} className="text-red-500" />
+              전문 보기
+            </button>
+            <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl font-bold hover:bg-black text-sm transition-colors">
+              <Printer size={16} /> PDF 저장
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* ══════════════════ Y-Report 생성 UI ══════════════════ */}
+      {/* ══════════════════ lop검증 생성 UI ══════════════════ */}
       {!d && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 flex flex-col items-center gap-6 text-center">
           <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
             <Sparkles size={28} className="text-emerald-600" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Y-Report 생성 준비 완료</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">lop검증 생성 준비 완료</h2>
             <p className="text-gray-500 text-sm">시뮬레이션 결과를 바탕으로 AI 비교 분석 리포트를 생성합니다.</p>
           </div>
 
@@ -1896,7 +1970,7 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
               onClick={handleCreate}
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg"
             >
-              <Sparkles size={18} /> Y-Report 생성 시작
+              <Sparkles size={18} /> lop검증 생성 시작
             </button>
           )}
 
@@ -1999,7 +2073,7 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
               <div className="flex items-center gap-2 mb-1">
                 <span className="font-bold text-sm text-gray-900">{se.metric}</span>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${se.type === 'warning' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                  {se.change > 0 ? '+' : ''}{se.change}{se.unit}
+                  {se.change > 0 ? '+' : ''}{parseFloat(se.change.toFixed(1))}{se.unit}
                 </span>
                 <span className={`text-[10px] font-bold ${se.type === 'warning' ? 'text-red-500' : 'text-amber-500'}`}>
                   {se.type === 'warning' ? '⚠️ 역효과' : '🔍 관찰 필요'}
@@ -2051,6 +2125,43 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
           <p className="text-xs text-blue-700">
             <strong>💡 판단 가이드:</strong> 좌측(순기능)이 우측(역효과)보다 크면 전략을 유지하되, 역효과 항목에 대한 <strong>보완 솔루션</strong>을 검토하세요. 역효과가 치명적이면 해당 솔루션만 제외 후 재시뮬레이션을 추천합니다.
           </p>
+        </div>
+      </div>
+
+      {/* ────────────────── 종합 평가: LLM 종합 평가 ────────────────── */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+            <Sparkles size={18} className="text-emerald-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">종합 평가 — AI Summary</h2>
+            <p className="text-xs text-gray-400">모든 지표를 종합한 AI 전략 분석가의 총평</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 flex items-center gap-3">
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+              <Sparkles size={16} className="text-white" />
+            </div>
+            <div>
+              <p className="text-white font-bold text-sm">AI 전략 분석 리포트</p>
+              <p className="text-white/70 text-xs">GPT-5.2 기반 자동 생성 · 시뮬레이션 데이터 근거</p>
+            </div>
+          </div>
+          {d.llmSummary ? (
+            <article className="p-6 bg-amber-50/40 rounded-b-2xl">
+              <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-4">AI 분석 결과</p>
+              <p
+                className="text-sm text-gray-700"
+                style={{ whiteSpace: 'pre-wrap', lineHeight: 1.9 }}
+              >
+                {d.llmSummary}
+              </p>
+            </article>
+          ) : (
+            <div className="p-6 text-sm text-gray-400 text-center">요약 내용이 없습니다.</div>
+          )}
         </div>
       </div>
 
@@ -2131,64 +2242,6 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
         </div>
       </div>
 
-      {/* ────────────────── 지표 2-B: 평점 분포 (RatingDistribution) ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-            <BarChart2 size={18} className="text-purple-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 2-B — 평점 분포 (Rating Distribution)</h2>
-            <p className="text-xs text-gray-400">항목별 전략 전후 가중 평균 평점 비교</p>
-          </div>
-        </div>
-
-        {Object.keys(d.ratingDistribution).length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-100 p-6 text-center text-sm text-gray-400">
-            평점 분포 데이터 없음
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-bold text-gray-600">지표</th>
-                  <th className="text-center py-3 px-4 font-bold text-gray-400">Sim 1 (가중 평균)</th>
-                  <th className="text-center py-3 px-4 font-bold text-emerald-600">Sim 2 (가중 평균)</th>
-                  <th className="text-center py-3 px-4 font-bold text-gray-500">변화</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(d.ratingDistribution).map(([key, dist]) => {
-                  const LABELS = { taste: '맛', value: '가성비', atmosphere: '분위기', service: '서비스', price: '가격' };
-                  const s1 = Array.isArray(dist?.sim1) ? dist.sim1 : [];
-                  const s2 = Array.isArray(dist?.sim2) ? dist.sim2 : [];
-                  const wavg = (arr) => {
-                    const nums = arr.filter(v => typeof v?.score === 'number' && typeof v?.density === 'number');
-                    if (!nums.length) return 0;
-                    const tot = nums.reduce((a, b) => a + b.density, 0) || 1;
-                    return nums.reduce((a, b) => a + b.score * b.density, 0) / tot;
-                  };
-                  const a1 = wavg(s1);
-                  const a2 = wavg(s2);
-                  const delta = a2 - a1;
-                  return (
-                    <tr key={key} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                      <td className="py-3 px-4 font-bold text-gray-900">{LABELS[key] ?? key}</td>
-                      <td className="text-center py-3 px-4 text-gray-500">{formatNumber(a1, { maximumFractionDigits: 1 })}</td>
-                      <td className="text-center py-3 px-4 font-bold text-emerald-600">{formatNumber(a2, { maximumFractionDigits: 1 })}</td>
-                      <td className="text-center py-3 px-4">
-                        <ChangeBadge value={parseFloat(delta.toFixed(1))} suffix="" showPlus={true} />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
       {/* ────────────────── 지표 3: 시간대별 손님 변화 (Hourly Traffic) ────────────────── */}
       <div className="space-y-6">
         <div className="flex items-center gap-3">
@@ -2243,7 +2296,7 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
           </ResponsiveContainer>
           <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
             <p className="text-xs text-amber-700">
-              <strong>💡 인사이트:</strong> 피크 타임이 <strong>점심 → 저녁</strong>으로 전환됨. 2인 세트가 저녁 데이트 고객 유입에 기여하며, 저녁 방문이 <strong>+50%</strong> 증가.
+              <strong>💡 인사이트:</strong> <span dangerouslySetInnerHTML={{ __html: peakInsight }} />
             </p>
           </div>
         </div>
@@ -2266,20 +2319,20 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
           <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-sm text-gray-400">세대별 데이터 없음</div>
         ) : (
         <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={d.generation} barGap={4} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={d.generation} barCategoryGap="40%" margin={{ top: 5, right: 20, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="gen" tick={{ fontSize: 12, fontWeight: 600 }} />
+              <XAxis dataKey="gen" tick={{ fontSize: 10, fontWeight: 600 }} interval={0} />
               <YAxis tick={{ fontSize: 11 }} unit="%" domain={[0, 'auto']} />
               <Tooltip formatter={(val, name) => [`${val}%`, name === '전략 전' ? '전략 전' : '전략 후']} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }} />
-              <Bar dataKey="sim1" fill="#c7d2fe" radius={[4, 4, 0, 0]} name="전략 전" barSize={28} />
-              <Bar dataKey="sim2" fill="#6366f1" radius={[4, 4, 0, 0]} name="전략 후" barSize={28} />
+              <Bar dataKey="sim1" fill="#c7d2fe" radius={[4, 4, 0, 0]} name="전략 전" barSize={22} />
+              <Bar dataKey="sim2" fill="#6366f1" radius={[4, 4, 0, 0]} name="전략 후" barSize={22} />
               <Legend formatter={(val) => val === '전략 전' ? 'Sim 1 (전략 전)' : 'Sim 2 (전략 후)'} wrapperStyle={{ fontSize: '12px' }} />
             </BarChart>
           </ResponsiveContainer>
           <div className="mt-3 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
             <p className="text-xs text-indigo-700">
-              <strong>💡 인사이트:</strong> Z세대(Z1+Z2) 비율이 <strong>40.8% → 49.7%</strong>로 급증. 데이트코스·인스타감성 솔루션이 젊은 층 유입에 직접 기여.
+              <strong>💡 인사이트:</strong> <span dangerouslySetInnerHTML={{ __html: genInsight }} />
             </p>
           </div>
         </div>
@@ -2328,7 +2381,7 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
           </table>
           <div className="p-3 bg-rose-50 border-t border-rose-100">
             <p className="text-xs text-rose-700">
-              <strong>💡 인사이트:</strong> 사적모임형 비중이 <strong>+7.3%p</strong> 증가하며 가장 큰 변화. 2인 세트 메뉴가 데이트 수요 흡수에 효과적.
+              <strong>💡 인사이트:</strong> <span dangerouslySetInnerHTML={{ __html: purposeInsight }} />
             </p>
           </div>
         </div>
@@ -2364,7 +2417,7 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
           </div>
           <div className="bg-gradient-to-br from-cyan-50 to-emerald-50 p-5 rounded-xl border border-cyan-200 shadow-sm text-center">
             <p className="text-xs text-gray-500 mb-1">순 증가</p>
-            <p className="text-2xl font-bold text-gray-900">+{formatNumber(d.retention.newUsers - d.retention.churned)}명</p>
+            <p className="text-2xl font-bold text-gray-900">{(d.retention.newUsers - d.retention.churned) >= 0 ? '+' : ''}{formatNumber(d.retention.newUsers - d.retention.churned)}명</p>
             <p className="text-xs text-gray-400 mt-1">{formatNumber(d.retention.sim1Agents)} → {formatNumber(d.retention.sim2Agents)} 에이전트</p>
           </div>
         </div>
@@ -2385,8 +2438,8 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
         <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
           {/* 범례 — 매장명만 색상으로 구분 */}
           <div className="flex flex-wrap gap-3 mb-6 text-xs font-bold">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-gray-400 inline-block"></span> <span className="text-gray-500">류진 (전략 전)</span></span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> <span className="text-emerald-600">류진 (전략 후)</span></span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-gray-400 inline-block"></span> <span className="text-gray-500">{d.storeName} (전략 전)</span></span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> <span className="text-emerald-600">{d.storeName} (전략 후)</span></span>
             <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> <span className="text-blue-600">{d.radarStores.comp1}</span></span>
             <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-purple-500 inline-block"></span> <span className="text-purple-600">{d.radarStores.comp2}</span></span>
             <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-orange-500 inline-block"></span> <span className="text-orange-600">{d.radarStores.comp3}</span></span>
@@ -2402,13 +2455,13 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
                 </div>
                 <div className="space-y-1.5">
                   {[
-                    { label: '류진 (전)', value: item.target_before, nameColor: 'text-gray-500' },
-                    { label: '류진 (후)', value: item.target_after, nameColor: 'text-emerald-600' },
+                    { label: `${d.storeName} (전)`, value: item.targetBefore, nameColor: 'text-gray-500' },
+                    { label: `${d.storeName} (후)`, value: item.targetAfter, nameColor: 'text-emerald-600' },
                     { label: d.radarStores.comp1, value: item.comp1, nameColor: 'text-blue-600' },
                     { label: d.radarStores.comp2, value: item.comp2, nameColor: 'text-purple-600' },
                     { label: d.radarStores.comp3, value: item.comp3, nameColor: 'text-orange-600' },
                   ].map((bar, bi) => {
-                    const maxVal = Math.max(item.target_before, item.target_after, item.comp1, item.comp2, item.comp3);
+                    const maxVal = Math.max(item.targetBefore, item.targetAfter, item.comp1, item.comp2, item.comp3);
                     const pct = (bar.value / maxVal) * 100;
                     return (
                       <div key={bi} className="flex items-center gap-2">
@@ -2419,7 +2472,7 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
                             style={{ width: `${pct}%` }}
                           ></div>
                         </div>
-                        <span className="text-xs font-bold text-gray-600 w-14 text-right">{bar.value}{item.unit}</span>
+                        <span className="text-xs font-bold text-gray-600 w-14 text-right">{item.unit === '%' ? (+bar.value).toFixed(1) : bar.value}{item.unit}</span>
                       </div>
                     );
                   })}
@@ -2430,20 +2483,20 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
 
           <div className="mt-4 p-3 bg-teal-50 rounded-lg border border-teal-100">
             <p className="text-xs text-teal-700">
-              <strong>💡 인사이트:</strong> 전략 후 류진이 만족도·재방문율에서 경쟁 매장을 <strong>추월</strong>했습니다. 방문수는 아직 오시 망원본점에 다소 뒤처지나, 격차가 크게 축소됨.
+              <strong>💡 인사이트:</strong> <span dangerouslySetInnerHTML={{ __html: radarInsight }} />
             </p>
           </div>
         </div>
       </div>
 
-      {/* ────────────────── 지표 9: 에이전트 유형 (상주/유동) ────────────────── */}
+      {/* ────────────────── 지표 8: 에이전트 유형 (상주/유동) ────────────────── */}
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
             <MapPin size={18} className="text-orange-600" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 9 — 에이전트 유형별 분석 (Agent Type)</h2>
+            <h2 className="text-lg font-bold text-gray-900">지표 8 — 에이전트 유형별 분석 (Agent Type)</h2>
             <p className="text-xs text-gray-400">유동 인구 vs 상주 고객, 어느 쪽이 더 증가했는가?</p>
           </div>
         </div>
@@ -2462,14 +2515,14 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
         </div>
       </div>
 
-      {/* ────────────────── 지표 10: 성별 구성 ────────────────── */}
+      {/* ────────────────── 지표 9: 성별 구성 ────────────────── */}
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
             <Users size={18} className="text-pink-600" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 10 — 성별 구성 분석 (Gender Composition)</h2>
+            <h2 className="text-lg font-bold text-gray-900">지표 9 — 성별 구성 분석 (Gender Composition)</h2>
             <p className="text-xs text-gray-400">전략 전후 성별 비율이 달라졌는가?</p>
           </div>
         </div>
@@ -2488,14 +2541,14 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
         </div>
       </div>
 
-      {/* ────────────────── 지표 11: 세대×방문목적 크로스탭 히트맵 ────────────────── */}
+      {/* ────────────────── 지표 10: 세대×방문목적 크로스탭 히트맵 ────────────────── */}
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
             <Sparkles size={18} className="text-red-600" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">지표 11 — 세대 × 방문목적 크로스탭 (Heatmap)</h2>
+            <h2 className="text-lg font-bold text-gray-900">지표 10 — 세대 × 방문목적 크로스탭 (Heatmap)</h2>
             <p className="text-xs text-gray-400">어떤 세대가 어떤 목적으로 방문했는가? 전략 후 분포.</p>
           </div>
         </div>
@@ -2513,12 +2566,12 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
               {d.crosstab.generations.map((gen, gi) => (
                 <tr key={gen} className="border-b border-gray-50">
                   <td className="py-3 px-3 font-bold text-gray-900">{gen}</td>
-                  {d.crosstab.sim2[gi].map((val, pi) => {
+                  {(d.crosstab.sim2[gi] || []).map((val, pi) => {
                     const intensity = val / 50;
                     const bg = `rgba(239, 68, 68, ${Math.min(intensity, 1) * 0.6})`;
                     return (
                       <td key={pi} className="text-center py-3 px-3 font-bold text-sm" style={{ backgroundColor: bg, color: intensity > 0.5 ? '#fff' : '#374151' }}>
-                        {val}%
+                        {(+val).toFixed(1)}%
                       </td>
                     );
                   })}
@@ -2528,50 +2581,332 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
           </table>
           <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-100">
             <p className="text-xs text-red-700">
-              <strong>💡 인사이트:</strong> Z1세대는 사적모임(40%)이 압도적, S세대는 생활베이스(50%)가 지배적. 세대별 맞춤 마케팅이 필요합니다.
+              <strong>💡 인사이트:</strong> <span dangerouslySetInnerHTML={{ __html: heatmapInsight }} />
             </p>
           </div>
         </div>
       </div>
 
-      {/* ────────────────── 지표 8: LLM 종합 평가 ────────────────── */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-            <Sparkles size={18} className="text-emerald-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">종합 평가 — AI Summary (GPT-5.2)</h2>
-            <p className="text-xs text-gray-400">모든 지표를 종합한 AI 전략 분석가의 총평</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 flex items-center gap-3">
-            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-              <Sparkles size={16} className="text-white" />
-            </div>
-            <div>
-              <p className="text-white font-bold text-sm">AI 전략 분석 리포트</p>
-              <p className="text-white/70 text-xs">GPT-5.2 기반 자동 생성 · 시뮬레이션 데이터 근거</p>
-            </div>
-          </div>
-          {d.llmSummary ? (
-            <article className="p-6 bg-amber-50/40 rounded-b-2xl">
-              <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-4">AI 분석 결과</p>
-              <p
-                className="text-sm text-gray-700"
-                style={{ whiteSpace: 'pre-wrap', lineHeight: 1.9 }}
-              >
-                {d.llmSummary}
-              </p>
-            </article>
-          ) : (
-            <div className="p-6 text-sm text-gray-400 text-center">요약 내용이 없습니다.</div>
-          )}
-        </div>
-      </div>
-
       </> /* end {d && <>} */}
+
+      {/* ── lop검증 전문 보기 모달 ─────────────────────────────────── */}
+      {isYModalOpen && d && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:hidden">
+          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col animate-fade-in-up">
+            {/* 모달 헤더 */}
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <FileText size={20} className="text-emerald-600" />
+                lop검증 전문 보기
+              </h3>
+              <button onClick={() => setIsYModalOpen(false)} className="text-gray-400 hover:text-gray-900 p-2 hover:bg-gray-200 rounded-full transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* 모달 본문 */}
+            <div className="p-8 overflow-y-auto text-left bg-white space-y-8 text-sm text-gray-700">
+
+              {/* 헤더 */}
+              <div className="border-b border-gray-200 pb-6">
+                <p className="text-xs text-emerald-600 font-bold uppercase tracking-widest mb-1">lop검증 — 전략 비교 분석 보고서</p>
+                <h2 className="text-2xl font-bold text-gray-900">{d.storeName}</h2>
+                <p className="text-gray-400 text-xs mt-1">전략 적용 전(Sim 1) vs 후(Sim 2) · 160명 에이전트 × {simDays}일 시뮬레이션</p>
+              </div>
+
+              {/* 핵심 KPI */}
+              <section>
+                <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-5 h-5 bg-emerald-100 rounded flex items-center justify-center text-emerald-600 text-xs font-black">1</span>
+                  핵심 성과 지표 (KPI)
+                </h3>
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="text-left px-4 py-2 font-semibold text-gray-500 border border-gray-200">지표</th>
+                      <th className="text-center px-4 py-2 font-semibold text-gray-500 border border-gray-200">전략 전 (Sim 1)</th>
+                      <th className="text-center px-4 py-2 font-semibold text-gray-500 border border-gray-200">전략 후 (Sim 2)</th>
+                      <th className="text-center px-4 py-2 font-semibold text-gray-500 border border-gray-200">변화</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-gray-100">
+                      <td className="px-4 py-2 border border-gray-200 font-medium">총 방문수</td>
+                      <td className="px-4 py-2 border border-gray-200 text-center">{formatNumber(d.overview.sim1.totalVisits)}명</td>
+                      <td className="px-4 py-2 border border-gray-200 text-center font-bold text-emerald-700">{formatNumber(d.overview.sim2.totalVisits)}명</td>
+                      <td className="px-4 py-2 border border-gray-200 text-center">
+                        <span className={`font-bold ${d.overview.sim2.totalVisits >= d.overview.sim1.totalVisits ? 'text-emerald-600' : 'text-red-500'}`}>
+                          {d.overview.sim2.totalVisits >= d.overview.sim1.totalVisits ? '+' : ''}{formatNumber(d.overview.sim2.totalVisits - d.overview.sim1.totalVisits)}명
+                        </span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-gray-100">
+                      <td className="px-4 py-2 border border-gray-200 font-medium">시장 점유율</td>
+                      <td className="px-4 py-2 border border-gray-200 text-center">{d.overview.sim1.marketShare}%</td>
+                      <td className="px-4 py-2 border border-gray-200 text-center font-bold text-emerald-700">{d.overview.sim2.marketShare}%</td>
+                      <td className="px-4 py-2 border border-gray-200 text-center">
+                        <span className={`font-bold ${d.overview.sim2.marketShare >= d.overview.sim1.marketShare ? 'text-emerald-600' : 'text-red-500'}`}>
+                          {(d.overview.sim2.marketShare - d.overview.sim1.marketShare) >= 0 ? '+' : ''}{(d.overview.sim2.marketShare - d.overview.sim1.marketShare).toFixed(2)}%p
+                        </span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-gray-100">
+                      <td className="px-4 py-2 border border-gray-200 font-medium">평균 평점</td>
+                      <td className="px-4 py-2 border border-gray-200 text-center">{d.ratingSummary.sim1.avg}점</td>
+                      <td className="px-4 py-2 border border-gray-200 text-center font-bold text-emerald-700">{d.ratingSummary.sim2.avg}점</td>
+                      <td className="px-4 py-2 border border-gray-200 text-center">
+                        <span className={`font-bold ${d.ratingSummary.sim2.avg >= d.ratingSummary.sim1.avg ? 'text-emerald-600' : 'text-red-500'}`}>
+                          {(d.ratingSummary.sim2.avg - d.ratingSummary.sim1.avg) >= 0 ? '+' : ''}{(d.ratingSummary.sim2.avg - d.ratingSummary.sim1.avg).toFixed(2)}점
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 border border-gray-200 font-medium">고객 만족도</td>
+                      <td className="px-4 py-2 border border-gray-200 text-center">{d.ratingSummary.sim1.satisfaction}%</td>
+                      <td className="px-4 py-2 border border-gray-200 text-center font-bold text-emerald-700">{d.ratingSummary.sim2.satisfaction}%</td>
+                      <td className="px-4 py-2 border border-gray-200 text-center">
+                        <span className={`font-bold ${d.ratingSummary.sim2.satisfaction >= d.ratingSummary.sim1.satisfaction ? 'text-emerald-600' : 'text-red-500'}`}>
+                          {(d.ratingSummary.sim2.satisfaction - d.ratingSummary.sim1.satisfaction) >= 0 ? '+' : ''}{(d.ratingSummary.sim2.satisfaction - d.ratingSummary.sim1.satisfaction).toFixed(1)}%p
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              {/* 피크타임 */}
+              <section>
+                <h3 className="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <span className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center text-blue-600 text-xs font-black">3</span>
+                  피크타임 변화 분석
+                </h3>
+                <div className="flex gap-6 bg-gray-50 rounded-lg p-4">
+                  <div className="text-center">
+                    <p className="text-xs text-gray-400 mb-1">전략 전 피크</p>
+                    <p className="text-lg font-bold text-gray-600">{d.peakSlot.sim1}</p>
+                  </div>
+                  <div className="flex items-center text-gray-300 text-xl">→</div>
+                  <div className="text-center">
+                    <p className="text-xs text-gray-400 mb-1">전략 후 피크</p>
+                    <p className="text-lg font-bold text-emerald-600">{d.peakSlot.sim2}</p>
+                  </div>
+                </div>
+                <p className="mt-2 text-gray-600" dangerouslySetInnerHTML={{ __html: peakInsight }} />
+              </section>
+
+              {/* 세대별 분포 */}
+              <section>
+                <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-5 h-5 bg-violet-100 rounded flex items-center justify-center text-violet-600 text-xs font-black">4</span>
+                  세대별 방문 분포
+                </h3>
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="text-left px-3 py-2 font-semibold text-gray-500 border border-gray-200">세대</th>
+                      <th className="text-center px-3 py-2 font-semibold text-gray-500 border border-gray-200">전략 전</th>
+                      <th className="text-center px-3 py-2 font-semibold text-gray-500 border border-gray-200">전략 후</th>
+                      <th className="text-center px-3 py-2 font-semibold text-gray-500 border border-gray-200">변화</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.generation.map((g, i) => (
+                      <tr key={i} className="border-b border-gray-100">
+                        <td className="px-3 py-2 border border-gray-200 font-medium">{g.gen}</td>
+                        <td className="px-3 py-2 border border-gray-200 text-center">{g.sim1}%</td>
+                        <td className="px-3 py-2 border border-gray-200 text-center font-bold text-emerald-700">{g.sim2}%</td>
+                        <td className="px-3 py-2 border border-gray-200 text-center">
+                          <span className={`font-bold ${g.sim2 >= g.sim1 ? 'text-emerald-600' : 'text-red-500'}`}>
+                            {(g.sim2 - g.sim1) >= 0 ? '+' : ''}{(g.sim2 - g.sim1).toFixed(1)}%p
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="mt-2 text-gray-600" dangerouslySetInnerHTML={{ __html: genInsight }} />
+              </section>
+
+              {/* 방문 목적 */}
+              <section>
+                <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-5 h-5 bg-amber-100 rounded flex items-center justify-center text-amber-600 text-xs font-black">5</span>
+                  방문 목적 분포
+                </h3>
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="text-left px-3 py-2 font-semibold text-gray-500 border border-gray-200">목적</th>
+                      <th className="text-center px-3 py-2 font-semibold text-gray-500 border border-gray-200">전략 전</th>
+                      <th className="text-center px-3 py-2 font-semibold text-gray-500 border border-gray-200">전략 후</th>
+                      <th className="text-center px-3 py-2 font-semibold text-gray-500 border border-gray-200">변화</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.purpose.map((p, i) => (
+                      <tr key={i} className="border-b border-gray-100">
+                        <td className="px-3 py-2 border border-gray-200 font-medium">{p.type}</td>
+                        <td className="px-3 py-2 border border-gray-200 text-center">{p.sim1Pct}%</td>
+                        <td className="px-3 py-2 border border-gray-200 text-center font-bold text-emerald-700">{p.sim2Pct}%</td>
+                        <td className="px-3 py-2 border border-gray-200 text-center">
+                          <span className={`font-bold ${p.sim2Pct >= p.sim1Pct ? 'text-emerald-600' : 'text-red-500'}`}>
+                            {(p.sim2Pct - p.sim1Pct) >= 0 ? '+' : ''}{(p.sim2Pct - p.sim1Pct).toFixed(1)}%p
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="mt-2 text-gray-600" dangerouslySetInnerHTML={{ __html: purposeInsight }} />
+              </section>
+
+              {/* 고객 유지 */}
+              <section>
+                <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-5 h-5 bg-cyan-100 rounded flex items-center justify-center text-cyan-600 text-xs font-black">6</span>
+                  고객 유지 분석 (Retention)
+                </h3>
+                <div className="grid grid-cols-4 gap-3">
+                  {[
+                    { label: '기존 고객 유지', value: `${formatNumber(d.retention.retained)}명`, sub: `유지율 ${formatPercent(d.retention.retentionRate, 1)}`, color: 'text-cyan-600' },
+                    { label: '신규 유입', value: `${formatNumber(d.retention.newUsers)}명`, sub: `Sim2의 ${formatPercent(d.retention.newRatio, 1)}`, color: 'text-emerald-600' },
+                    { label: '이탈 (Churn)', value: `${formatNumber(d.retention.churned)}명`, sub: '', color: 'text-red-500' },
+                    { label: '순 증가', value: `${(d.retention.newUsers - d.retention.churned) >= 0 ? '+' : ''}${formatNumber(d.retention.newUsers - d.retention.churned)}명`, sub: `${formatNumber(d.retention.sim1Agents)} → ${formatNumber(d.retention.sim2Agents)} 에이전트`, color: 'text-gray-900' },
+                  ].map((item, i) => (
+                    <div key={i} className="bg-gray-50 rounded-lg p-3 text-center">
+                      <p className="text-xs text-gray-400 mb-1">{item.label}</p>
+                      <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
+                      {item.sub && <p className="text-xs text-gray-400 mt-1">{item.sub}</p>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* 경쟁 매장 비교 */}
+              <section>
+                <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-5 h-5 bg-teal-100 rounded flex items-center justify-center text-teal-600 text-xs font-black">7</span>
+                  경쟁 매장 비교 (Competitor Benchmark)
+                </h3>
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="text-left px-3 py-2 font-semibold text-gray-500 border border-gray-200">지표</th>
+                      <th className="text-center px-3 py-2 font-semibold text-gray-500 border border-gray-200">{d.storeName} 전</th>
+                      <th className="text-center px-3 py-2 font-semibold text-gray-500 border border-gray-200">{d.storeName} 후</th>
+                      <th className="text-center px-3 py-2 font-semibold text-gray-500 border border-gray-200">{d.radarStores.comp1 || '경쟁1'}</th>
+                      <th className="text-center px-3 py-2 font-semibold text-gray-500 border border-gray-200">{d.radarStores.comp2 || '경쟁2'}</th>
+                      <th className="text-center px-3 py-2 font-semibold text-gray-500 border border-gray-200">{d.radarStores.comp3 || '경쟁3'}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.radar.map((item, i) => (
+                      <tr key={i} className="border-b border-gray-100">
+                        <td className="px-3 py-2 border border-gray-200 font-medium">{item.metric}{item.unit}</td>
+                        <td className="px-3 py-2 border border-gray-200 text-center text-gray-500">{item.unit === '%' ? (+item.targetBefore).toFixed(1) : item.targetBefore}{item.unit}</td>
+                        <td className="px-3 py-2 border border-gray-200 text-center font-bold text-emerald-700">{item.unit === '%' ? (+item.targetAfter).toFixed(1) : item.targetAfter}{item.unit}</td>
+                        <td className="px-3 py-2 border border-gray-200 text-center">{item.unit === '%' ? (+item.comp1).toFixed(1) : item.comp1}{item.unit}</td>
+                        <td className="px-3 py-2 border border-gray-200 text-center">{item.unit === '%' ? (+item.comp2).toFixed(1) : item.comp2}{item.unit}</td>
+                        <td className="px-3 py-2 border border-gray-200 text-center">{item.unit === '%' ? (+item.comp3).toFixed(1) : item.comp3}{item.unit}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="mt-2 text-gray-600" dangerouslySetInnerHTML={{ __html: radarInsight }} />
+              </section>
+
+              {/* 역효과 */}
+              {d.sideEffects.length > 0 && (
+                <section>
+                  <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <span className="w-5 h-5 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-black">!</span>
+                    역효과 분석 (Side Effects)
+                  </h3>
+                  <div className="space-y-2">
+                    {d.sideEffects.map((se, i) => (
+                      <div key={i} className={`rounded-xl p-4 flex items-start gap-3 border ${se.type === 'warning' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${se.type === 'warning' ? 'bg-red-100' : 'bg-amber-100'}`}>
+                          {se.type === 'warning'
+                            ? <AlertTriangle size={16} className="text-red-500" />
+                            : <AlertCircle size={16} className="text-amber-500" />
+                          }
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <span className="font-bold text-sm text-gray-900">{se.metric}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${se.type === 'warning' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                              {se.change > 0 ? '+' : ''}{parseFloat(se.change.toFixed(1))}{se.unit}
+                            </span>
+                            <span className={`text-[10px] font-bold ${se.type === 'warning' ? 'text-red-500' : 'text-amber-500'}`}>
+                              {se.type === 'warning' ? '⚠️ 역효과' : '🔍 관찰 필요'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600 leading-relaxed">{se.detail}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* 히트맵 */}
+              <section>
+                <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="w-5 h-5 bg-red-100 rounded flex items-center justify-center text-red-600 text-xs font-black">10</span>
+                  세대 × 방문목적 크로스탭 (전략 후)
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50">
+                        <th className="text-left px-3 py-2 font-semibold text-gray-500 border border-gray-200">세대 \ 목적</th>
+                        {d.crosstab.purposes.map(p => (
+                          <th key={p} className="text-center px-3 py-2 font-semibold text-gray-500 border border-gray-200">{p}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {d.crosstab.generations.map((gen, gi) => (
+                        <tr key={gen} className="border-b border-gray-50">
+                          <td className="px-3 py-2 border border-gray-200 font-bold text-gray-900">{gen}</td>
+                          {(d.crosstab.sim2[gi] || []).map((val, pi) => {
+                            const intensity = val / 50;
+                            const bg = `rgba(239, 68, 68, ${Math.min(intensity, 1) * 0.6})`;
+                            return (
+                              <td key={pi} className="text-center px-3 py-2 font-bold border border-gray-200" style={{ backgroundColor: bg, color: intensity > 0.5 ? '#fff' : '#374151' }}>
+                                {(+val).toFixed(1)}%
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="mt-2 text-gray-600" dangerouslySetInnerHTML={{ __html: heatmapInsight }} />
+              </section>
+
+            </div>
+
+            {/* 모달 푸터 */}
+            <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 flex items-center gap-2"
+              >
+                <Printer size={18} />
+                PDF 저장
+              </button>
+              <button
+                onClick={() => setIsYModalOpen(false)}
+                className="px-6 py-2 bg-gray-900 text-white rounded-xl font-bold hover:bg-black"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -2589,7 +2924,7 @@ const PricingView = () => {
       name: 'Basic Plan',
       price: '29,000원',
       period: '/월',
-      features: ['월 50 크레딧 제공', '기본 X-Report 분석', '시뮬레이션 기본형'],
+      features: ['월 50 크레딧 제공', 'lop분석 기본 제공', '시뮬레이션 기본형'],
       color: 'border-gray-100',
       buttonVariant: 'secondary'
     },
@@ -2597,7 +2932,7 @@ const PricingView = () => {
       name: 'Premium Plan',
       price: '59,000원',
       period: '/월',
-      features: ['월 150 크레딧 제공', '심층 X-Report 분석', '시뮬레이션 우선순위', '데이터 히스토리 보존'],
+      features: ['월 150 크레딧 제공', 'lop분석 심층 제공', '시뮬레이션 우선순위', '데이터 히스토리 보존'],
       color: 'border-red-100 bg-red-50/30',
       popular: true,
       buttonVariant: 'primary'
@@ -2606,7 +2941,7 @@ const PricingView = () => {
       name: 'Pro Plan',
       price: '99,000원',
       period: '/월',
-      features: ['월 300 크레딧 제공', '모든 X/Y-Report 기능', '상권 변동 실시간 알림', '데이터 엑스포트 (CSV)'],
+      features: ['월 300 크레딧 제공', 'lop분석/lop검증 전체 기능', '상권 변동 실시간 알림', '데이터 엑스포트 (CSV)'],
       color: 'border-gray-200',
       buttonVariant: 'primary'
     },
@@ -2691,7 +3026,7 @@ const PricingView = () => {
               <div className={`text-3xl font-black font-space mb-8 ${plan.color === 'bg-gray-900' ? 'text-white' : 'text-gray-900'}`}>{plan.price}</div>
 
               <ul className={`space-y-3 mb-10 flex-1 ${plan.color === 'bg-gray-900' ? 'text-gray-400' : 'text-gray-500'} text-xs`}>
-                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> AI X-Report 생성</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> AI lop분석 생성</li>
                 <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> 시뮬레이션 테스트</li>
               </ul>
 
@@ -2749,7 +3084,8 @@ const App = () => {
   const [simJobId, setSimJobId] = useState(null);
   const [simTimeoutMs, setSimTimeoutMs] = useState(30 * 60 * 1000);
   const [simMaxRetries, setSimMaxRetries] = useState(450);
-  const [simId, setSimId] = useState(null); // resultId from completed simulation job → Y-Report의 simulation_id
+  const [simDays, setSimDays] = useState(7);
+  const [simId, setSimId] = useState(null); // resultId from completed simulation job → lop검증의 simulation_id
 
   // Initialise selectedStoreId to first store once data arrives
   useEffect(() => {
@@ -2900,10 +3236,11 @@ const App = () => {
       case 'simulation': return (
         <SimulationView
           data={safeStoreData}
-          onJobCreated={(jobId, timeoutMs, maxRetries) => {
+          onJobCreated={(jobId, timeoutMs, maxRetries, days) => {
             setSimJobId(jobId);
             setSimTimeoutMs(timeoutMs);
             setSimMaxRetries(maxRetries);
+            if (days) setSimDays(days);
             changeTab('simulation_map');
           }}
           selectedSolutions={selectedSolutions}
@@ -2925,7 +3262,7 @@ const App = () => {
           onManageMembership={() => setActiveTab('pricing')}
         />
       );
-      case 'y-report': return <YReportView storeData={safeStoreData} selectedSolutions={selectedSolutions} simId={simId} />;
+      case 'y-report': return <YReportView storeData={safeStoreData} selectedSolutions={selectedSolutions} simId={simId} simDays={simDays} />;
       case 'pricing': return <PricingView />;
       default: return dashboardView;
     }
@@ -2973,7 +3310,7 @@ const App = () => {
             />
             <SidebarItem
               icon={FileText}
-              label="X-Report"
+              label="lop분석"
               active={activeTab === 'x-report'}
               onClick={() => changeTab('x-report')}
             />
@@ -3040,7 +3377,7 @@ const App = () => {
         <div className="sticky top-0 bg-white/80 backdrop-blur-md z-40 border-b border-gray-100 px-8 py-3 flex gap-4 overflow-x-auto no-scrollbar">
           <StepCard number="1" title="매장 입력" completed={completedSteps.includes('dashboard')} active={activeTab === 'dashboard'} onClick={() => changeTab('dashboard')} />
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
-          <StepCard number="2" title="X-Report" completed={completedSteps.includes('x-report')} active={activeTab === 'x-report'} onClick={() => changeTab('x-report')} />
+          <StepCard number="2" title="lop분석" completed={completedSteps.includes('x-report')} active={activeTab === 'x-report'} onClick={() => changeTab('x-report')} />
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
           <StepCard number="3" title="시뮬레이션 설정" completed={completedSteps.includes('simulation')} active={activeTab === 'simulation'} onClick={() => changeTab('simulation')} />
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
