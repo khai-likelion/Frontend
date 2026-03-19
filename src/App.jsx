@@ -565,12 +565,16 @@ const DashboardView = ({
   const [showResults, setShowResults] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Initialize searchTerm with selected store name
+  // Track the previous selectedStoreId to detect actual selection changes
+  const prevSelectedStoreIdRef = useRef(selectedStoreId);
+
+  // Only update searchTerm when user selects a DIFFERENT store (not when stores list changes)
   useEffect(() => {
-    if (selectedStoreId) {
+    if (selectedStoreId && selectedStoreId !== prevSelectedStoreIdRef.current) {
       const store = stores.find(s => s.id === selectedStoreId);
       if (store) setSearchTerm(store.name);
     }
+    prevSelectedStoreIdRef.current = selectedStoreId;
   }, [selectedStoreId, stores]);
 
   const handleSearchChange = (e) => {
@@ -2736,6 +2740,7 @@ const App = () => {
   /* --- Store Data (API) --- */
   const [stores, setStores] = useState([]);
   const [storeTotal, setStoreTotal] = useState(0);
+  const [allStoreTotal, setAllStoreTotal] = useState(null); // Total stores count (fixed, not affected by search)
   const [storeOffset, setStoreOffset] = useState(0);
   const [isLoadingStores, setIsLoadingStores] = useState(false);
   const [storeError, setStoreError] = useState(null); // { code, message } | null
@@ -2776,6 +2781,10 @@ const App = () => {
         setStores(norm.items);
         setStoreTotal(norm.total);
         setStoreOffset(0);
+        // Save the total count from initial load (no search query) as the fixed "all stores" total
+        if (!storeSearchQuery) {
+          setAllStoreTotal(norm.total);
+        }
       } catch (err) {
         if (err.name !== 'AbortError') {
           setStoreError({ code: err.code ?? null, message: err.message ?? '매장 데이터를 불러오지 못했습니다.' });
@@ -2867,7 +2876,7 @@ const App = () => {
       <DashboardView
         stats={stats}
         stores={stores}
-        storeTotal={storeTotal}
+        storeTotal={allStoreTotal ?? storeTotal}
         onAnalyze={handleAnalyze}
         selectedStoreId={selectedStoreId}
         onSelectStore={setSelectedStoreId}
