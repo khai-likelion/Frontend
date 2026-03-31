@@ -55,6 +55,7 @@ export async function fetchYReportView(yReportId, { signal } = {}) {
 // ── Safe-defaults object (returned on invalid/empty response) ──────────────
 function safeDefaults() {
   return {
+    storeName: '—',
     overview: {
       sim1: { totalVisits: 0, marketShare: 0 },
       sim2: { totalVisits: 0, marketShare: 0 },
@@ -118,6 +119,9 @@ export function normalizeYReportView(resp) {
   const kw = resp.keywords ?? {};
 
   return {
+    // ── 타겟 매장명 ───────────────────────────────────────────────────────
+    storeName: str(resp.storeSourceId ?? resp.store_source_id, '—'),
+
     // ── 지표 1: Overview ──────────────────────────────────────────────────
     overview: {
       sim1: {
