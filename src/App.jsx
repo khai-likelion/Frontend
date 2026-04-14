@@ -567,11 +567,12 @@ const DashboardView = ({
 
   // Initialize searchTerm with selected store name
   useEffect(() => {
-    if (selectedStoreId) {
+    // 검색 중(showResults가 true)일 때는 텍스트를 강제로 덮어쓰지 않음
+    if (selectedStoreId && !showResults) {
       const store = stores.find(s => s.id === selectedStoreId);
       if (store) setSearchTerm(store.name);
     }
-  }, [selectedStoreId, stores]);
+  }, [selectedStoreId, stores, showResults]);
 
   const handleSearchChange = (e) => {
     const val = e.target.value;
@@ -2751,12 +2752,7 @@ const App = () => {
   const [simMaxRetries, setSimMaxRetries] = useState(450);
   const [simId, setSimId] = useState(null); // resultId from completed simulation job → Y-Report의 simulation_id
 
-  // Initialise selectedStoreId to first store once data arrives
-  useEffect(() => {
-    if (stores.length > 0 && selectedStoreId === null) {
-      setSelectedStoreId(stores[0].id);
-    }
-  }, [stores, selectedStoreId]);
+  // (Removed: Initialise selectedStoreId to first store to leave the search bar empty by default)
 
   // Debounced fetch with AbortController cleanup
   useEffect(() => {
@@ -2849,6 +2845,10 @@ const App = () => {
   };
 
   const handleAnalyze = () => {
+    if (!selectedStoreId) {
+      alert('분석할 매장을 먼저 검색하고 선택해주세요!');
+      return;
+    }
     changeTab('verification');
   };
 
