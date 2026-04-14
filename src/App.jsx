@@ -208,11 +208,11 @@ const MyPageView = ({ data, onBack, onManageMembership }) => {
 
         {/* Right Column: Report Archives (8 cols) */}
         <div className="lg:col-span-8 space-y-8">
-          {/* X-Report Archive */}
+          {/* Lop 진단 Archive */}
           <section>
             <div className="flex justify-between items-end mb-4">
               <h3 className="font-bold text-xl text-gray-900 flex items-center gap-2">
-                <FileText size={24} className="text-blue-500" /> X-Report 보관함
+                <FileText size={24} className="text-blue-500" /> Lop 진단 보관함
               </h3>
               <button className="text-sm text-gray-500 hover:text-gray-900 underline">전체보기</button>
             </div>
@@ -250,11 +250,11 @@ const MyPageView = ({ data, onBack, onManageMembership }) => {
             </div>
           </section>
 
-          {/* Y-Report Archive */}
+          {/* Lop 검증 Archive */}
           <section>
             <div className="flex justify-between items-end mb-4">
               <h3 className="font-bold text-xl text-gray-900 flex items-center gap-2">
-                <BarChart2 size={24} className="text-purple-500" /> Y-Report 보관함
+                <BarChart2 size={24} className="text-purple-500" /> Lop 검증 보관함
               </h3>
               <button className="text-sm text-gray-500 hover:text-gray-900 underline">전체보기</button>
             </div>
@@ -264,7 +264,7 @@ const MyPageView = ({ data, onBack, onManageMembership }) => {
                 <Sparkles size={32} className="text-purple-400" />
               </div>
               <h4 className="font-bold text-gray-900 mb-2">아직 완료된 시뮬레이션 결과가 없습니다</h4>
-              <p className="text-gray-500 text-sm mb-6">X-Report 진단 후 가상 시뮬레이션을 돌려보세요.<br />미래의 매출 변화를 미리 예측해드립니다.</p>
+              <p className="text-gray-500 text-sm mb-6">Lop 진단 진단 후 가상 시뮬레이션을 돌려보세요.<br />미래의 매출 변화를 미리 예측해드립니다.</p>
               <button className="bg-gray-900 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-black transition-colors">
                 새 시뮬레이션 시작하기
               </button>
@@ -346,7 +346,7 @@ const AIChatButton = () => {
             <div className="flex gap-2">
               <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-xs">AI</div>
               <div className="bg-white p-3 rounded-2xl rounded-tl-none text-sm text-gray-600 shadow-sm border border-gray-100">
-                사장님, X-Report 분석 결과 <strong>'가성비'</strong> 항목 보완이 시급합니다. 관련 리뷰를 보여드릴까요?
+                사장님, Lop 진단 분석 결과 <strong>'가성비'</strong> 항목 보완이 시급합니다. 관련 리뷰를 보여드릴까요?
               </div>
             </div>
           </div>
@@ -977,7 +977,7 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
         <div className="flex justify-between items-end border-b border-gray-100 pb-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">X-Report: {d?.name ?? storeData?.name ?? '—'}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">Lop 진단: {d?.name ?? storeData?.name ?? '—'}</h1>
               <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold border border-red-200">진단 완료</span>
             </div>
             <p className="text-gray-500 text-sm">GPT-5.2 기반 AI 분석 리포트 — 매장 전략 처방전</p>
@@ -1035,14 +1035,14 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
           )}
         </div>
 
-      {/* ══════════════════ X-Report 생성 UI ══════════════════ */}
+      {/* ══════════════════ Lop 진단 생성 UI ══════════════════ */}
       {!d && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 flex flex-col items-center gap-6 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
             <Sparkles size={28} className="text-red-600" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">X-Report 생성 준비 완료</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Lop 진단 생성 준비 완료</h2>
             <p className="text-gray-500 text-sm">AI가 매장을 진단하고 맞춤형 전략 처방전을 생성합니다.</p>
           </div>
 
@@ -1078,7 +1078,7 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
               onClick={handleCreate}
               className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg"
             >
-              <Sparkles size={18} /> X-Report 생성 시작
+              <Sparkles size={18} /> Lop 진단 생성 시작
             </button>
           )}
 
@@ -1277,7 +1277,7 @@ const XReportView = ({ storeData, onNext, selectedSolutions = [], onSelectSoluti
               <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                 <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                   <FileText size={20} className="text-red-600" />
-                  X-Report 전문 보기
+                  Lop 진단 전문 보기
                 </h3>
                 <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-900 p-2 hover:bg-gray-200 rounded-full transition-colors">
                   <X size={24} />
@@ -1493,7 +1493,7 @@ const SimulationView = ({ data, onJobCreated, selectedSolutions = [] }) => {
   );
 };
 
-// ── Y-Report: 비교 분석 리포트 (지표 1~3) ──────────────────────────────
+// ── Lop 검증: 비교 분석 리포트 (지표 1~3) ──────────────────────────────
 const yReportMockData = {
   // 지표 1: 기본 방문 지표
   overview: {
@@ -1693,7 +1693,7 @@ const ChangeBadge = ({ value, suffix = '%', showPlus = true }) => {
   );
 };
 
-// ── Y-Report TTL reconnect constants ────────────────────────────────────────
+// ── Lop 검증 TTL reconnect constants ────────────────────────────────────────
 const Y_REPORT_JOB_KEY = 'pending_y_report_job';
 const Y_REPORT_JOB_TTL = 600_000; // 10 minutes
 
@@ -1830,7 +1830,7 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
       <div className="flex justify-between items-end border-b border-gray-100 pb-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">Y-Report</h1>
+            <h1 className="text-3xl font-bold text-gray-900 font-space tracking-tight">Lop 검증</h1>
             <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">비교 분석</span>
           </div>
           <p className="text-gray-500 text-sm">전략 적용 전(Sim 1) vs 후(Sim 2) 시뮬레이션 비교 보고서  ·  96명 에이전트 × 7일</p>
@@ -1846,14 +1846,14 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
         </div>
       </div>
 
-      {/* ══════════════════ Y-Report 생성 UI ══════════════════ */}
+      {/* ══════════════════ Lop 검증 생성 UI ══════════════════ */}
       {!d && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 flex flex-col items-center gap-6 text-center">
           <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
             <Sparkles size={28} className="text-emerald-600" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Y-Report 생성 준비 완료</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Lop 검증 생성 준비 완료</h2>
             <p className="text-gray-500 text-sm">시뮬레이션 결과를 바탕으로 AI 비교 분석 리포트를 생성합니다.</p>
           </div>
 
@@ -1897,7 +1897,7 @@ const YReportView = ({ storeData, selectedSolutions = [], simId = null }) => {
               onClick={handleCreate}
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg"
             >
-              <Sparkles size={18} /> Y-Report 생성 시작
+              <Sparkles size={18} /> Lop 검증 생성 시작
             </button>
           )}
 
@@ -2590,7 +2590,7 @@ const PricingView = () => {
       name: 'Basic Plan',
       price: '29,000원',
       period: '/월',
-      features: ['월 50 크레딧 제공', '기본 X-Report 분석', '시뮬레이션 기본형'],
+      features: ['월 50 크레딧 제공', '기본 Lop 진단 분석', '시뮬레이션 기본형'],
       color: 'border-gray-100',
       buttonVariant: 'secondary'
     },
@@ -2598,7 +2598,7 @@ const PricingView = () => {
       name: 'Premium Plan',
       price: '59,000원',
       period: '/월',
-      features: ['월 150 크레딧 제공', '심층 X-Report 분석', '시뮬레이션 우선순위', '데이터 히스토리 보존'],
+      features: ['월 150 크레딧 제공', '심층 Lop 진단 분석', '시뮬레이션 우선순위', '데이터 히스토리 보존'],
       color: 'border-red-100 bg-red-50/30',
       popular: true,
       buttonVariant: 'primary'
@@ -2607,7 +2607,7 @@ const PricingView = () => {
       name: 'Pro Plan',
       price: '99,000원',
       period: '/월',
-      features: ['월 300 크레딧 제공', '모든 X/Y-Report 기능', '상권 변동 실시간 알림', '데이터 엑스포트 (CSV)'],
+      features: ['월 300 크레딧 제공', '모든 Lop 진단 / Lop 검증 기능', '상권 변동 실시간 알림', '데이터 엑스포트 (CSV)'],
       color: 'border-gray-200',
       buttonVariant: 'primary'
     },
@@ -2692,7 +2692,7 @@ const PricingView = () => {
               <div className={`text-3xl font-black font-space mb-8 ${plan.color === 'bg-gray-900' ? 'text-white' : 'text-gray-900'}`}>{plan.price}</div>
 
               <ul className={`space-y-3 mb-10 flex-1 ${plan.color === 'bg-gray-900' ? 'text-gray-400' : 'text-gray-500'} text-xs`}>
-                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> AI X-Report 생성</li>
+                <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> AI Lop 진단 생성</li>
                 <li className="flex items-center gap-2"><CheckCircle size={14} className="text-green-500" /> 시뮬레이션 테스트</li>
               </ul>
 
@@ -2750,7 +2750,7 @@ const App = () => {
   const [simJobId, setSimJobId] = useState(null);
   const [simTimeoutMs, setSimTimeoutMs] = useState(30 * 60 * 1000);
   const [simMaxRetries, setSimMaxRetries] = useState(450);
-  const [simId, setSimId] = useState(null); // resultId from completed simulation job → Y-Report의 simulation_id
+  const [simId, setSimId] = useState(null); // resultId from completed simulation job → Lop 검증의 simulation_id
 
   // (Permanently Disabled: Removed default store auto-selection)
 
@@ -2970,7 +2970,7 @@ const App = () => {
             />
             <SidebarItem
               icon={FileText}
-              label="X-Report"
+              label="Lop 진단"
               active={activeTab === 'x-report'}
               onClick={() => changeTab('x-report')}
             />
@@ -3037,7 +3037,7 @@ const App = () => {
         <div className="sticky top-0 bg-white/80 backdrop-blur-md z-40 border-b border-gray-100 px-8 py-3 flex gap-4 overflow-x-auto no-scrollbar">
           <StepCard number="1" title="매장 입력" completed={completedSteps.includes('dashboard')} active={activeTab === 'dashboard'} onClick={() => changeTab('dashboard')} />
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
-          <StepCard number="2" title="X-Report" completed={completedSteps.includes('x-report')} active={activeTab === 'x-report'} onClick={() => changeTab('x-report')} />
+          <StepCard number="2" title="Lop 진단" completed={completedSteps.includes('x-report')} active={activeTab === 'x-report'} onClick={() => changeTab('x-report')} />
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
           <StepCard number="3" title="시뮬레이션 설정" completed={completedSteps.includes('simulation')} active={activeTab === 'simulation'} onClick={() => changeTab('simulation')} />
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
