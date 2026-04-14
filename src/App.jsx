@@ -2729,7 +2729,7 @@ const App = () => {
   const changeTab = (tab) => {
     setActiveTab(tab);
     // Logic to mark previous steps as complete
-    const steps = ['dashboard', 'verification', 'x-report', 'simulation', 'simulation_map', 'y-report'];
+    const steps = ['dashboard', 'verification', 'Lop 진단', 'simulation', 'simulation_map', 'Lop 검증'];
     const idx = steps.indexOf(tab);
     setCompletedSteps(steps.slice(0, idx));
   };
@@ -2880,11 +2880,11 @@ const App = () => {
       case 'verification': return (
         <VerificationView
           data={safeStoreData}
-          onVerified={() => changeTab('x-report')}
+          onVerified={() => changeTab('Lop 진단')}
           onBack={() => changeTab('dashboard')}
         />
       );
-      case 'x-report': return (
+      case 'Lop 진단': return (
         <XReportView
           storeData={safeStoreData}
           onNext={() => changeTab('simulation')}
@@ -2909,7 +2909,7 @@ const App = () => {
       case 'simulation_map': return (
         <SimulationMap
           storeData={safeStoreData}
-          onComplete={(resultId) => { setSimId(resultId); changeTab('y-report'); }}
+          onComplete={(resultId) => { setSimId(resultId); changeTab('Lop 검증'); }}
           jobId={simJobId}
           timeoutMs={simTimeoutMs}
           maxRetries={simMaxRetries}
@@ -2922,7 +2922,7 @@ const App = () => {
           onManageMembership={() => setActiveTab('pricing')}
         />
       );
-      case 'y-report': return <YReportView storeData={safeStoreData} selectedSolutions={selectedSolutions} simId={simId} />;
+      case 'Lop 검증': return <YReportView storeData={safeStoreData} selectedSolutions={selectedSolutions} simId={simId} />;
       case 'pricing': return <PricingView />;
       default: return dashboardView;
     }
@@ -2971,8 +2971,8 @@ const App = () => {
             <SidebarItem
               icon={FileText}
               label="Lop 진단"
-              active={activeTab === 'x-report'}
-              onClick={() => changeTab('x-report')}
+              active={activeTab === 'Lop 진단'}
+              onClick={() => changeTab('Lop 진단')}
             />
             <SidebarItem
               icon={Sliders}
@@ -2989,8 +2989,8 @@ const App = () => {
             <SidebarItem
               icon={BarChart2}
               label="최종 리포트"
-              active={activeTab === 'y-report'}
-              onClick={() => changeTab('y-report')}
+              active={activeTab === 'Lop 검증'}
+              onClick={() => changeTab('Lop 검증')}
             />
           </nav>
         </div>
@@ -3037,13 +3037,13 @@ const App = () => {
         <div className="sticky top-0 bg-white/80 backdrop-blur-md z-40 border-b border-gray-100 px-8 py-3 flex gap-4 overflow-x-auto no-scrollbar">
           <StepCard number="1" title="매장 입력" completed={completedSteps.includes('dashboard')} active={activeTab === 'dashboard'} onClick={() => changeTab('dashboard')} />
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
-          <StepCard number="2" title="Lop 진단" completed={completedSteps.includes('x-report')} active={activeTab === 'x-report'} onClick={() => changeTab('x-report')} />
+          <StepCard number="2" title="Lop 진단" completed={completedSteps.includes('Lop 진단')} active={activeTab === 'Lop 진단'} onClick={() => changeTab('Lop 진단')} />
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
           <StepCard number="3" title="시뮬레이션 설정" completed={completedSteps.includes('simulation')} active={activeTab === 'simulation'} onClick={() => changeTab('simulation')} />
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
           <StepCard number="4" title="시뮬레이션" completed={completedSteps.includes('simulation_map')} active={activeTab === 'simulation_map'} onClick={() => changeTab('simulation_map')} />
           <ChevronRight className="text-gray-300 flex-shrink-0 self-center" size={16} />
-          <StepCard number="5" title="최종 리포트" completed={completedSteps.includes('y-report')} active={activeTab === 'y-report'} onClick={() => changeTab('y-report')} />
+          <StepCard number="5" title="최종 리포트" completed={completedSteps.includes('Lop 검증')} active={activeTab === 'Lop 검증'} onClick={() => changeTab('Lop 검증')} />
         </div>
 
         <div className="max-w-7xl mx-auto p-8 lg:p-12 pb-24">
