@@ -567,11 +567,12 @@ const DashboardView = ({
 
   // Initialize searchTerm with selected store name
   useEffect(() => {
-    if (selectedStoreId) {
+    // 검색창 입력 중(!showResults)에는 외부 상태가 검색어를 덮어쓰지 않도록 차단
+    if (selectedStoreId && !showResults) {
       const store = stores.find(s => s.id === selectedStoreId);
       if (store) setSearchTerm(store.name);
     }
-  }, [selectedStoreId, stores]);
+  }, [selectedStoreId, stores, showResults]);
 
   const handleSearchChange = (e) => {
     const val = e.target.value;
@@ -2751,12 +2752,8 @@ const App = () => {
   const [simMaxRetries, setSimMaxRetries] = useState(450);
   const [simId, setSimId] = useState(null); // resultId from completed simulation job → Y-Report의 simulation_id
 
-  // Initialise selectedStoreId to first store once data arrives
-  useEffect(() => {
-    if (stores.length > 0 && selectedStoreId === null) {
-      setSelectedStoreId(stores[0].id);
-    }
-  }, [stores, selectedStoreId]);
+  // (Permanently Disabled: Removed default store auto-selection)
+
 
   // Debounced fetch with AbortController cleanup
   useEffect(() => {
@@ -2841,7 +2838,7 @@ const App = () => {
     };
   }, [stores, storeTotal]);
 
-  const selectedStoreData = (selectedStoreId && stores.find(s => s.id === selectedStoreId)) || stores[0] || null;
+  const selectedStoreData = (selectedStoreId && stores.find(s => s.id === selectedStoreId)) || null;
   // Safe fallback so downstream views never receive null
   const safeStoreData = selectedStoreData ?? {
     id: '', name: '—', address: '', lat: null, lng: null,
